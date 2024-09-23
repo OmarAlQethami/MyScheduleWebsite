@@ -1,1 +1,10 @@
 ﻿env.config
+.vs/
+bin/
+obj/
+*.csproj.user
+*.log
+*.tmp
+*.dll
+*.exe
+*.pdb
