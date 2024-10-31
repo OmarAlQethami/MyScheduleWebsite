@@ -435,6 +435,117 @@ namespace MyScheduleWebsite.admin
             HttpContext.Current.Response.End();
         }
 
+        protected void btnSignUp_Click(object sender, EventArgs e)
+        {
+            string newUser = txtUsername1.Text.ToString();
+            string newPassword = txtPassword1.Text.ToString();
+            string newEmail = txtEmail1.Text.ToString();
+
+            if (!Membership.ValidateUser(newUser, newPassword))
+            {
+                MembershipUser newUserObj = Membership.CreateUser(newUser, newPassword, newEmail);
+                Guid userId = (Guid)newUserObj.ProviderUserKey;
+
+                string strFName = txtFName.Text;
+                string strLName = txtLName.Text;
+                string strArFName = txtArFName.Text;
+                string strArLName = txtArLName.Text;
+                string strEmail = txtEmail1.Text;
+                string strUniversity = ddlUniversity.SelectedValue;
+                string strMajor = ddlMajors.SelectedValue;
+
+                int universityId = GetUniversityId(strUniversity);
+                int majorId = GetMajorId(strMajor);
+
+                CRUD myCrud = new CRUD();
+                string mySql = @"INSERT INTO faculty (facultyEnglishFirstName, facultyEnglishLastName,
+                           facultyArabicFirstName, facultyArabicLastName, email, universityId, majorId, UserId)
+                           VALUES (@fName, @lName, @arFName, @arLName, @email, @universityId, @majorId, @UserId)";
+
+                Dictionary<string, object> myPara = new Dictionary<string, object>();
+                myPara.Add("@fName", strFName);
+                myPara.Add("@lName", strLName);
+                myPara.Add("@arFName", strArFName);
+                myPara.Add("@arLName", strArLName);
+                myPara.Add("@email", strEmail);
+                myPara.Add("@universityId", universityId);
+                myPara.Add("@majorId", majorId);
+                myPara.Add("@UserId", userId);
+                int rtn = myCrud.InsertUpdateDelete(mySql, myPara);
+                if (rtn >= 1)
+                {
+                    Roles.AddUserToRole(newUser, "faculty");
+                    lblSignUpOutput.Text = "Faculty User Created Successfully. Send to him his Username and Password";
+                }
+                else
+                {
+                    lblSignUpOutput.Text = "Signing up has failed. Please try again.";
+                }
+            }
+            else
+            {
+                lblSignUpOutput.Text = "The Username you chose is unavailable. Please try with a different username.";
+                return;
+            }
+        }
+
+
+        protected void ddlUniversity_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedUniversity = ddlUniversity.SelectedValue;
+            PopulateMajors(selectedUniversity);
+        }
+
+        private void PopulateMajors(string universityName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = "SELECT majorEnglishName FROM majors WHERE universityId = (SELECT UniversityId from Universities WHERE universityEnglishName = @universityName)";
+
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@universityName", universityName);
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                ddlMajors.DataSource = dr;
+                ddlMajors.DataTextField = "MajorEnglishName";
+                ddlMajors.DataValueField = "MajorEnglishName";
+                ddlMajors.DataBind();
+            }
+            ddlMajors.Items.Insert(0, new ListItem("Choose a Major", "0"));
+        }
+
+        private int GetUniversityId(string universityName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = "SELECT universityId FROM universities WHERE universityEnglishName = @universityName";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@universityName", universityName);
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                if (dr.Read())
+                {
+                    return dr.GetInt32(0);
+                }
+            }
+            throw new Exception("University ID not found.");
+        }
+        private int GetMajorId(string majorName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = "SELECT majorId FROM majors WHERE majorEnglishName = @majorName";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@majorName", majorName);
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                if (dr.Read())
+                {
+                    return dr.GetInt32(0);
+                }
+            }
+            throw new Exception("Major ID not found.");
+        }
 
     }
 }

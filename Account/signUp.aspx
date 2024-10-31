@@ -46,7 +46,7 @@
                 <td class="style2">
                     Arabic Last Name:</td>
                 <td>
-                    <asp:TextBox ID="txtArLName" runat="server"></asp:TextBox>
+                    <asp:TextBox ID="txtArLName" runat="server" autocomplete="off"></asp:TextBox>
   
                 </td>
             </tr>
