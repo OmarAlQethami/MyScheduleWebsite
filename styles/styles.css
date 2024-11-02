@@ -34,29 +34,63 @@
 
 .subjects-container {
     width: 100%;
-    height: 100%;
+    height: 500px;
     background-color: #CCCCCC;
     border-radius: 10px;
     margin-bottom: 30px;
-    padding-left: 50px;
-    padding-right: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
+    overflow: auto;
 }
 
 .subjects-row {
     display: flex;
-    justify-content: space-between;
+    min-width: 1800px;
     align-items: center;
-    padding-bottom: 20px;
 }
 
 .subject {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100px;
     height: 100px;
+    font-size: 10px;
+    margin: 5px;
     background-color: #BBBBBB;
     border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    overflow: hidden;
+}
+
+.subject:hover {
+    background-color: #555555;
+    color: #CCCCCC;
+}
+
+.subject-button {
+    width: 100px;
+    height: 100px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.custom-button {
+    background-color: #888888;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+    background-color: #555555;
 }

@@ -11,8 +11,13 @@
          </div>
         <div class="subjects-container" id="subjectsContainer" runat="server">
             <div class="subjects-row">
-                
+                <!-- Subjects will be dynamically added here -->
             </div>
         </div>
+        <div class="buttons">
+            <asp:Button ID="btnBack" runat="server" Text="Back" PostBackUrl="~/Default.aspx" CssClass="custom-button" />
+            <asp:Button ID="btnNext" runat="server" Text="Next" CssClass="custom-button" />
+        </div>
+
     </div>
 </asp:Content>
