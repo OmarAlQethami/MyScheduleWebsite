@@ -56,6 +56,13 @@
                         <li><a runat="server" href="~/About">About</a></li>
                         <li><a runat="server" href="~/Contact">Contact</a></li>
                     </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <% if (Session["Username"] != null) { %>
+                           <li>
+                                <asp:Button ID="btnLogout" runat="server" Text="Log out" CssClass="btn btn-link navbar-btn" OnClick="Logout_Click" />
+                           </li>
+                        <% } %>
+                    </ul>
                 </div>
             </div>
         </div>

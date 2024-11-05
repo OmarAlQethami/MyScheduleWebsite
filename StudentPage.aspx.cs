@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
@@ -13,6 +14,7 @@ namespace MyScheduleWebsite
 {
     public partial class StudentPage : System.Web.UI.Page
     {
+        protected int currentStep = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -24,6 +26,8 @@ namespace MyScheduleWebsite
                 int universityId = getUniversityId(userId);
                 int majorId = getMajorId(userId);
                 BindSubjects(universityId, majorId);
+
+                UpdateStepDisplay();
             }
         }
         private Guid GetUserId()
@@ -89,10 +93,10 @@ namespace MyScheduleWebsite
             return majorId;
         }
 
-        protected DataTable GetSubjectsByUniversityAndMajor(int universityId, int majorId)
+        protected DataTable GetSubjects(int universityId, int majorId)
         {
             CRUD myCrud = new CRUD();
-            string mySql = @"SELECT * FROM subjects WHERE universityId = @universityId AND majorId = @majorId";
+            string mySql = @"SELECT * FROM subjects WHERE universityId = 1 AND majorId = 1 AND (subjectTypeId = 1 OR subjectTypeId = 2)";
 
             Dictionary<string, object> myPara = new Dictionary<string, object>();
             myPara.Add("@universityId", universityId);
@@ -102,10 +106,12 @@ namespace MyScheduleWebsite
             return dt;
         }
 
+        protected List<string> selectedSubjects = new List<string>();
+
         private void BindSubjects(int universityId, int majorId)
         {
             CRUD crud = new CRUD();
-            DataTable subjectsTable = GetSubjectsByUniversityAndMajor(universityId, majorId);
+            DataTable subjectsTable = GetSubjects(universityId, majorId);
 
             var groupedSubjects = subjectsTable.AsEnumerable()
                 .GroupBy(row => row.Field<int>("subjectLevel"));
@@ -120,11 +126,31 @@ namespace MyScheduleWebsite
                 {
                     string subjectCode = subject.Field<string>("subjectCode");
                     string subjectName = subject.Field<string>("subjectEnglishName");
-                    subjectsContainer.InnerHtml += $"<div class='subject'><asp:Button ID={subjectCode} runat=\"server\" CssClass=\"subject\" />{subjectName}</asp:Button></div>";
+
+                    // Create a div instead of a button
+                    subjectsContainer.InnerHtml += $"<div class='subject' id='{subjectCode}' onclick='SubjectClicked(this)'><span>{subjectName}</span></div>";
                 }
 
                 subjectsContainer.InnerHtml += "</div>";
             }
+        }
+
+        protected void btnNext_Click(object sender, EventArgs e)
+        {
+            currentStep++;
+            UpdateStepDisplay();
+        }
+
+        protected void btnBack_Click(object sender, EventArgs e)
+        {
+            if (currentStep > 1)
+                currentStep--;
+            UpdateStepDisplay();
+        }
+
+        private void UpdateStepDisplay()
+        {
+            
         }
     }
 }

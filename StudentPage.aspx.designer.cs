@@ -42,6 +42,15 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.Label lblHoursTaken;
 
         /// <summary>
+        /// lblChoose control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblChoose;
+
+        /// <summary>
         /// subjectsContainer control.
         /// </summary>
         /// <remarks>
@@ -49,6 +58,15 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl subjectsContainer;
+
+        /// <summary>
+        /// lblSelectedSubjects control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblSelectedSubjects;
 
         /// <summary>
         /// btnBack control.

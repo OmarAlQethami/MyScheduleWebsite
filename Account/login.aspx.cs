@@ -15,7 +15,21 @@ namespace MyScheduleWebsite.Account
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            Session["Username"] = txtUserName.Text;
+            if (Session["Username"] != null)
+            {
+                if (Roles.IsUserInRole(Session["Username"].ToString(), "student"))
+                {
+                    Response.Redirect("~/StudentPage.aspx");
+                }
+                else if (Roles.IsUserInRole(Session["Username"].ToString(), "faculty"))
+                {
+                    Response.Redirect("~/FacultyPage.aspx");
+                }
+                else if (Roles.IsUserInRole(Session["Username"].ToString(), "admin"))
+                {
+                    Response.Redirect("~/admin/AdminPage.aspx");
+                }
+            }
             createAdminAndUserByDefault();
         }
 
