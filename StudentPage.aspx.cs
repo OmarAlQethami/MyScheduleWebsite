@@ -14,20 +14,21 @@ namespace MyScheduleWebsite
 {
     public partial class StudentPage : System.Web.UI.Page
     {
-        protected int currentStep = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
+            if (!Request.IsAuthenticated)
+            {
+                Response.Redirect("~/Default.aspx");
+            }
+            else if (!IsPostBack)
             {
                 lblGreeting.Text = "Hello " + User.Identity.Name + "!";
                 Guid userId = GetUserId();
-                lblCurrentLevel.Text = "Current Level: " + getCurrentLevel(userId);
+                //lblCurrentLevel.Text = "Current Level: " + getCurrentLevel(userId);
 
                 int universityId = getUniversityId(userId);
                 int majorId = getMajorId(userId);
-                BindSubjects(universityId, majorId);
-
-                UpdateStepDisplay();
+                //BindSubjects(universityId, majorId);
             }
         }
         private Guid GetUserId()
@@ -127,30 +128,11 @@ namespace MyScheduleWebsite
                     string subjectCode = subject.Field<string>("subjectCode");
                     string subjectName = subject.Field<string>("subjectEnglishName");
 
-                    // Create a div instead of a button
                     subjectsContainer.InnerHtml += $"<div class='subject' id='{subjectCode}' onclick='SubjectClicked(this)'><span>{subjectName}</span></div>";
                 }
 
                 subjectsContainer.InnerHtml += "</div>";
             }
-        }
-
-        protected void btnNext_Click(object sender, EventArgs e)
-        {
-            currentStep++;
-            UpdateStepDisplay();
-        }
-
-        protected void btnBack_Click(object sender, EventArgs e)
-        {
-            if (currentStep > 1)
-                currentStep--;
-            UpdateStepDisplay();
-        }
-
-        private void UpdateStepDisplay()
-        {
-            
         }
     }
 }
