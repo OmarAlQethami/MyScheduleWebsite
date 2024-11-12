@@ -4,16 +4,29 @@
     <div class="main-container">
         <div class="info">
             <asp:Label ID="lblGreeting" runat="server" Text="Hello, name"></asp:Label>
-            <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: 4"></asp:Label>
+            <div class="label-center">
+                <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: 4"></asp:Label>
+            </div>
             <div class="hours-taken-container">
                 <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Taken: 38 of 156"></asp:Label>
                 <asp:Label ID="lblElectiveUniversityHoursTaken" runat="server" Text="Elective University Hours Taken: 2 of 4"></asp:Label>
                 <asp:Label ID="lblElectiveCollegeHoursTaken" runat="server" Text="Elective College Hours Taken: 0 of 12"></asp:Label>
             </div>
         </div>
+
+        <div class="status-container">
+            <div class="status-bar">
+                <div id="progress-bar" class="progress-bar-fill"></div>
+            </div>
+            <label id="hours-chosen-label">Hours chosen: 0</label>
+        </div>
+
         <div class="choose-labels">
             <div class="choose-label-wrapper">
                 <asp:Label ID="lblChoose1" runat="server" CssClass="labels" Text="Choose your desired Compulsory subjects:"></asp:Label>
+            </div>
+            <div class="lbl-output">
+                <asp:Label ID="lblOutput" runat="server" CssClass="labels" Text=""></asp:Label>
             </div>
         </div>
 
@@ -181,23 +194,84 @@
             <asp:Button ID="btnNext" runat="server" Text="Next" CssClass="custom-button"/>
         </div>
 
+        <div class="help-center">
+            <div class="help-button" onclick="toggleHelpCenter()">?</div>
+            <div class="help-content">
+                <div class="email-options">
+                    <button class="email-option">Email Admin</button>
+                    <button class="email-option">Email Faculty</button>
+                </div>
+                <input type="text" placeholder="Email Title" class="email-title">
+                <textarea placeholder="Type your message here..." class="email-message"></textarea>
+                <button class="send-button">Send</button>
+            </div>
+        </div>
+
+
     </div>
 
     <script>
         var selectedSubjects = [];
+        var totalHours = 0;
+
+        function updateProgressBar() {
+            var progressBar = document.getElementById('progress-bar');
+            var hoursLabel = document.getElementById('hours-chosen-label');
+            var lblOutput = document.getElementById('<%= lblOutput.ClientID %>');
+
+            hoursLabel.innerText = "Hours chosen: " + totalHours;
+
+            var progressWidth = (totalHours / 20) * 100;
+            progressBar.style.width = progressWidth + '%';
+
+            if (totalHours < 12) {
+                progressBar.style.backgroundColor = 'red';
+                lblOutput.innerText = "";
+            } else if (totalHours >= 12 && totalHours < 20) {
+                progressBar.style.backgroundColor = 'green';
+                lblOutput.innerText = "";
+            } else if (totalHours >= 20) {
+                progressBar.style.backgroundColor = 'green';
+                displayAlert("You have reached the maximum limit of 20 hours.");
+            }
+        }
 
         function SubjectClicked(element) {
             var subjectCode = element.id;
+            var lblOutput = document.getElementById('<%= lblOutput.ClientID %>');
+
+            lblOutput.innerText = "";
+
+            if (!element.classList.contains('available') && !element.classList.contains('unoffered')) {
+                displayAlert("You cannot choose this subject.");
+                return;
+            }
 
             if (selectedSubjects.includes(subjectCode)) {
                 selectedSubjects = selectedSubjects.filter(item => item !== subjectCode);
+                totalHours -= 3;
                 element.classList.remove('selected');
-            } else {
+            } else if (totalHours + 3 <= 20) {
                 selectedSubjects.push(subjectCode);
+                totalHours += 3;
                 element.classList.add('selected');
+            } else {
+                displayAlert("You can't select more than 20 hours.");
+                return;
             }
 
-            document.getElementById('<%= lblSelectedSubjects.ClientID %>').innerText = selectedSubjects.join(', ');
+            updateProgressBar();
+        }
+
+        function displayAlert(message) {
+            var lblOutput = document.getElementById('<%= lblOutput.ClientID %>');
+            lblOutput.innerText = message;
+            lblOutput.style.color = 'red';
+        }
+
+        function toggleHelpCenter() {
+            const content = document.querySelector('.help-content');
+            content.classList.toggle('active');
         }
     </script>
 
