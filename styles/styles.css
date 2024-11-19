@@ -284,3 +284,51 @@
     padding-right: 50px;
 }
 
+.floating-legend {
+    position: fixed;
+    top: 20%;
+    left: 75px;
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.legend-box {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.legend-box.taken {
+    border-color: #A9D18E;
+}
+
+.legend-box.available {
+    border-color: #7EC8D1;
+}
+
+.legend-box.selected {
+    background-color: #ADD8E6;
+}
+
+.legend-box.unoffered {
+    border-color: #F4B183;
+}
+
+.legend-box.unavailable {
+    background-color: #BBBBBB;
+    border-color: #888888;
+}
+
+

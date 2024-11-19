@@ -8,7 +8,7 @@
                 <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: 4"></asp:Label>
             </div>
             <div class="hours-taken-container">
-                <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Taken: 38 of 156"></asp:Label>
+                <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Taken: 36 of 140"></asp:Label>
                 <asp:Label ID="lblElectiveUniversityHoursTaken" runat="server" Text="Elective University Hours Taken: 2 of 4"></asp:Label>
                 <asp:Label ID="lblElectiveCollegeHoursTaken" runat="server" Text="Elective College Hours Taken: 0 of 12"></asp:Label>
             </div>
@@ -207,8 +207,32 @@
             </div>
         </div>
 
+        <div class="floating-legend">
+            <div class="legend-item">
+                <div class="legend-box taken"></div>
+                <span>Taken</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box available"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box selected"></div>
+                <span>Selected</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box unoffered"></div>
+                <span>Unoffered</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box unavailable"></div>
+                <span>Unavailable</span>
+            </div>
+        </div>
+        
 
     </div>
+
 
     <script>
         var selectedSubjects = [];
