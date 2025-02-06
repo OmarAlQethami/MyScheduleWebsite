@@ -2,6 +2,8 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
+    <link rel="stylesheet" href="~/styles/WelcomeStyles.css">
+
     <div>
         <h2>Welcome to our website</h2>
         <h4>Before you start, you need to Sign In or Sign Up</h4>

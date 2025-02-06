@@ -116,6 +116,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Default.aspx" />
+    <Content Include="DepartmentHeadPage.aspx" />
+    <Content Include="EditInfoPage.aspx" />
     <Content Include="FacultyPage.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -132,6 +134,7 @@
     <Content Include="Account\Web.config" />
     <Content Include="env.config" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
+    <Content Include="OrderSuccessfulPage.aspx" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
@@ -162,7 +165,18 @@
     <Content Include="Scripts\WebForms\WebUIValidation.js" />
     <Content Include="Site.Master" />
     <Content Include="StudentPage.aspx" />
+    <Content Include="StudentProgressPage.aspx" />
+    <Content Include="styles\AdminStyles.css" />
+    <Content Include="styles\DepartmentHeadStyles.css" />
+    <Content Include="styles\EditInfoStyles.css" />
+    <Content Include="styles\FacultyStyles.css" />
+    <Content Include="styles\HelpCenterStyles.css" />
+    <Content Include="styles\OrderSuccessfulStyles.css" />
+    <Content Include="styles\SignInStyles.css" />
+    <Content Include="styles\SignUpStyles.css" />
+    <Content Include="styles\StudentStyles.css" />
     <Content Include="styles\styles.css" />
+    <Content Include="styles\WelcomeStyles.css" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -216,6 +230,20 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DepartmentHeadPage.aspx.cs">
+      <DependentUpon>DepartmentHeadPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DepartmentHeadPage.aspx.designer.cs">
+      <DependentUpon>DepartmentHeadPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="EditInfoPage.aspx.cs">
+      <DependentUpon>EditInfoPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EditInfoPage.aspx.designer.cs">
+      <DependentUpon>EditInfoPage.aspx</DependentUpon>
+    </Compile>
     <Compile Include="FacultyPage.aspx.cs">
       <DependentUpon>FacultyPage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -225,6 +253,13 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="OrderSuccessfulPage.aspx.cs">
+      <DependentUpon>OrderSuccessfulPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="OrderSuccessfulPage.aspx.designer.cs">
+      <DependentUpon>OrderSuccessfulPage.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
@@ -247,6 +282,13 @@
     </Compile>
     <Compile Include="StudentPage.aspx.designer.cs">
       <DependentUpon>StudentPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="StudentProgressPage.aspx.cs">
+      <DependentUpon>StudentProgressPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="StudentProgressPage.aspx.designer.cs">
+      <DependentUpon>StudentProgressPage.aspx</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>

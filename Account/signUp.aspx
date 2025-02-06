@@ -1,6 +1,8 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="signUp.aspx.cs" Inherits="MyScheduleWebsite.Account.signUp" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
+    <link rel="stylesheet" href="~/styles/SignUpStyles.css">
+
     <div>
     
         <table class="style1">

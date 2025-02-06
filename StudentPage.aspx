@@ -1,6 +1,8 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="StudentPage.aspx.cs" Inherits="MyScheduleWebsite.StudentPage" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
+    <link rel="stylesheet" href="~/styles/StudentStyles.css">
+
     <div class="main-container">
         <div class="info">
             <asp:Label ID="lblGreeting" runat="server" Text="Hello, name"></asp:Label>
