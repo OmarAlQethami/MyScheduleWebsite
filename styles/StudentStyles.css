@@ -1,2 +1,16 @@
 ﻿body {
+    
+}
+
+.subject.history {
+    /*background-color: #BBBBBB;*/
+    border-color: #AAAAAA;
+}
+
+.subject.history-selected {
+    background-color: #A9D18E;
+}
+
+.subject.history:hover {
+    transform: scale(1.08);
 }
