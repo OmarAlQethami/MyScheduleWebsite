@@ -6,7 +6,15 @@
 
     <div class="main-container">
         <div class="info">
-            
+            <asp:Label ID="lblGreeting" runat="server" Text="Hello, N/A"></asp:Label>
+            <div class="label-center">
+                <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: N/A"></asp:Label>
+            </div>
+            <div class="hours-taken-container">
+                <asp:Label ID="lblHoursSelected" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveUniversityHoursSelected" runat="server" Text="Elective University Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveCollegeHoursSelected" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
+            </div>
         </div>
         <div class="choose-labels">
             <div class="choose-label-wrapper">

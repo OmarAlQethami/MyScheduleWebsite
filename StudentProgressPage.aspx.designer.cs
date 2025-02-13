@@ -15,6 +15,51 @@ namespace MyScheduleWebsite
     {
 
         /// <summary>
+        /// lblGreeting control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblGreeting;
+
+        /// <summary>
+        /// lblCurrentLevel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCurrentLevel;
+
+        /// <summary>
+        /// lblHoursSelected control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblHoursSelected;
+
+        /// <summary>
+        /// lblElectiveUniversityHoursSelected control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblElectiveUniversityHoursSelected;
+
+        /// <summary>
+        /// lblElectiveCollegeHoursSelected control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblElectiveCollegeHoursSelected;
+
+        /// <summary>
         /// lblChoose1 control.
         /// </summary>
         /// <remarks>
