@@ -85,6 +85,18 @@
     color: #000000;
 }
 
+.subject.history {
+    border-color: #AAAAAA;
+}
+
+.subject.history-selected {
+    background-color: #A9D18E;
+}
+
+.subject.history:hover {
+    transform: scale(1.08);
+}
+
 .choose-labels {
     display: flex;
     justify-content: space-between;
