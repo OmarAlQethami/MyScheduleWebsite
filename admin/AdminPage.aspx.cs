@@ -488,12 +488,70 @@ namespace MyScheduleWebsite.admin
                 return;
             }
         }
+        protected void btnSignUp1_Click(object sender, EventArgs e)
+        {
+            string newUser = txtUserName2.Text.ToString();
+            string newPassword = txtPass1.Text.ToString();
+            string newEmail = txtEmail2.Text.ToString();
+
+            if (!Membership.ValidateUser(newUser, newPassword))
+            {
+                MembershipUser newUserObj = Membership.CreateUser(newUser, newPassword, newEmail);
+                Guid userId = (Guid)newUserObj.ProviderUserKey;
+
+                string strFName1 = txtFName1.Text;
+                string strLName1 = txtLName1.Text;
+                string strArFName1 = txtArFName1.Text;
+                string strArLName1 = txtArLName1.Text;
+                string strEmail2 = txtEmail2.Text;
+                string strUniversity1 = ddlUniversity1.SelectedValue;
+                string strMajor1 = ddlMajors1.SelectedValue;
+
+                int universityId = GetUniversityId(strUniversity1);
+                int majorId = GetMajorId(strMajor1);
+
+                CRUD myCrud = new CRUD();
+                string mySql = @"INSERT INTO departmentHead (departmentHeadEnglishFirstName, departmentHeadEnglishLastName,
+                           departmentHeadArabicFirstName, departmentHeadArabicLastName, email, universityId, majorId, UserId)
+                           VALUES (@fName, @lName, @arFName, @arLName, @email, @universityId, @majorId, @UserId)";
+
+                Dictionary<string, object> myPara = new Dictionary<string, object>();
+                myPara.Add("@fName", strFName1);
+                myPara.Add("@lName", strLName1);
+                myPara.Add("@arFName", strArFName1);
+                myPara.Add("@arLName", strArLName1);
+                myPara.Add("@email", strEmail2);
+                myPara.Add("@universityId", universityId);
+                myPara.Add("@majorId", majorId);
+                myPara.Add("@UserId", userId);
+                int rtn = myCrud.InsertUpdateDelete(mySql, myPara);
+                if (rtn >= 1)
+                {
+                    Roles.AddUserToRole(newUser, "departmentHead");
+                    lblSignUpOutput.Text = "departmentHead User Created Successfully. Send to him his Username and Password";
+                }
+                else
+                {
+                    lblSignUpOutput.Text = "Signing up has failed. Please try again.";
+                }
+            }
+            else
+            {
+                lblSignUpOutput.Text = "The Username you chose is unavailable. Please try with a different username.";
+                return;
+            }
+        }
 
 
         protected void ddlUniversity_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedUniversity = ddlUniversity.SelectedValue;
             PopulateMajors(selectedUniversity);
+        }
+        protected void ddlUniversity1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedUniversity = ddlUniversity1.SelectedValue;
+            PopulateMajors1(selectedUniversity);
         }
 
         private void PopulateMajors(string universityName)
@@ -513,6 +571,24 @@ namespace MyScheduleWebsite.admin
             }
             ddlMajors.Items.Insert(0, new ListItem("Choose a Major", "0"));
         }
+        private void PopulateMajors1(string universityName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = "SELECT majorEnglishName FROM majors WHERE universityId = (SELECT UniversityId from Universities WHERE universityEnglishName = @universityName)";
+
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@universityName", universityName);
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                ddlMajors1.DataSource = dr;
+                ddlMajors1.DataTextField = "MajorEnglishName";
+                ddlMajors1.DataValueField = "MajorEnglishName";
+                ddlMajors1.DataBind();
+            }
+            ddlMajors1.Items.Insert(0, new ListItem("Choose a Major", "0"));
+        }
+
 
         private int GetUniversityId(string universityName)
         {

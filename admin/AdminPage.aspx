@@ -50,7 +50,7 @@
         </table>
     </div>
 
-       <table  border="2">
+       <table>
            <tr>
                <td colspan ="5" align="center" >
                    <asp:Label ID="lblMsg" runat="server"  Text=""></asp:Label>
@@ -312,10 +312,10 @@
                 </td>
             </tr>
             <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    &nbsp;</td>
+                <td class="style2" style="height: 20px">
+                    </td>
+                <td style="height: 20px">
+                    </td>
             </tr>
             <tr>
                 <td class="style2">
@@ -341,7 +341,138 @@
         </table>
         
         <br />
-        
+
+        <table class="style1">
+            <tr><td colspan="2"></td></tr>
+            <tr>
+                <td class="style2">
+                    <strong>Sign Up a new departmentHead Member:</strong></td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    English First Name:</td>
+                <td>
+                    <asp:TextBox ID="txtFName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    English
+                    Last Name:</td>
+                <td>
+                    <asp:TextBox ID="txtLName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Arabic First Name:</td>
+                <td>
+                    <asp:TextBox ID="txtArFName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Arabic Last Name:</td>
+                <td>
+                    <asp:TextBox ID="txtArLName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Email:</td>
+                <td>
+                    <asp:TextBox ID="txtEmail2" runat="server" autocomplete="off"></asp:TextBox>
+                    
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Username:</td>
+                <td>
+                    <asp:TextBox ID="txtUserName2" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Password:</td>
+                <td>
+                    <asp:TextBox ID="txtPass1" runat="server" TextMode="Password"></asp:TextBox> 
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    University:</td>
+                <td>
+                    <asp:DropDownList ID="ddlUniversity1" runat="server" DataSourceID="SqlDataSource2" DataTextField="universityEnglishName" DataValueField="universityEnglishName" OnSelectedIndexChanged="ddlUniversity1_SelectedIndexChanged" AutoPostBack="True" AppendDataBoundItems="True">
+                        <asp:ListItem Text="Choose a University" Value="" Selected="True"></asp:ListItem>
+                    </asp:DropDownList>
+
+                    <asp:SqlDataSource ID="SqlDataSource2" runat="server" 
+                        ConnectionString="<%$ ConnectionStrings:MyScheduleWebsiteConStr %>" 
+                        SelectCommand="SELECT [universityEnglishName] FROM [universities]">
+                    </asp:SqlDataSource>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="style2" style="height: 22px">
+                    Major:</td>
+                <td style="height: 22px">
+                    <asp:DropDownList ID="ddlMajors1" runat="server" AutoPostBack="True">
+                        <asp:ListItem Text="Choose a Major" Value="" Selected="True"></asp:ListItem>
+                    </asp:DropDownList>
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    <asp:Button ID="btnSignUp1" runat="server" ForeColor="#0000FF" style="font-weight: bold" onclick="btnSignUp1_Click" 
+                        Text="Sign Up" OnClientClick="return confirm('Are all your information correct?')"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    <asp:Label ID="Label1" runat="server"></asp:Label>
+                </td>
+            </tr>
+        </table>
+
+        <br />
     
     </div>
     
