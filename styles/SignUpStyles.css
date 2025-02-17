@@ -1,2 +1,93 @@
 ﻿body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.style2 {
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: #007BFF;
+}
+
+button,
+input[type="submit"] {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+    button:hover,
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+.info-label {
+    display: block;
+    margin-bottom: 15px;
+    color: red;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 90%;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select,
+    button,
+    input[type="submit"] {
+        padding: 10px;
+    }
 }

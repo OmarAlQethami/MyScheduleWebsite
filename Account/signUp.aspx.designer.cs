@@ -15,6 +15,15 @@ namespace MyScheduleWebsite.Account
     {
 
         /// <summary>
+        /// lblInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblInfo;
+
+        /// <summary>
         /// txtFName control.
         /// </summary>
         /// <remarks>
@@ -24,6 +33,15 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtFName;
 
         /// <summary>
+        /// lblFNameError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblFNameError;
+
+        /// <summary>
         /// txtLName control.
         /// </summary>
         /// <remarks>
@@ -31,6 +49,15 @@ namespace MyScheduleWebsite.Account
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtLName;
+
+        /// <summary>
+        /// lblLNameError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLNameError;
 
         /// <summary>
         /// txtArFName control.
@@ -69,6 +96,24 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtUsername;
 
         /// <summary>
+        /// lblUsernameError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblUsernameError;
+
+        /// <summary>
+        /// lblOutput control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblOutput;
+
+        /// <summary>
         /// txtPassword control.
         /// </summary>
         /// <remarks>
@@ -76,6 +121,33 @@ namespace MyScheduleWebsite.Account
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtPassword;
+
+        /// <summary>
+        /// lblPasswordError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPasswordError;
+
+        /// <summary>
+        /// txtConfirmPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmPassword;
+
+        /// <summary>
+        /// lblConfirmPasswordError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblConfirmPasswordError;
 
         /// <summary>
         /// txtUniId control.
@@ -87,6 +159,15 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtUniId;
 
         /// <summary>
+        /// lblUniIdError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblUniIdError;
+
+        /// <summary>
         /// ddlUniversity control.
         /// </summary>
         /// <remarks>
@@ -94,6 +175,15 @@ namespace MyScheduleWebsite.Account
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlUniversity;
+
+        /// <summary>
+        /// lblUniversityError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblUniversityError;
 
         /// <summary>
         /// SqlDataSource1 control.
@@ -112,6 +202,15 @@ namespace MyScheduleWebsite.Account
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlMajors;
+
+        /// <summary>
+        /// lblMajorError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMajorError;
 
         /// <summary>
         /// ddlCurrentLevel control.
@@ -141,12 +240,12 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.Button btnBack;
 
         /// <summary>
-        /// lblOutput control.
+        /// Label1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblOutput;
+        protected global::System.Web.UI.WebControls.Label Label1;
     }
 }
