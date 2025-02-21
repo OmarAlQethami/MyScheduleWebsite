@@ -110,7 +110,7 @@ namespace MyScheduleWebsite
         protected DataTable GetSubjects(int universityId, int majorId)
         {
             CRUD myCrud = new CRUD();
-            string mySql = @"SELECT * FROM subjects WHERE universityId = 1 AND majorId = 1 AND (subjectTypeId = 1 OR subjectTypeId = 2)";
+            string mySql = @"SELECT * FROM subjects WHERE universityId = @universityId AND majorId = @majorId";
 
             Dictionary<string, object> myPara = new Dictionary<string, object>();
             myPara.Add("@universityId", universityId);
@@ -120,23 +120,39 @@ namespace MyScheduleWebsite
             return dt;
         }
 
+        private class BindSubjectsData
+        {
+            public List<Subject> Subjects { get; set; } = new List<Subject>();
+            public List<string> AutoSelectedSubjects { get; set; } = new List<string>();
+            public decimal TotalCompulsoryHours { get; set; }
+            public decimal TotalElectiveUniversityHours { get; set; }
+            public decimal TotalElectiveCollegeHours { get; set; }
+        }
+
+        private class SubjectsRenderResult
+        {
+            public string PrerequisitesJson { get; set; }
+            public string SubjectNameMapJson { get; set; }
+            public string SubjectLevelMapJson { get; set; }
+            public string SubjectCreditHoursMapJson { get; set; }
+            public string SubjectTypeMapJson { get; set; }
+        }
+
         private void BindSubjects(int universityId, int majorId)
         {
             int currentLevel = getCurrentLevel(GetUserId());
-
-            CRUD crud = new CRUD();
             DataTable subjectsTable = GetSubjects(universityId, majorId);
 
-            List<Subject> subjects = new List<Subject>();
-            List<string> autoSelectedSubjects = new List<string>();
+            BindSubjectsData data = ProcessSubjectsData(subjectsTable, currentLevel);
 
-            Dictionary<string, string> subjectNameMap = new Dictionary<string, string>();
+            SubjectsRenderResult renderResult = RenderSubjectsHtmlAndJson(data);
 
-            Dictionary<string, int> subjectLevelMap = new Dictionary<string, int>();
+            RegisterClientScripts(data, renderResult, currentLevel);
+        }
 
-            decimal totalCompulsoryHours = 0;
-            decimal totalElectiveUniversityHours = 0;
-            decimal totalElectiveCollegeHours = 0;
+        private BindSubjectsData ProcessSubjectsData(DataTable subjectsTable, int currentLevel)
+        {
+            var data = new BindSubjectsData();
 
             foreach (DataRow row in subjectsTable.Rows)
             {
@@ -150,11 +166,15 @@ namespace MyScheduleWebsite
                     TypeId = int.Parse(row["subjectTypeId"].ToString())
                 };
 
-                if (subject.IsCompulsory) totalCompulsoryHours += subject.CreditHours;
-                else if (subject.IsElectiveUniversity) totalElectiveUniversityHours += subject.CreditHours;
-                else if (subject.IsElectiveCollege) totalElectiveCollegeHours += subject.CreditHours;
+                if (subject.IsCompulsory)
+                    data.TotalCompulsoryHours += subject.CreditHours;
+                else if (subject.IsElectiveUniversity)
+                    data.TotalElectiveUniversityHours += subject.CreditHours;
+                else if (subject.IsElectiveCollege)
+                    data.TotalElectiveCollegeHours += subject.CreditHours;
 
-                if (row["prerequisites"] != null && !string.IsNullOrWhiteSpace(row["prerequisites"].ToString()))
+                if (row["prerequisites"] != null &&
+                    !string.IsNullOrWhiteSpace(row["prerequisites"].ToString()))
                 {
                     var prerequisites = row["prerequisites"].ToString().Split(',');
                     subject.Prerequisites = new List<string>(prerequisites);
@@ -164,19 +184,20 @@ namespace MyScheduleWebsite
                     subject.Prerequisites = new List<string>();
                 }
 
-                subjects.Add(subject);
-
-                subjectNameMap[subject.Code] = subject.EnglishName;
-
-                subjectLevelMap[subject.Code] = subject.Level;
+                data.Subjects.Add(subject);
 
                 if (subject.Level < currentLevel)
                 {
-                    autoSelectedSubjects.Add(subject.Code);
+                    data.AutoSelectedSubjects.Add(subject.Code);
                 }
             }
 
-            var subjectGroups = subjects.GroupBy(s => s.Level);
+            return data;
+        }
+
+        private SubjectsRenderResult RenderSubjectsHtmlAndJson(BindSubjectsData data)
+        {
+            var subjectGroups = data.Subjects.GroupBy(s => s.Level).OrderBy(g => g.Key);
             subjectsContainer.InnerHtml = string.Empty;
 
             string prerequisitesJson = "var subjectPrerequisites = {";
@@ -185,27 +206,50 @@ namespace MyScheduleWebsite
             string subjectCreditHoursMapJson = "var subjectCreditHoursMap = {";
             string subjectTypeMapJson = "var subjectTypeMap = {";
 
-            lblHoursSelected.Text = $"Compulsory Hours Selected: 0 of {totalCompulsoryHours}";
-            lblElectiveUniversityHoursSelected.Text = $"Elective University Hours Selected: 0 of {totalElectiveUniversityHours}";
-            lblElectiveCollegeHoursSelected.Text = $"Elective College Hours Selected: 0 of {totalElectiveCollegeHours}";
+            lblHoursSelected.Text = $"Compulsory Hours Selected: 0 of {data.TotalCompulsoryHours}";
+            lblElectiveUniversityHoursSelected.Text = $"Elective University Hours Selected: 0 of {data.TotalElectiveUniversityHours}";
+            lblElectiveCollegeHoursSelected.Text = $"Elective College Hours Selected: 0 of {data.TotalElectiveCollegeHours}";
+
+            int electivePlaceholderCounter = 1;
 
             foreach (var group in subjectGroups)
             {
                 subjectsContainer.InnerHtml += "<div class='subjects-row'>";
 
-                foreach (var subject in group)
+                var CompulsorySubjects = group.Where(s => !s.IsElectiveCollege && !s.IsElectiveUniversity);
+                var electiveSubjectsInLevel = group.Where(s => s.IsElectiveCollege || s.IsElectiveUniversity).ToList();
+
+                foreach (var subject in CompulsorySubjects)
                 {
                     string subjectCode = subject.Code;
                     string subjectName = subject.EnglishName;
-                    string prerequisites = string.Join(",", subject.Prerequisites);
-
                     subjectsContainer.InnerHtml += $"<div class='subject history' id='{subjectCode}' onclick='SubjectClicked(this)'><span>{subjectName}</span></div>";
 
                     prerequisitesJson += $"'{subjectCode}': [{string.Join(",", subject.Prerequisites.Select(p => $"'{p}'"))}],";
                     subjectNameMapJson += $"'{subjectCode}': '{subjectName}',";
                     subjectLevelMapJson += $"'{subjectCode}': {subject.Level},";
-                    subjectCreditHoursMapJson += $"'{subject.Code}': {subject.CreditHours},";
-                    subjectTypeMapJson += $"'{subject.Code}': {subject.TypeId},";
+                    subjectCreditHoursMapJson += $"'{subjectCode}': {subject.CreditHours},";
+                    subjectTypeMapJson += $"'{subjectCode}': {subject.TypeId},";
+                }
+
+                if (electiveSubjectsInLevel.Any())
+                {
+                    string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
+                    subjectsContainer.InnerHtml +=
+                        $"<div class='subject elective-slot' id='{placeholderId}' data-level='{group.Key}' onclick='showElectivePopup({group.Key}, \"{placeholderId}\")'>" +
+                            $"<span>Elective ({electivePlaceholderCounter})</span>" +
+                        $"</div>";
+                    foreach (var subject in electiveSubjectsInLevel)
+                    {
+                        string subjectCode = subject.Code;
+                        string subjectName = subject.EnglishName;
+                        prerequisitesJson += $"'{subjectCode}': [{string.Join(",", subject.Prerequisites.Select(p => $"'{p}'"))}],";
+                        subjectNameMapJson += $"'{subjectCode}': '{subjectName}',";
+                        subjectLevelMapJson += $"'{subjectCode}': {subject.Level},";
+                        subjectCreditHoursMapJson += $"'{subjectCode}': {subject.CreditHours},";
+                        subjectTypeMapJson += $"'{subjectCode}': {subject.TypeId},";
+                    }
+                    electivePlaceholderCounter++;
                 }
 
                 subjectsContainer.InnerHtml += "</div>";
@@ -217,26 +261,58 @@ namespace MyScheduleWebsite
             subjectCreditHoursMapJson = subjectCreditHoursMapJson.TrimEnd(',') + "};";
             subjectTypeMapJson = subjectTypeMapJson.TrimEnd(',') + "};";
 
-            ClientScript.RegisterStartupScript(this.GetType(), "PrerequisitesScript", $"<script>{prerequisitesJson}</script>", false);
-            ClientScript.RegisterStartupScript(this.GetType(), "SubjectNameMapScript", $"<script>{subjectNameMapJson}</script>", false);
-            ClientScript.RegisterStartupScript(this.GetType(), "SubjectLevelMapScript", $"<script>{subjectLevelMapJson}</script>", false);
-            ClientScript.RegisterStartupScript(this.GetType(), "SubjectCreditHoursMapScript", $"<script>{subjectCreditHoursMapJson}</script>", false);
-            ClientScript.RegisterStartupScript(this.GetType(), "SubjectTypeMapScript", $"<script>{subjectTypeMapJson}</script>", false);
+            return new SubjectsRenderResult
+            {
+                PrerequisitesJson = prerequisitesJson,
+                SubjectNameMapJson = subjectNameMapJson,
+                SubjectLevelMapJson = subjectLevelMapJson,
+                SubjectCreditHoursMapJson = subjectCreditHoursMapJson,
+                SubjectTypeMapJson = subjectTypeMapJson
+            };
+        }
+
+        private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult, int currentLevel)
+        {
+            ClientScript.RegisterStartupScript(this.GetType(), "PrerequisitesScript", $"<script>{renderResult.PrerequisitesJson}</script>", false);
+            ClientScript.RegisterStartupScript(this.GetType(), "SubjectNameMapScript", $"<script>{renderResult.SubjectNameMapJson}</script>", false);
+            ClientScript.RegisterStartupScript(this.GetType(), "SubjectLevelMapScript", $"<script>{renderResult.SubjectLevelMapJson}</script>", false);
+            ClientScript.RegisterStartupScript(this.GetType(), "SubjectCreditHoursMapScript", $"<script>{renderResult.SubjectCreditHoursMapJson}</script>", false);
+            ClientScript.RegisterStartupScript(this.GetType(), "SubjectTypeMapScript", $"<script>{renderResult.SubjectTypeMapJson}</script>", false);
+
+            var electivesByLevel = data.Subjects
+                .Where(s => s.IsElectiveCollege || s.IsElectiveUniversity)
+                .GroupBy(s => s.Level)
+                .OrderBy(g => g.Key)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.Code).ToList());
+
+            string electiveOptionsJson = "var electiveOptions = {";
+            foreach (var kvp in electivesByLevel)
+            {
+                electiveOptionsJson += $"'{kvp.Key}': [{string.Join(",", kvp.Value.Select(code => $"'{code}'"))}],";
+            }
+            electiveOptionsJson = electiveOptionsJson.TrimEnd(',') + "};";
+            ClientScript.RegisterStartupScript(this.GetType(), "ElectiveOptionsScript", $"<script>{electiveOptionsJson}</script>", false);
+
             string totalHoursScript = $@"
-            var totalCompulsoryHours = {totalCompulsoryHours};
-            var totalElectiveUniversityHours = {totalElectiveUniversityHours};
-            var totalElectiveCollegeHours = {totalElectiveCollegeHours};
+            var totalCompulsoryHours = {data.TotalCompulsoryHours};
+            var totalElectiveUniversityHours = {data.TotalElectiveUniversityHours};
+            var totalElectiveCollegeHours = {data.TotalElectiveCollegeHours};
             var lblHoursSelectedId = '{lblHoursSelected.ClientID}';
             var lblElectiveUniversityHoursSelectedId = '{lblElectiveUniversityHoursSelected.ClientID}';
             var lblElectiveCollegeHoursSelectedId = '{lblElectiveCollegeHoursSelected.ClientID}';
             ";
             ClientScript.RegisterStartupScript(this.GetType(), "TotalHoursScript", $"<script>{totalHoursScript}</script>", false);
 
-            string selectedSubjectsJsArray = $"var preSelectedSubjects = {Newtonsoft.Json.JsonConvert.SerializeObject(autoSelectedSubjects)};";
+            string selectedSubjectsJsArray = $"var preSelectedSubjects = {Newtonsoft.Json.JsonConvert.SerializeObject(data.AutoSelectedSubjects)};";
             Page.ClientScript.RegisterStartupScript(this.GetType(), "AutoSelectSubjects", $"<script>{selectedSubjectsJsArray}</script>", false);
 
             string currentLevelJs = $"var currentStudentLevel = {currentLevel};";
             Page.ClientScript.RegisterStartupScript(this.GetType(), "CurrentStudentLevel", $"<script>{currentLevelJs}</script>", false);
+        }
+
+        protected void btnConfirm_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

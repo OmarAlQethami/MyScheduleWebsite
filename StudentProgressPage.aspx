@@ -29,7 +29,7 @@
         </div>
         <div class="buttons">
             <asp:Button ID="btnBack" runat="server" Text="Back" PostBackUrl="~/Default.aspx" CssClass="custom-button"/>
-            <asp:Button ID="btnNext" runat="server" Text="Next" CssClass="custom-button"/>
+            <asp:Button ID="btnConfirm" runat="server" Text="Confirm" CssClass="custom-button" OnClick="btnConfirm_Click"/>
         </div>
     </div>
 

@@ -33,6 +33,21 @@ function SubjectClicked(element) {
     if (selectedSubjects.includes(subjectCode)) {
         selectedSubjects = selectedSubjects.filter(item => item !== subjectCode);
         element.classList.remove('history-selected');
+
+        var slotId = element.getAttribute("data-slot-id");
+        if (slotId) {
+            var level = element.getAttribute("data-slot-level");
+            var electiveNumber = slotId.split('_')[2];
+
+            var slot = document.createElement("div");
+            slot.id = slotId;
+            slot.className = "subject elective-slot";
+            slot.setAttribute("data-level", level);
+            slot.setAttribute("onclick", "showElectivePopup(" + level + ", '" + slotId + "')");
+            slot.innerHTML = "<span>Elective (" + electiveNumber + ")</span>";
+
+            element.parentNode.replaceChild(slot, element);
+        }
         RemoveDependentSubjects(subjectCode);
     } else {
         var prerequisites = subjectPrerequisites[subjectCode] || [];
@@ -97,6 +112,75 @@ function updateHours() {
         `Elective College Hours Selected: ${selectedCollege} of ${totalElectiveCollegeHours}`;
     document.getElementById(lblElectiveUniversityHoursSelectedId).innerText =
         `Elective University Hours Selected: ${selectedUniversity} of ${totalElectiveUniversityHours}`;
+}
+
+function showElectivePopup(level, slotId) {
+    var electiveCodes = electiveOptions[level] || [];
+    var electiveOptionsList = [];
+
+    electiveCodes.forEach(function (code) {
+        var electiveName = subjectNameMap[code] || code;
+        electiveOptionsList.push({ code: code, name: electiveName });
+    });
+
+    var popup = document.createElement("div");
+    popup.className = "elective-popup";
+
+    electiveOptionsList.forEach(function (option) {
+        var optionDiv = document.createElement("div");
+        optionDiv.className = "elective-option";
+        optionDiv.innerText = option.name;
+        optionDiv.onclick = function (e) {
+            e.stopPropagation();
+            var slot = document.getElementById(slotId);
+            var level = slot.getAttribute("data-level");
+
+            var subjectElement = document.createElement("div");
+            subjectElement.id = option.code;
+            subjectElement.className = "subject history";
+            subjectElement.setAttribute("onclick", "SubjectClicked(this)");
+            subjectElement.innerHTML = "<span>" + option.name + "</span>";
+            subjectElement.setAttribute("data-slot-id", slotId);
+            subjectElement.setAttribute("data-slot-level", level);
+
+            slot.parentNode.replaceChild(subjectElement, slot);
+
+            SubjectClicked(subjectElement);
+
+            if (popup && popup.parentNode) {
+                popup.parentNode.removeChild(popup);
+            }
+        };
+        popup.appendChild(optionDiv);
+    });
+
+    var slotElem = document.getElementById(slotId);
+    var rect = slotElem.getBoundingClientRect();
+    popup.style.position = "absolute";
+    popup.style.top = (rect.bottom + window.scrollY) + "px";
+    popup.style.left = (rect.left + window.scrollX) + "px";
+    popup.style.backgroundColor = "#EEEEEE";
+    popup.style.border = "1px solid #ccc";
+    popup.style.padding = "10px";
+    popup.style.zIndex = 1000;
+    popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+    document.body.appendChild(popup);
+
+    document.addEventListener("click", function handler(event) {
+        if (!popup.contains(event.target) && event.target.id !== slotId) {
+            if (popup && popup.parentNode) {
+                popup.parentNode.removeChild(popup);
+            }
+            document.removeEventListener("click", handler);
+        }
+    });
+
+    if (slotElem) {
+        var childSpans = slotElem.getElementsByTagName("span");
+        for (var i = 0; i < childSpans.length; i++) {
+            childSpans[i].style.pointerEvents = "none";
+        }
+    }
 }
 
 function displayAlert(message) {
