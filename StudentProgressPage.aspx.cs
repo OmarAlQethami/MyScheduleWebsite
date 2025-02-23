@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -19,7 +21,7 @@ namespace MyScheduleWebsite
             {
                 Response.Redirect("~/Default.aspx");
             }
-            else if (!IsPostBack)
+            else
             {
                 lblGreeting.Text = "Hello " + User.Identity.Name + "!";
                 Guid userId = GetUserId();
@@ -309,10 +311,258 @@ namespace MyScheduleWebsite
             string currentLevelJs = $"var currentStudentLevel = {currentLevel};";
             Page.ClientScript.RegisterStartupScript(this.GetType(), "CurrentStudentLevel", $"<script>{currentLevelJs}</script>", false);
         }
+        private int GetStudentId(Guid userId)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT studentId FROM students WHERE UserId = @UserId";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@UserId", userId);
+            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+            return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["studentId"]) : 0;
+        }
 
+        private int GetSubjectId(string subjectCode, int universityId, int majorId)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT subjectId FROM subjects 
+                   WHERE subjectCode = @subjectCode 
+                     AND universityId = @universityId 
+                     AND majorId = @majorId";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@subjectCode", subjectCode);
+            myPara.Add("@universityId", universityId);
+            myPara.Add("@majorId", majorId);
+            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+            return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["subjectId"]) : 0;
+        }
+
+        private string GetSubjectName(string subjectCode, int universityId, int majorId)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT subjectEnglishName FROM subjects 
+                   WHERE subjectCode = @subjectCode 
+                     AND universityId = @universityId 
+                     AND majorId = @majorId";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@subjectCode", subjectCode);
+            myPara.Add("@universityId", universityId);
+            myPara.Add("@majorId", majorId);
+            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+            return dt.Rows.Count > 0 ? dt.Rows[0]["subjectEnglishName"].ToString() : subjectCode;
+        }
+        private bool IsSubjectTaken(int studentId, int subjectId)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT COUNT(*) FROM studentsProgress WHERE studentId = @studentId AND subjectId = @subjectId";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@studentId", studentId);
+            myPara.Add("@subjectId", subjectId);
+            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+            return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
+        }
+
+        private List<string> GetPrerequisiteCodes(int subjectId)
+        {
+            List<string> prerequisites = new List<string>();
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT prerequisites FROM subjects WHERE subjectId = @subjectId";
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@subjectId", subjectId);
+            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+            if (dt.Rows.Count > 0 && dt.Rows[0]["prerequisites"] != DBNull.Value)
+            {
+                string prereqStr = dt.Rows[0]["prerequisites"].ToString();
+                prerequisites = prereqStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                          .Select(p => p.Trim()).ToList();
+            }
+            return prerequisites;
+        }
         protected void btnConfirm_Click(object sender, EventArgs e)
         {
+            Guid userId = GetUserId();
+            int studentId = GetStudentId(userId);
+            int universityId = getUniversityId(userId);
+            int majorId = getMajorId(userId);
 
+            if (studentId == 0)
+            {
+                lblOutput.Text = "Student not found!";
+                lblOutput.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            string selectedSubjectsCSV = hdnSelectedSubjects.Value;
+            List<string> selectedSubjectCodes = selectedSubjectsCSV.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            if (string.IsNullOrEmpty(selectedSubjectsCSV))
+            {
+                lblOutput.Text = "No subjects selected!";
+                lblOutput.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            List<string> errors = new List<string>();
+            Dictionary<string, int> validSubjects = new Dictionary<string, int>();
+            List<string> reservedSubjects = new List<string>();
+
+            foreach (string code in selectedSubjectCodes)
+            {
+                int subjectId = GetSubjectId(code, universityId, majorId);
+                if (subjectId == 0)
+                {
+                    errors.Add($"Invalid subject code: {code}");
+                    continue;
+                }
+
+                if (IsSubjectTaken(studentId, subjectId))
+                {
+                    reservedSubjects.Add(code);
+                    continue;
+                }
+
+                List<string> prerequisiteCodes = GetPrerequisiteCodes(subjectId);
+                List<string> missingPrerequisites = new List<string>();
+
+                foreach (string prereqCode in prerequisiteCodes)
+                {
+                    int prereqSubjectId = GetSubjectId(prereqCode, universityId, majorId);
+                    if (prereqSubjectId == 0)
+                    {
+                        errors.Add($"Invalid prerequisite '{prereqCode}'");
+                        continue;
+                    }
+
+                    bool isTaken = IsSubjectTaken(studentId, prereqSubjectId);
+                    bool isSelected = selectedSubjectCodes.Contains(prereqCode);
+
+                    if (!isTaken && !isSelected)
+                    {
+                        missingPrerequisites.Add(GetSubjectName(prereqCode, universityId, majorId));
+                    }
+                }
+
+                if (missingPrerequisites.Count > 0)
+                {
+                    errors.Add($"{GetSubjectName(code, universityId, majorId)} requires: {string.Join(", ", missingPrerequisites)}");
+                }
+                else
+                {
+                    validSubjects.Add(code, subjectId);
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                lblOutput.Text = string.Join("<br />", errors);
+                lblOutput.ForeColor = System.Drawing.Color.Red;
+            }
+
+            List<string> successfullyInserted = new List<string>();
+            bool shouldRollback = false;
+            Exception actualError = null;
+            CRUD myCrud = null;
+
+            try
+            {
+                foreach (var subject in validSubjects)
+                {
+                    myCrud = new CRUD();
+
+                    string insertSql = @"INSERT INTO studentsProgress (studentId, subjectId) 
+                                   VALUES (@studentId, @subjectId)";
+
+                    Dictionary<string, object> insertParams = new Dictionary<string, object>
+                    {
+                        { "@studentId", studentId },
+                        { "@subjectId", subject.Value }
+                    };
+
+                    int result = myCrud.InsertUpdateDelete(insertSql, insertParams);
+
+                    if (result > 0)
+                    {
+                        successfullyInserted.Add(subject.Key);
+                    }
+                    else
+                    {
+                        shouldRollback = true;
+                        actualError = new Exception($"Failed to insert subject {subject.Key}");
+                        break;
+                    }
+
+                    myCrud = null;
+                }
+
+                if (shouldRollback)
+                {
+                    throw actualError;
+                }
+
+                if (successfullyInserted.Count > 0 && errors.Count == 0)
+                {
+                    Response.Redirect("StudentPage.aspx", false);
+                    Context.ApplicationInstance.CompleteRequest();
+                    return;
+                }
+            }
+            catch (ThreadAbortException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                shouldRollback = true;
+                actualError = ex;
+            }
+            finally
+            {
+                try
+                {
+                    if (shouldRollback && successfullyInserted.Count > 0)
+                    {
+                        foreach (string subjectCode in successfullyInserted)
+                        {
+                            var deleteCrud = new CRUD();
+                            try
+                            {
+                                int subjectId = GetSubjectId(subjectCode, universityId, majorId);
+                                string deleteSql = @"DELETE FROM studentsProgress 
+                                             WHERE studentId = @studentId 
+                                               AND subjectId = @subjectId";
+
+                                deleteCrud.InsertUpdateDelete(deleteSql, new Dictionary<string, object>
+                                {
+                                    { "@studentId", studentId },
+                                    { "@subjectId", subjectId }
+                                });
+                            }
+                            finally
+                            {
+                                deleteCrud = null;
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    hdnSelectedSubjects.Value = string.Join(",", selectedSubjectCodes);
+                    ScriptManager.RegisterStartupScript(this, GetType(), "restoreSelection",
+                        $"restoreSelection('{hdnSelectedSubjects.ClientID}');", true);
+
+                    var reservedSubjectsJson = Newtonsoft.Json.JsonConvert.SerializeObject(reservedSubjects);
+                    ScriptManager.RegisterStartupScript(this, GetType(), "markReservedSubjects",
+                        $"markReservedSubjects({reservedSubjectsJson});", true);
+
+                    myCrud = null;
+
+                    if (shouldRollback)
+                    {
+                        lblOutput.Text = $"Error: {actualError.Message}. Changes rolled back.";
+                        lblOutput.ForeColor = Color.Red;
+                    }
+                }
+            }
         }
+
     }
 }

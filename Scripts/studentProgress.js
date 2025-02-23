@@ -19,6 +19,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+function onConfirmClick() {
+
+    const hiddenField = document.getElementById('hdnSelectedSubjects');
+
+    if (!hiddenField) {
+        console.error("Hidden field not found!");
+        return false;
+    }
+
+    hiddenField.value = selectedSubjects.join(',');
+}
+
 function SubjectClicked(element) {
     var subjectCode = element.id;
     var lblOutput = document.getElementById(lblOutputClientId);
@@ -71,7 +83,7 @@ function SubjectClicked(element) {
         selectedSubjects.push(subjectCode);
         element.classList.add('history-selected');
     }
-
+    console.log("Current selection:", selectedSubjects);
     updateHours();
 }
 
@@ -180,6 +192,16 @@ function showElectivePopup(level, slotId) {
         for (var i = 0; i < childSpans.length; i++) {
             childSpans[i].style.pointerEvents = "none";
         }
+    }
+}
+
+function restoreSelection(hiddenFieldId) {
+    const hiddenField = document.getElementById(hiddenFieldId);
+    if (hiddenField && hiddenField.value) {
+        hiddenField.value.split(',').forEach(code => {
+            const el = document.getElementById(code);
+            if (el) el.classList.add('history-selected');
+        });
     }
 }
 
