@@ -63,7 +63,8 @@
 }
 
 .subject.taken {
-    border-color: #A9D18E;
+    border-color: #AAAAAA;
+    background-color: #A9D18E;
 }
 
 .subject.available {
@@ -107,23 +108,6 @@
     display: flex;
     justify-content: flex-start;
     padding-left: 10px
-}
-
-.elective-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    width: 100%;
-}
-
-.elective-subjects-container {
-    width: 100%;
-    height: 400px;
-    background-color: #CCCCCC;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    padding: 20px;
-    overflow-x: auto;
 }
 
 .status-container {
@@ -178,7 +162,8 @@
 }
 
 .legend-box.taken {
-    border-color: #A9D18E;
+    border-color: #AAAAAA;
+    background-color: #A9D18E;
 }
 
 .legend-box.available {
