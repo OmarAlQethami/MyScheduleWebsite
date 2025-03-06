@@ -5,6 +5,12 @@ var totalElectiveCollegeHours = 0;
 var lblHoursTakenId, lblElectiveUniversityHoursTakenId, lblElectiveCollegeHoursTakenId;
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.subject').forEach(subject => {
+        const originalClasses = Array.from(subject.classList)
+            .filter(c => c !== 'selected')
+            .join(' ');
+        subject.dataset.originalClasses = originalClasses;
+    });
     updateHours();
     updateProgressBar();
 });
@@ -14,18 +20,30 @@ function SubjectClicked(element) {
     const lblOutput = document.getElementById(lblOutputClientId);
     lblOutput.innerText = "";
 
-    if (element.classList.contains('taken')) {
-        displayAlert("This subject has already been taken");
-        return;
-    }
+    //if (element.classList.contains('taken')) {
+    //    displayAlert("This subject has already been taken");
+    //    return;
+    //}
 
     if (selectedSubjects.includes(subjectCode)) {
         selectedSubjects = selectedSubjects.filter(code => code !== subjectCode);
-        element.classList.remove('selected');
-    }
-    selectedSubjects.push(subjectCode);
-    element.classList.add('selected');
+        element.className = element.dataset.originalClasses;
+    } else {
+        const subjectHours = subjectCreditHoursMap[subjectCode] || 0;
+        const currentHours = selectedSubjects.reduce((sum, code) =>
+            sum + (subjectCreditHoursMap[code] || 0), 0);
 
+        if (currentHours + subjectHours > 20) {
+            displayAlert("You have reached the maximum limit of 20 hours.");
+            return;
+        }
+
+        element.dataset.originalClasses = Array.from(element.classList)
+            .filter(c => c !== 'selected')
+            .join(' ');
+        selectedSubjects.push(subjectCode);
+        element.classList.add('selected');
+    }
     updateHours();
     updateProgressBar();
 }
@@ -101,13 +119,21 @@ function updateProgressBar() {
         sum + subjectCreditHoursMap[code], 0);
     const progressBar = document.getElementById(progressBarId);
     const hoursLabel = document.getElementById(hoursLabelId);
+    const lblOutput = document.getElementById(lblOutputClientId);
 
+    const progressWidth = (totalSelected / 20) * 100;
     if (progressBar) {
-        progressBar.style.width = `${Math.min((totalSelected / 18) * 100, 100)}%`;
+        progressBar.style.width = `${Math.min(progressWidth, 100)}%`;
+        progressBar.style.backgroundColor = totalSelected < 12 ? 'red' : 'green';
     }
     if (hoursLabel) {
         hoursLabel.textContent = `Hours selected: ${totalSelected}`;
     }
+    //if (totalSelected >= 20) {
+    //    displayAlert("You have reached the maximum limit of 20 hours.");
+    //} else {
+    //    lblOutput.innerText = "";
+    //}
 }
 
 function displayAlert(message) {

@@ -20,17 +20,27 @@ namespace MyScheduleWebsite
             {
                 Response.Redirect("~/Default.aspx");
             }
+
+            Guid userId = GetUserId();
+            int universityId = GetUniversityId(userId);
+            int majorId = GetMajorId(userId);
+            int studentId = GetStudentId(userId);
+
+            List<string> takenSubjects = GetTakenSubjectCodes(studentId, universityId, majorId);
+            if (takenSubjects.Count == 0)
+            {
+                Response.Redirect("~/StudentProgressPage.aspx");
+                return;
+            }
             else if (!IsPostBack)
             {
                 lblGreeting.Text = "Hello " + User.Identity.Name + "!";
-                Guid userId = GetUserId();
-                lblCurrentLevel.Text = "Current Level: " + getCurrentLevel(userId);
+                lblCurrentLevel.Text = "Current Level: " + GetCurrentLevel(userId);
 
-                int universityId = getUniversityId(userId);
-                int majorId = getMajorId(userId);
                 BindSubjects(universityId, majorId);
             }
         }
+
         private class Subject
         {
             public string Code { get; set; }
@@ -52,6 +62,7 @@ namespace MyScheduleWebsite
             public decimal TotalElectiveUniversityHours { get; set; }
             public decimal TotalElectiveCollegeHours { get; set; }
         }
+
         private class SubjectsRenderResult
         {
             public string PrerequisitesJson { get; set; }
@@ -60,6 +71,7 @@ namespace MyScheduleWebsite
             public string SubjectCreditHoursMapJson { get; set; }
             public string SubjectTypeMapJson { get; set; }
         }
+
         private Guid GetUserId()
         {
             if (Membership.GetUser() is MembershipUser user)
@@ -69,7 +81,7 @@ namespace MyScheduleWebsite
             return Guid.Empty;
         }
 
-        private int getCurrentLevel(Guid userId)
+        private int GetCurrentLevel(Guid userId)
         {
             int currentLevel = 0;
 
@@ -87,7 +99,7 @@ namespace MyScheduleWebsite
             return currentLevel;
         }
 
-        private int getUniversityId(Guid userId)
+        private int GetUniversityId(Guid userId)
         {
             int universityId = 0;
 
@@ -105,7 +117,7 @@ namespace MyScheduleWebsite
             return universityId;
         }
 
-        private int getMajorId(Guid userId)
+        private int GetMajorId(Guid userId)
         {
             int majorId = 0;
 
@@ -122,6 +134,7 @@ namespace MyScheduleWebsite
             dr.Close();
             return majorId;
         }
+
         private int GetStudentId(Guid userId)
         {
             CRUD myCrud = new CRUD();
@@ -131,32 +144,32 @@ namespace MyScheduleWebsite
             DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
             return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["studentId"]) : 0;
         }
-        private int GetSubjectId(string subjectCode, int universityId, int majorId)
-        {
-            CRUD myCrud = new CRUD();
-            string mySql = @"SELECT subjectId FROM subjects 
-                             WHERE subjectCode = @subjectCode 
-                               AND universityId = @universityId 
-                               AND majorId = @majorId";
-            Dictionary<string, object> myPara = new Dictionary<string, object>();
-            myPara.Add("@subjectCode", subjectCode);
-            myPara.Add("@universityId", universityId);
-            myPara.Add("@majorId", majorId);
-            DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
-            return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["subjectId"]) : 0;
-        }
-        private bool IsSubjectTaken(int studentId, int subjectId)
-        {
-            CRUD myCrud = new CRUD();
-            string mySql = "SELECT COUNT(*) FROM studentsProgress WHERE studentId = @studentId AND subjectId = @subjectId";
-            Dictionary<string, object> parameters = new Dictionary<string, object>
-            {
-                { "@studentId", studentId },
-                { "@subjectId", subjectId }
-            };
-            DataTable dt = myCrud.getDTPassSqlDic(mySql, parameters);
-            return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
-        }
+        //private int GetSubjectId(string subjectCode, int universityId, int majorId)
+        //{
+        //    CRUD myCrud = new CRUD();
+        //    string mySql = @"SELECT subjectId FROM subjects 
+        //                     WHERE subjectCode = @subjectCode 
+        //                       AND universityId = @universityId 
+        //                       AND majorId = @majorId";
+        //    Dictionary<string, object> myPara = new Dictionary<string, object>();
+        //    myPara.Add("@subjectCode", subjectCode);
+        //    myPara.Add("@universityId", universityId);
+        //    myPara.Add("@majorId", majorId);
+        //    DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+        //    return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["subjectId"]) : 0;
+        //}
+        //private bool IsSubjectTaken(int studentId, int subjectId)
+        //{
+        //    CRUD myCrud = new CRUD();
+        //    string mySql = "SELECT COUNT(*) FROM studentsProgress WHERE studentId = @studentId AND subjectId = @subjectId";
+        //    Dictionary<string, object> parameters = new Dictionary<string, object>
+        //    {
+        //        { "@studentId", studentId },
+        //        { "@subjectId", subjectId }
+        //    };
+        //    DataTable dt = myCrud.getDTPassSqlDic(mySql, parameters);
+        //    return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
+        //}
         private List<string> GetTakenSubjectCodes(int studentId, int universityId, int majorId)
         {
             List<string> takenSubjects = new List<string>();
@@ -179,6 +192,7 @@ namespace MyScheduleWebsite
             }
             return takenSubjects;
         }
+
         protected DataTable GetSubjects(int universityId, int majorId)
         {
             CRUD myCrud = new CRUD();
@@ -206,8 +220,9 @@ namespace MyScheduleWebsite
             var renderResult = RenderSubjectsHtmlAndJson(data, takenSubjects);
 
             RegisterClientScripts(data, renderResult);
-            UpdateProgressLabels(subjects, takenSubjects);
+            UpdateProgressLabels(subjects);
         }
+
         private List<Subject> ProcessSubjects(int universityId, int majorId)
         {
             DataTable subjectsTable = GetSubjects(universityId, majorId);
@@ -228,6 +243,7 @@ namespace MyScheduleWebsite
             }
             return subjects;
         }
+
         private BindSubjectsData ProcessSubjectsData(List<Subject> subjects)
         {
             var data = new BindSubjectsData();
@@ -309,6 +325,7 @@ namespace MyScheduleWebsite
                 SubjectTypeMapJson = subjectTypeMapJson
             };
         }
+
         private void AddSubjectToJsonMaps(Subject subject,
             ref string prerequisitesJson,
             ref string subjectNameMapJson,
@@ -322,6 +339,7 @@ namespace MyScheduleWebsite
             subjectCreditHoursMapJson += $"'{subject.Code}': {subject.CreditHours},";
             subjectTypeMapJson += $"'{subject.Code}': {subject.TypeId},";
         }
+
         private void RenderSubjectHtml(Subject subject, List<string> takenSubjectCodes)
         {
             bool isTaken = takenSubjectCodes.Contains(subject.Code);
@@ -333,13 +351,15 @@ namespace MyScheduleWebsite
                     <span>{subject.EnglishName}</span>
                 </div>";
         }
+
         private List<string> GetPrerequisites(string prerequisites)
         {
             return string.IsNullOrWhiteSpace(prerequisites)
                 ? new List<string>()
                 : prerequisites.Split(',').Select(p => p.Trim()).ToList();
         }
-        private void UpdateProgressLabels(List<Subject> subjects, List<string> takenSubjectCodes)
+
+        private void UpdateProgressLabels(List<Subject> subjects)
         {
             decimal totalCompulsoryHours = subjects.Where(s => s.IsCompulsory).Sum(s => s.CreditHours);
             decimal totalElectiveCollegeHours = subjects.Where(s => s.IsElectiveCollege).Sum(s => s.CreditHours);
@@ -349,12 +369,14 @@ namespace MyScheduleWebsite
             lblElectiveCollegeHoursTaken.Text = $"Elective College Hours Selected: 0 of {totalElectiveCollegeHours}";
             lblElectiveUniversityHoursTaken.Text = $"Elective University Hours Selected: 0 of {totalElectiveUniversityHours}";
         }
+
         private string GetSubjectStatusClass(Subject subject, bool isTaken)
         {
             if (isTaken) return "taken";
-            if (subject.Level > getCurrentLevel(GetUserId())) return "unavailable";
+            if (subject.Level > GetCurrentLevel(GetUserId())) return "unavailable";
             return "available";
         }
+
         private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult)
         {
             ClientScript.RegisterStartupScript(GetType(), "Prerequisites", renderResult.PrerequisitesJson, true);
