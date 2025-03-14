@@ -4,10 +4,21 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <link rel="stylesheet" href="/styles/AdminStyles.css">
-
-    <div>
+    <div class="admin-container">
+        <div class="sidebar-menu">
+            <br />
+            <h3>Admin Menu</h3>
+            <ul>
+                <li><a href="ManageUsers.aspx"> Sign Up a new Faculty Member</a></li>
+                <li><a href="ManageRoles.aspx"> Sign Up a new departmentHead Member</a></li>
+                <li><a href="Reports.aspx"> Register a new University</a></li>
+                <li><a href="Logout.aspx">Logout</a></li>
+            </ul>
+        </div>
+    
     <h3> User Role Management Console</h3>
-    <div>
+        <br />
+    <div class="admin-container">
         <table border="1">
             <tr>
                 <th>
@@ -49,7 +60,7 @@
             </tr>
         </table>
     </div>
-
+ </div>
        <table>
            <tr>
                <td colspan ="5" align="center" >
@@ -156,8 +167,6 @@
     
         <br />
 
-
-    </div>
     <fieldset   style="width: auto; ">
         <legend>Users & Roles</legend>
         <table cellpadding="10" style= "">
@@ -332,9 +341,9 @@
                     &nbsp;</td>
             </tr>
             <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
+                <td class="style2" style="height: 20px">
+                    </td>
+                <td style="height: 20px">
                     <asp:Label ID="lblSignUpOutput" runat="server"></asp:Label>
                 </td>
             </tr>
@@ -345,10 +354,10 @@
         <table class="style1">
             <tr><td colspan="2"></td></tr>
             <tr>
-                <td class="style2">
+                <td class="style2" style="height: 20px">
                     <strong>Sign Up a new departmentHead Member:</strong></td>
-                <td>
-                    &nbsp;</td>
+                <td style="height: 20px">
+                    </td>
             </tr>
             <tr>
                 <td class="style2">
@@ -467,12 +476,95 @@
                 <td class="style2">
                     &nbsp;</td>
                 <td>
-                    <asp:Label ID="Label1" runat="server"></asp:Label>
+                    <asp:Label ID="lblSignUpOutput1" runat="server"></asp:Label>
                 </td>
             </tr>
         </table>
 
         <br />
+
+       <table>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style3" style="height: 20px; width: 286px;"><strong>Register a new University:</strong></td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            University English Name:</td>
+        <td>
+            <asp:TextBox ID="txtUName" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            University Arabic Name:</td>
+        <td>
+            <asp:TextBox ID="txtUArName" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Enter Majors:</td>
+        <td>
+            <asp:TextBox ID="txtMajors" runat="server" placeholder="Enter Major" Width="279px"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Enter Arabic Majors:</td>
+        <td>
+            <asp:TextBox ID="txtArMajors" runat="server" placeholder="ادخل التخصص" Width="280px"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Total Credit Hours:</td>
+        <td>
+            <asp:TextBox ID="txtTotal" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>  
+        <td>
+            <asp:Button ID="btnAddMajors" runat="server" ForeColor="#0000FF" style="font-weight: bold" onclick="btnAddMajors_Click" 
+                Text="addition" OnClientClick="return confirm('Are all your information correct?')"/>
+        </td>
+        <td class="style2">
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            <asp:Label ID="lblMajorsOutput" runat="server"></asp:Label>
+        </td>
+    </tr>
+</table>
     
     </div>
     
