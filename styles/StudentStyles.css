@@ -49,7 +49,6 @@
     color: #000000;
     border: 4px solid transparent;
     border-radius: 10px;
-    cursor: pointer;
     user-select: none;
     transition: background-color 0.3s, transform 0.2s;
 }
@@ -69,10 +68,12 @@
 
 .subject.available {
     border-color: #7EC8D1;
+    cursor: pointer;
 }
 
 .subject.unoffered {
     border-color: #F4B183;
+    cursor: pointer;
 }
 
 .subject.unavailable {
@@ -83,6 +84,7 @@
 .subject.selected {
     background-color: #ADD8E6;
     color: #000000;
+    cursor: pointer;
 }
 
 .subject.history {
@@ -215,7 +217,7 @@
 }
 
 .elective-option {
-    display: flex;
+    /*display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -231,14 +233,21 @@
     border-radius: 10px;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.2s;*/
+    border-color: #7EC8D1;
+    /*cursor: pointer;*/
 }
 
 .elective-slot:hover {
     transform: scale(1.08);
 }
 
-.elective-option:hover {
+.available .elective-option:hover {
     transform: scale(1.08);
+}
+
+.subject.elective-slot.unavailable-slot {
+    background-color: #BBBBBB;
+    border-color: #888888;
 }
 

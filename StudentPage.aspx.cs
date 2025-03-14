@@ -144,32 +144,7 @@ namespace MyScheduleWebsite
             DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
             return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["studentId"]) : 0;
         }
-        //private int GetSubjectId(string subjectCode, int universityId, int majorId)
-        //{
-        //    CRUD myCrud = new CRUD();
-        //    string mySql = @"SELECT subjectId FROM subjects 
-        //                     WHERE subjectCode = @subjectCode 
-        //                       AND universityId = @universityId 
-        //                       AND majorId = @majorId";
-        //    Dictionary<string, object> myPara = new Dictionary<string, object>();
-        //    myPara.Add("@subjectCode", subjectCode);
-        //    myPara.Add("@universityId", universityId);
-        //    myPara.Add("@majorId", majorId);
-        //    DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
-        //    return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["subjectId"]) : 0;
-        //}
-        //private bool IsSubjectTaken(int studentId, int subjectId)
-        //{
-        //    CRUD myCrud = new CRUD();
-        //    string mySql = "SELECT COUNT(*) FROM studentsProgress WHERE studentId = @studentId AND subjectId = @subjectId";
-        //    Dictionary<string, object> parameters = new Dictionary<string, object>
-        //    {
-        //        { "@studentId", studentId },
-        //        { "@subjectId", subjectId }
-        //    };
-        //    DataTable dt = myCrud.getDTPassSqlDic(mySql, parameters);
-        //    return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
-        //}
+        
         private List<string> GetTakenSubjectCodes(int studentId, int universityId, int majorId)
         {
             List<string> takenSubjects = new List<string>();
@@ -212,14 +187,15 @@ namespace MyScheduleWebsite
         {
             Guid userId = GetUserId();
             int studentId = GetStudentId(userId);
+            int currentLevel = GetCurrentLevel(userId);
 
             var subjects = ProcessSubjects(universityId, majorId);
             var takenSubjects = GetTakenSubjectCodes(studentId, universityId, majorId);
 
             var data = ProcessSubjectsData(subjects);
-            var renderResult = RenderSubjectsHtmlAndJson(data, takenSubjects);
+            var renderResult = RenderSubjectsHtmlAndJson(data, takenSubjects, currentLevel);
 
-            RegisterClientScripts(data, renderResult);
+            RegisterClientScripts(data, renderResult, currentLevel);
             UpdateProgressLabels(subjects);
         }
 
@@ -262,7 +238,7 @@ namespace MyScheduleWebsite
             return data;
         }
 
-        private SubjectsRenderResult RenderSubjectsHtmlAndJson(BindSubjectsData data, List<string> takenSubjectCodes)
+        private SubjectsRenderResult RenderSubjectsHtmlAndJson(BindSubjectsData data, List<string> takenSubjectCodes, int currentLevel)
         {
             subjectsContainer.InnerHtml = string.Empty;
             int electivePlaceholderCounter = 1;
@@ -296,17 +272,45 @@ namespace MyScheduleWebsite
                 }
 
                 var electiveSubjects = group.Where(s => s.IsElectiveCollege || s.IsElectiveUniversity).ToList();
+
                 if (electiveSubjects.Any())
                 {
-                    string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
-                    subjectsContainer.InnerHtml +=
-                        $"<div class='subject elective-slot' id='{placeholderId}' data-level='{group.Key}' " +
-                        $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\")'>" +
-                        "<span>Elective (" + electivePlaceholderCounter + ")</span></div>";
+                    string slotText = $"Elective ({electivePlaceholderCounter})";
+                    var takenElective = electiveSubjects.FirstOrDefault(s => takenSubjectCodes.Contains(s.Code));
+                    if (takenElective != null)
+                    {
+                        subjectsContainer.InnerHtml += $@"
+                            <div class='subject taken elective' id='{takenElective.Code}'>
+                                <span>{slotText} - {takenElective.EnglishName}</span>
+                            </div>";
+                    }
+                    else
+                    {
+                        string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
+                        bool isSlotUnavailable = group.Key > currentLevel;
+                        string slotClass = isSlotUnavailable ? "subject elective-slot unavailable-slot" : "subject elective-slot";
 
+                        subjectsContainer.InnerHtml +=
+                            $"<div class='{slotClass}' id='{placeholderId}' data-level='{group.Key}' data-current-level='{currentLevel}' " +
+                            $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\", {currentLevel})'>" +
+                            "<span>Elective (" + electivePlaceholderCounter + ")</span></div>";
+
+                    }
                     electivePlaceholderCounter++;
-                }
 
+                    // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+                    if (electivePlaceholderCounter == 6)
+                    {
+                        string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
+                        bool isSlotUnavailable = group.Key > currentLevel;
+                        string slotClass = isSlotUnavailable ? "subject elective-slot unavailable-slot" : "subject elective-slot";
+
+                        subjectsContainer.InnerHtml +=
+                            $"<div class='{slotClass}' id='{placeholderId}' data-level='{group.Key}' " +
+                                $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\", {currentLevel})'>" +
+                                "<span>Elective (" + electivePlaceholderCounter + ")</span></div>";
+                    }
+                }
                 subjectsContainer.InnerHtml += "</div>";
             }
 
@@ -342,9 +346,9 @@ namespace MyScheduleWebsite
 
         private void RenderSubjectHtml(Subject subject, List<string> takenSubjectCodes)
         {
-            bool isTaken = takenSubjectCodes.Contains(subject.Code);
-            string statusClass = GetSubjectStatusClass(subject, isTaken);
-            string onClickHandler = isTaken ? "disabled" : "onclick='SubjectClicked(this)'";
+            string statusClass = GetSubjectStatusClass(subject, takenSubjectCodes);
+            bool isClickable = statusClass == "available";
+            string onClickHandler = isClickable ? "onclick='SubjectClicked(this)'" : "";
 
             subjectsContainer.InnerHtml += $@"
                 <div class='subject {statusClass}' id='{subject.Code}' {onClickHandler}>
@@ -370,14 +374,25 @@ namespace MyScheduleWebsite
             lblElectiveUniversityHoursTaken.Text = $"Elective University Hours Selected: 0 of {totalElectiveUniversityHours}";
         }
 
-        private string GetSubjectStatusClass(Subject subject, bool isTaken)
+        private string GetSubjectStatusClass(Subject subject, List<string> takenSubjectCodes)
         {
-            if (isTaken) return "taken";
-            if (subject.Level > GetCurrentLevel(GetUserId())) return "unavailable";
+            if (takenSubjectCodes.Contains(subject.Code))
+                return "taken";
+
+            if (subject.Level > GetCurrentLevel(GetUserId()))
+                return "unavailable";
+
+            if (subject.Prerequisites.Any() && !subject.Prerequisites.All(p => takenSubjectCodes.Contains(p)))
+            {
+                return "unavailable";
+            }
+
+            // I need later to alter this to have "unoffered" based on the curriculum
+
             return "available";
         }
 
-        private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult)
+        private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult, int currentLevel)
         {
             ClientScript.RegisterStartupScript(GetType(), "Prerequisites", renderResult.PrerequisitesJson, true);
             ClientScript.RegisterStartupScript(GetType(), "SubjectNameMap", renderResult.SubjectNameMapJson, true);
@@ -386,7 +401,7 @@ namespace MyScheduleWebsite
             ClientScript.RegisterStartupScript(GetType(), "SubjectTypeMap", renderResult.SubjectTypeMapJson, true);
 
             var electivesByLevel = data.Subjects
-                .Where(s => s.IsElectiveCollege || s.IsElectiveUniversity)
+                .Where(s => (s.IsElectiveCollege || s.IsElectiveUniversity))
                 .GroupBy(s => s.Level)
                 .ToDictionary(g => g.Key, g => g.Select(s => s.Code).ToList());
 
