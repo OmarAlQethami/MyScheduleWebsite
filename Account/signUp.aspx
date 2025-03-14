@@ -1,183 +1,208 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="signUp.aspx.cs" Inherits="MyScheduleWebsite.Account.signUp" %>
+﻿<%@ Page Title="Sign Up" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="signUp.aspx.cs" Inherits="MyScheduleWebsite.Account.signUp" %>
+
+<%@ Register Assembly="System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Namespace="System.Web.UI" TagPrefix="asp" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link href="../styles/SignUpStyles.css" rel="stylesheet" />
 
-    <div>
-        <asp:Label ID="lblInfo" runat="server" 
-            Text="This page is only for students. If you are a faculty member, please contact the Admin through the help center for privileges." 
-            CssClass="info-label" ForeColor="Red"></asp:Label>
+    <link rel="stylesheet" href="/styles/SignUpStyles.css">
 
-        <table class="style1">
-            <tr><td colspan="2"></td></tr>
-            <tr>
-                <td class="style2"><strong>Sign Up</strong></td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="style2">English First Name:</td>
-                <td>
-                    <asp:TextBox ID="txtFName" runat="server" autocomplete="off"></asp:TextBox>
-                    <asp:Label ID="lblFNameError" runat="server" ForeColor="Red"></asp:Label>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">English Last Name:</td>
-                <td>
-                    <asp:TextBox ID="txtLName" runat="server" autocomplete="off"></asp:TextBox>
-                    <asp:Label ID="lblLNameError" runat="server" ForeColor="Red"></asp:Label>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Arabic First Name:</td>
-                <td>
-                    <asp:TextBox ID="txtArFName" runat="server" autocomplete="off"></asp:TextBox>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Arabic Last Name:</td>
-                <td>
-                    <asp:TextBox ID="txtArLName" runat="server" autocomplete="off"></asp:TextBox>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Email:</td>
-                <td>
-                    <asp:TextBox ID="txtEmail" runat="server" autocomplete="off"></asp:TextBox>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Username:</td>
-                <td>
-                    <asp:TextBox ID="txtUsername" runat="server"></asp:TextBox>
-                    <asp:Label ID="lblUsernameError" runat="server" ForeColor="Red" style="margin-left: 5px;"></asp:Label>
-                    <asp:Label ID="lblOutput" runat="server" ForeColor="Red" style="margin-top: 10px;"></asp:Label>          
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Password:</td>
-                <td>
-                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" />
-                    <asp:Label ID="lblPasswordError" runat="server" ForeColor="Red"></asp:Label>
-                    <button type="button" id="btnTogglePassword" onclick="togglePasswordVisibility()">Show</button>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Confirm Password:</td>
-                <td>
-                    <asp:TextBox ID="txtConfirmPassword" runat="server" TextMode="Password" />
-                    <asp:Label ID="lblConfirmPasswordError" runat="server" ForeColor="Red"></asp:Label>
-                    <button type="button" id="btnToggleConfirmPassword" onclick="toggleConfirmPasswordVisibility()">Show</button>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="style2">Student's University ID:</td>
-                <td>
-                    <asp:TextBox ID="txtUniId" runat="server"></asp:TextBox>
-                    <asp:Label ID="lblUniIdError" runat="server" ForeColor="Red"></asp:Label>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">University:</td>
-                <td>
-                    <asp:DropDownList ID="ddlUniversity" runat="server" DataSourceID="SqlDataSource1" 
-                        DataTextField="universityEnglishName" DataValueField="universityEnglishName" 
-                        OnSelectedIndexChanged="ddlUniversity_SelectedIndexChanged" AutoPostBack="false" 
-                        AppendDataBoundItems="True">
-                        <asp:ListItem Text="Choose a University" Value="" Selected="True"></asp:ListItem>
-                    </asp:DropDownList>
-                    <asp:Label ID="lblUniversityError" runat="server" ForeColor="Red"></asp:Label>
-                    <asp:SqlDataSource ID="SqlDataSource1" runat="server" 
-                        ConnectionString="<%$ ConnectionStrings:MyScheduleWebsiteConStr %>" 
-                        SelectCommand="SELECT [universityEnglishName] FROM [universities]">
-                    </asp:SqlDataSource>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Major:</td>
-                <td>
-                    <asp:DropDownList ID="ddlMajors" runat="server" OnSelectedIndexChanged="ddlMajors_SelectedIndexChanged" AutoPostBack="false">
-                        <asp:ListItem Text="Choose a Major" Value="0" Selected="True"></asp:ListItem>
-                        <asp:ListItem Text="Computer Science" Value="1"></asp:ListItem>
-                    </asp:DropDownList>
-                    <asp:Label ID="lblMajorError" runat="server" ForeColor="Red"></asp:Label>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">Current Level:</td>
-                <td>
-                    <asp:DropDownList ID="ddlCurrentLevel" runat="server">
-                        <asp:ListItem Text="Choose your current level" Value="0" Selected="True"></asp:ListItem>
-                        <asp:ListItem Text="1" Value="1"></asp:ListItem>
-                        <asp:ListItem Text="2" Value="2"></asp:ListItem>
-                        <asp:ListItem Text="3" Value="3"></asp:ListItem>
-                        <asp:ListItem Text="4" Value="4"></asp:ListItem>
-                        <asp:ListItem Text="5" Value="5"></asp:ListItem>
-                        <asp:ListItem Text="6" Value="6"></asp:ListItem>
-                        <asp:ListItem Text="7" Value="7"></asp:ListItem>
-                        <asp:ListItem Text="8" Value="8"></asp:ListItem>
-                        <asp:ListItem Text="9" Value="9"></asp:ListItem>
-                        <asp:ListItem Text="10" Value="10"></asp:ListItem>
-                    </asp:DropDownList>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td>
-                    <asp:Button ID="btnSignUp" runat="server" ForeColor="#0000FF" style="font-weight: bold" 
-                        onclick="btnSignUp_Click" Text="Sign Up" 
-                        OnClientClick="return confirm('Are all your information correct?')" />
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td>
-                    <asp:Button ID="btnBack" runat="server" Text="Back" PostBackUrl="~/default.aspx" 
-                        ForeColor="#000000" style="font-weight: bold" />
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">&nbsp;</td>
-                <td><asp:Label ID="Label1" runat="server" ForeColor="Red"></asp:Label></td>
-            </tr>
-        </table>
-        <br />
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-8 col-md-10 fill">
+
+                <div class="card shadow-lg border-0 rounded-lg">
+
+                    <div class="card-header bg-primary text-white text-center rounded-top pd4">
+                        <h3 class="card-title mb-0 py-3">Create Student Account</h3>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="container mt-4">
+                            <div class="row">
+                                <div class="col-12">
+                                    <asp:Label 
+                                        ID="lblInfo" 
+                                        runat="server" 
+                                        Text="This page is for student sign-ups only. Faculty, please contact Admin for account privileges." 
+                                        CssClass="alert alert-warning d-block mb-3" 
+                                        Visible="true">
+                                    </asp:Label>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 30px;">
+                                <div class="col-12">
+                                    <asp:Label 
+                                        ID="lblOutput" 
+                                        runat="server" 
+                                        CssClass="alert alert-danger d-block mb-3" 
+                                        Visible="false">
+                                    </asp:Label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        
+                        <hr class="mb-4" />
+
+                        <asp:Panel ID="formPanel" runat="server" CssClass="mil">
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <asp:TextBox ID="txtFName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
+                                        <label for="txtFName">English First Name</label>
+                                        <asp:RequiredFieldValidator ID="rfvFName" runat="server" ControlToValidate="txtFName" ErrorMessage="First name is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                        <asp:RegularExpressionValidator ID="revFName" runat="server" ControlToValidate="txtFName" ErrorMessage="Must be in English." ValidationExpression="^[a-zA-Z\s]+$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <asp:TextBox ID="txtLName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
+                                        <label for="txtLName">English Last Name</label>
+                                        <asp:RequiredFieldValidator ID="rfvLName" runat="server" ControlToValidate="txtLName" ErrorMessage="Last name is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                        <asp:RegularExpressionValidator ID="revLName" runat="server" ControlToValidate="txtLName" ErrorMessage="Must be in English." ValidationExpression="^[a-zA-Z\s]+$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <asp:TextBox ID="txtArFName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
+                                        <label for="txtArFName">Arabic First Name (Optional)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <asp:TextBox ID="txtArLName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
+                                        <label for="txtArLName">Arabic Last Name (Optional)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <asp:TextBox ID="txtEmail" runat="server" CssClass="form-control" placeholder="" autocomplete="off" TextMode="Email"></asp:TextBox>
+                                <label for="txtEmail">Email Address</label>
+                                <asp:RequiredFieldValidator ID="rfvEmail" runat="server" ControlToValidate="txtEmail" ErrorMessage="Email is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                <asp:RegularExpressionValidator ID="revEmail" runat="server" ControlToValidate="txtEmail" ErrorMessage="Invalid email format." ValidationExpression="^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <asp:TextBox ID="txtUsername" runat="server" CssClass="form-control" placeholder=""></asp:TextBox>
+                                <label for="txtUsername">Username</label>
+                                <asp:RequiredFieldValidator ID="rfvUsername" runat="server" ControlToValidate="txtUsername" ErrorMessage="Username is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <div class="input-group">
+                                            <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" placeholder="Password" TextMode="Password"></asp:TextBox>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                                <i id="passwordEyeIcon" class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <label for="txtPassword">Password</label>
+                                        <asp:RequiredFieldValidator ID="rfvPassword" runat="server" ControlToValidate="txtPassword" ErrorMessage="Password is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                        <asp:RegularExpressionValidator ID="revPassword" runat="server" ControlToValidate="txtPassword" ErrorMessage="Min 6 characters." ValidationExpression=".{6,}" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <div class="input-group">
+                                            <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" placeholder="Confirm Password" TextMode="Password"></asp:TextBox>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="toggleConfirmPasswordVisibility()">
+                                                <i id="confirmPasswordEyeIcon" class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <label for="txtConfirmPassword">Confirm Password</label>
+                                        <asp:RequiredFieldValidator ID="rfvConfirmPassword" runat="server" ControlToValidate="txtConfirmPassword" ErrorMessage="Confirm password is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                        <asp:CompareValidator ID="cvConfirmPassword" runat="server" ControlToValidate="txtConfirmPassword" ControlToCompare="txtPassword" ErrorMessage="Passwords do not match." CssClass="text-danger" Display="Dynamic"></asp:CompareValidator>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <asp:TextBox ID="txtUniId" runat="server" CssClass="form-control" placeholder=""></asp:TextBox>
+                                <label for="txtUniId">University ID</label>
+                                <asp:RequiredFieldValidator ID="rfvUniId" runat="server" ControlToValidate="txtUniId" ErrorMessage="University ID is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                            </div>
+
+                            <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+                                <ContentTemplate>
+                                    <div class="form-floating mb-3">
+                                        <asp:DropDownList ID="ddlUniversity" runat="server" CssClass="form-select" DataTextField="universityEnglishName" DataValueField="universityEnglishName" AutoPostBack="true" OnSelectedIndexChanged="ddlUniversity_SelectedIndexChanged">
+                                            <asp:ListItem Text="Choose a University" Value=""></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <label for="ddlUniversity">University</label>
+                                        <asp:RequiredFieldValidator ID="rfvUniversity" runat="server" ControlToValidate="ddlUniversity" ErrorMessage="University is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <asp:DropDownList ID="ddlMajors" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlMajors_SelectedIndexChanged">
+                                            <asp:ListItem Text="Choose a Major" Value=""></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <label for="ddlMajors">Major</label>
+                                        <asp:RequiredFieldValidator ID="rfvMajor" runat="server" ControlToValidate="ddlMajors" ErrorMessage="Major is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <asp:DropDownList ID="ddlCurrentLevel" runat="server" CssClass="form-select">
+                                            <asp:ListItem Text="Choose your current level" Value=""></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <label for="ddlCurrentLevel">Current Level</label>
+                                        <asp:RequiredFieldValidator ID="rfvCurrentLevel" runat="server" ControlToValidate="ddlCurrentLevel" ErrorMessage="Current level is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+                                    </div>
+                                </ContentTemplate>
+                            </asp:UpdatePanel>
+
+                            <div class="d-grid mt-4 mb-0 gi">
+                                <asp:Button ID="btnSignUp" runat="server" CssClass="btn btn-primary btn-lg" Text="Sign Up" OnClick="btnSignUp_Click" />
+                            </div>
+                        </asp:Panel>
+
     </div>
+
+    <div class="card-footer text-center py-3">
+                        <div class="small">Already have an account? <a href="login.aspx">Log in</a></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <script type="text/javascript">
         function togglePasswordVisibility() {
             var passwordField = document.getElementById('<%= txtPassword.ClientID %>');
-            var toggleButton = document.getElementById('btnTogglePassword');
+            var icon = document.getElementById('passwordEyeIcon');
             if (passwordField.type === "password") {
                 passwordField.type = "text";
-                toggleButton.innerHTML = "Hide";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordField.type = "password";
-                toggleButton.innerHTML = "Show";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
         function toggleConfirmPasswordVisibility() {
             var confirmPasswordField = document.getElementById('<%= txtConfirmPassword.ClientID %>');
-            var toggleButton = document.getElementById('btnToggleConfirmPassword');
+            var icon = document.getElementById('confirmPasswordEyeIcon');
             if (confirmPasswordField.type === "password") {
                 confirmPasswordField.type = "text";
-                toggleButton.innerHTML = "Hide";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 confirmPasswordField.type = "password";
-                toggleButton.innerHTML = "Show";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
     </script>

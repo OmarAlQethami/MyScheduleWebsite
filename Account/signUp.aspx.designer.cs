@@ -24,6 +24,24 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.Label lblInfo;
 
         /// <summary>
+        /// lblOutput control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblOutput;
+
+        /// <summary>
+        /// formPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel formPanel;
+
+        /// <summary>
         /// txtFName control.
         /// </summary>
         /// <remarks>
@@ -33,13 +51,22 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtFName;
 
         /// <summary>
-        /// lblFNameError control.
+        /// rfvFName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblFNameError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvFName;
+
+        /// <summary>
+        /// revFName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revFName;
 
         /// <summary>
         /// txtLName control.
@@ -51,13 +78,22 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtLName;
 
         /// <summary>
-        /// lblLNameError control.
+        /// rfvLName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLNameError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvLName;
+
+        /// <summary>
+        /// revLName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revLName;
 
         /// <summary>
         /// txtArFName control.
@@ -87,6 +123,24 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtEmail;
 
         /// <summary>
+        /// rfvEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEmail;
+
+        /// <summary>
+        /// revEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revEmail;
+
+        /// <summary>
         /// txtUsername control.
         /// </summary>
         /// <remarks>
@@ -96,22 +150,13 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtUsername;
 
         /// <summary>
-        /// lblUsernameError control.
+        /// rfvUsername control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblUsernameError;
-
-        /// <summary>
-        /// lblOutput control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblOutput;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvUsername;
 
         /// <summary>
         /// txtPassword control.
@@ -123,13 +168,22 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtPassword;
 
         /// <summary>
-        /// lblPasswordError control.
+        /// rfvPassword control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblPasswordError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvPassword;
+
+        /// <summary>
+        /// revPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revPassword;
 
         /// <summary>
         /// txtConfirmPassword control.
@@ -141,13 +195,22 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtConfirmPassword;
 
         /// <summary>
-        /// lblConfirmPasswordError control.
+        /// rfvConfirmPassword control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblConfirmPasswordError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvConfirmPassword;
+
+        /// <summary>
+        /// cvConfirmPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CompareValidator cvConfirmPassword;
 
         /// <summary>
         /// txtUniId control.
@@ -159,13 +222,22 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.TextBox txtUniId;
 
         /// <summary>
-        /// lblUniIdError control.
+        /// rfvUniId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblUniIdError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvUniId;
+
+        /// <summary>
+        /// UpdatePanel1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
 
         /// <summary>
         /// ddlUniversity control.
@@ -177,22 +249,13 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.DropDownList ddlUniversity;
 
         /// <summary>
-        /// lblUniversityError control.
+        /// rfvUniversity control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblUniversityError;
-
-        /// <summary>
-        /// SqlDataSource1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSource1;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvUniversity;
 
         /// <summary>
         /// ddlMajors control.
@@ -204,13 +267,13 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.DropDownList ddlMajors;
 
         /// <summary>
-        /// lblMajorError control.
+        /// rfvMajor control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMajorError;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMajor;
 
         /// <summary>
         /// ddlCurrentLevel control.
@@ -222,6 +285,15 @@ namespace MyScheduleWebsite.Account
         protected global::System.Web.UI.WebControls.DropDownList ddlCurrentLevel;
 
         /// <summary>
+        /// rfvCurrentLevel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCurrentLevel;
+
+        /// <summary>
         /// btnSignUp control.
         /// </summary>
         /// <remarks>
@@ -229,23 +301,5 @@ namespace MyScheduleWebsite.Account
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSignUp;
-
-        /// <summary>
-        /// btnBack control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnBack;
-
-        /// <summary>
-        /// Label1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label1;
     }
 }
