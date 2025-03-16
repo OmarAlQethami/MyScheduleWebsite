@@ -55,6 +55,7 @@
                         <li><a runat="server" href="~/">Home</a></li>
                         <li><a runat="server" href="~/About">About</a></li>
                         <li><a runat="server" href="~/Contact">Contact</a></li>
+                        <li><a runat="server" href="~/EditInfoPage.aspx">Edit Information</a></li> <!-- 🔹 New Button -->
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <% if (Session["Username"] != null) { %>
