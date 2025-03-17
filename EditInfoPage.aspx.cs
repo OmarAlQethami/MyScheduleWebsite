@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.Security;
 using System.Data.SqlClient;
+using System.Web.UI.WebControls;
 
 namespace MyScheduleWebsite
 {
@@ -62,9 +63,10 @@ namespace MyScheduleWebsite
                 CRUD myCrud = new CRUD();
                 string mySql = @"SELECT studentEnglishFirstName, studentEnglishLastName, 
                                         studentArabicFirstName, studentArabicLastName, 
-                                        email, currentLevel 
+                                        email, currentLevel, universityId, majorId
                                  FROM students 
                                  WHERE UserId = @UserId";
+
                 Dictionary<string, object> myPara = new Dictionary<string, object>
                 {
                     { "@UserId", userId }
@@ -79,7 +81,13 @@ namespace MyScheduleWebsite
                         txtArabicFirstName.Text = dr["studentArabicFirstName"].ToString();
                         txtArabicLastName.Text = dr["studentArabicLastName"].ToString();
                         txtEmail.Text = dr["email"].ToString();
-                        ddlCurrentLevel.SelectedValue = dr["currentLevel"].ToString();
+
+                        int universityId = Convert.ToInt32(dr["universityId"]);
+                        int majorId = Convert.ToInt32(dr["majorId"]);
+                        int currentLevel = Convert.ToInt32(dr["currentLevel"]);
+
+                        PopulateCurrentLevels(universityId, majorId);
+                        ddlCurrentLevel.SelectedValue = currentLevel.ToString();
                     }
                 }
             }
@@ -87,6 +95,38 @@ namespace MyScheduleWebsite
             {
                 lblOutput.Text = "Error loading student info: " + ex.Message;
                 lblOutput.CssClass = "text-danger";
+            }
+        }
+
+        private void PopulateCurrentLevels(int universityId, int majorId)
+        {
+            ddlCurrentLevel.Items.Clear();
+            ddlCurrentLevel.Items.Add(new ListItem("Choose your current level", ""));
+
+            CRUD myCrud = new CRUD();
+            string mySql = @"SELECT MAX(subjectLevel) AS MaxLevel 
+                             FROM subjects 
+                             WHERE universityId = @universityId AND majorId = @majorId";
+
+            Dictionary<string, object> myPara = new Dictionary<string, object>()
+            {
+                { "@universityId", universityId },
+                { "@majorId", majorId }
+            };
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                if (dr != null && dr.Read())
+                {
+                    int maxLevel = dr.IsDBNull(0) ? 0 : dr.GetInt32(0);
+                    if (maxLevel > 0)
+                    {
+                        for (int i = 1; i <= maxLevel; i++)
+                        {
+                            ddlCurrentLevel.Items.Add(new ListItem(i.ToString(), i.ToString()));
+                        }
+                    }
+                }
             }
         }
 
@@ -139,6 +179,13 @@ namespace MyScheduleWebsite
                 };
 
                 int rtn = myCrud.InsertUpdateDelete(mySql, myPara);
+
+                // PASSWORD CHANGE FOR STUDENT
+                if (!string.IsNullOrEmpty(txtNewPasswordStudent.Text))
+                {
+                    ChangePassword(txtCurrentPasswordStudent.Text, txtNewPasswordStudent.Text, txtConfirmPasswordStudent.Text);
+                }
+
                 lblOutput.Text = rtn >= 1 ? "Student information updated successfully!" : "No changes were made.";
                 lblOutput.CssClass = rtn >= 1 ? "text-success" : "text-warning";
             }
@@ -173,24 +220,7 @@ namespace MyScheduleWebsite
 
             if (!string.IsNullOrEmpty(txtNewPassword.Text))
             {
-                if (txtNewPassword.Text != txtConfirmPassword.Text)
-                {
-                    lblOutput.Text = "Passwords do not match!";
-                    lblOutput.CssClass = "text-danger";
-                    return;
-                }
-
-                try
-                {
-                    string tempPassword = user.ResetPassword();
-                    user.ChangePassword(tempPassword, txtNewPassword.Text);
-                }
-                catch (Exception ex)
-                {
-                    lblOutput.Text = "Password change failed: " + ex.Message;
-                    lblOutput.CssClass = "text-danger";
-                    return;
-                }
+                ChangePassword(txtCurrentPasswordAdmin.Text, txtNewPassword.Text, txtConfirmPassword.Text);
             }
 
             Membership.UpdateUser(user);
@@ -219,10 +249,64 @@ namespace MyScheduleWebsite
             }
 
             user.Email = txtFacultyEmail.Text.Trim();
+
+            if (!string.IsNullOrEmpty(txtNewPasswordFaculty.Text))
+            {
+                ChangePassword(txtCurrentPasswordFaculty.Text, txtNewPasswordFaculty.Text, txtConfirmPasswordFaculty.Text);
+            }
+
             Membership.UpdateUser(user);
 
             lblOutput.Text = "Faculty email updated successfully.";
             lblOutput.CssClass = "text-success";
+        }
+
+        // === COMMON PASSWORD CHANGE METHOD ===
+        private void ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            var user = Membership.GetUser();
+            if (user == null)
+            {
+                lblOutput.Text = "User not found.";
+                lblOutput.CssClass = "text-danger";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(currentPassword))
+            {
+                lblOutput.Text = "Current password is required.";
+                lblOutput.CssClass = "text-danger";
+                return;
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                lblOutput.Text = "New password and confirmation do not match.";
+                lblOutput.CssClass = "text-danger";
+                return;
+            }
+
+            if (!Membership.ValidateUser(user.UserName, currentPassword))
+            {
+                lblOutput.Text = "Current password is incorrect.";
+                lblOutput.CssClass = "text-danger";
+                return;
+            }
+
+            try
+            {
+                string tempPassword = user.ResetPassword();
+                user.ChangePassword(tempPassword, newPassword);
+                Membership.UpdateUser(user);
+
+                lblOutput.Text = "Password changed successfully.";
+                lblOutput.CssClass = "text-success";
+            }
+            catch (Exception ex)
+            {
+                lblOutput.Text = "Password change failed: " + ex.Message;
+                lblOutput.CssClass = "text-danger";
+            }
         }
 
         protected void btnBack_Click(object sender, EventArgs e)
