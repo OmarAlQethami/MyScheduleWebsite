@@ -129,7 +129,7 @@ namespace MyScheduleWebsite.Account
                     Directory.CreateDirectory(folderPath);
                 }
             }
-            catch (Exception ex)
+            catch 
             {
 
             }
@@ -144,7 +144,7 @@ namespace MyScheduleWebsite.Account
                     Directory.Delete(folderPath, true);
                 }
             }
-            catch (Exception ex)
+            catch 
             {
 
             }

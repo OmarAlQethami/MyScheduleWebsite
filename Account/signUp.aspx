@@ -5,7 +5,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
 
-    <link rel="stylesheet" href="/styles/SignUpStyles.css">
+    <link href="../styles/SignUpStyles.css" rel="stylesheet" />
 
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -14,14 +14,14 @@
 
                 <div class="card shadow-lg border-0 rounded-lg">
 
-                    <div class="card-header bg-primary text-white text-center rounded-top pd4">
+                    <div class="card-header text-white text-center rounded-top pd4">
                         <h3 class="card-title mb-0 py-3">Create Student Account</h3>
                     </div>
 
                     <div class="card-body p-4">
                         <div class="container mt-4">
                             <div class="row">
-                                <div class="col-12">
+                                <div class="col-12" style="text-align: justify">
                                     <asp:Label 
                                         ID="lblInfo" 
                                         runat="server" 
@@ -72,15 +72,19 @@
                                 <div class="col-md-6">
                                     <div class="form-floating mb-3">
                                         <asp:TextBox ID="txtArFName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
-                                        <label for="txtArFName">Arabic First Name (Optional)</label>
+            <label for="txtArFName">Arabic First Name</label>
+            <asp:RequiredFieldValidator ID="rfvArFName" runat="server" ControlToValidate="txtArFName" ErrorMessage="First name in Arabic is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+            <asp:RegularExpressionValidator ID="revArFName" runat="server" ControlToValidate="txtArFName" ErrorMessage="The name must be in Arabic only." ValidationExpression="^[\u0600-\u06FF\s]+$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
-                                        <asp:TextBox ID="txtArLName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
-                                        <label for="txtArLName">Arabic Last Name (Optional)</label>
-                                    </div>
-                                </div>
+    <div class="form-floating mb-3">
+        <asp:TextBox ID="txtArLName" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
+        <label for="txtArLName">Arabic Last Name</label>
+        <asp:RequiredFieldValidator ID="rfvArLName" runat="server" ControlToValidate="txtArLName" ErrorMessage="اLast name required in Arabic." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
+        <asp:RegularExpressionValidator ID="revArLName" runat="server" ControlToValidate="txtArLName" ErrorMessage="The name must be in Arabic only." ValidationExpression="^[\u0600-\u06FF\s]+$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+    </div>
+</div>
                             </div>
 
                             <div class="form-floating mb-3">
@@ -91,10 +95,10 @@
                             </div>
 
                             <div class="form-floating mb-3">
-                                <asp:TextBox ID="txtUsername" runat="server" CssClass="form-control" placeholder=""></asp:TextBox>
+                                <asp:TextBox ID="txtUsername" runat="server" CssClass="form-control" placeholder="" autocomplete="off" oninput="removeSpaces(this)"></asp:TextBox>
                                 <label for="txtUsername">Username</label>
                                 <asp:RequiredFieldValidator ID="rfvUsername" runat="server" ControlToValidate="txtUsername" ErrorMessage="Username is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
-                            </div>
+                                <asp:RegularExpressionValidator ID="revUsername" runat="server" ControlToValidate="txtUsername" ErrorMessage="Username cannot contain spaces." ValidationExpression="^\S+$" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>    </div>
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -107,7 +111,7 @@
                                         </div>
                                         <label for="txtPassword">Password</label>
                                         <asp:RequiredFieldValidator ID="rfvPassword" runat="server" ControlToValidate="txtPassword" ErrorMessage="Password is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
-                                        <asp:RegularExpressionValidator ID="revPassword" runat="server" ControlToValidate="txtPassword" ErrorMessage="Min 6 characters." ValidationExpression=".{6,}" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
+                                        <asp:RegularExpressionValidator ID="revPassword" runat="server" ControlToValidate="txtPassword" ErrorMessage="Min 4 characters." ValidationExpression=".{4,}" CssClass="text-danger" Display="Dynamic"></asp:RegularExpressionValidator>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -126,7 +130,7 @@
                             </div>
 
                             <div class="form-floating mb-3">
-                                <asp:TextBox ID="txtUniId" runat="server" CssClass="form-control" placeholder=""></asp:TextBox>
+                                <asp:TextBox ID="txtUniId" runat="server" CssClass="form-control" placeholder="" autocomplete="off"></asp:TextBox>
                                 <label for="txtUniId">University ID</label>
                                 <asp:RequiredFieldValidator ID="rfvUniId" runat="server" ControlToValidate="txtUniId" ErrorMessage="University ID is required." CssClass="text-danger" Display="Dynamic"></asp:RequiredFieldValidator>
                             </div>
@@ -160,7 +164,8 @@
                             </asp:UpdatePanel>
 
                             <div class="d-grid mt-4 mb-0 gi">
-                                <asp:Button ID="btnSignUp" runat="server" CssClass="btn btn-primary btn-lg" Text="Sign Up" OnClick="btnSignUp_Click" />
+                                <asp:Button ID="btnCancel" runat="server" CausesValidation="false" CssClass="btn btn-secondary btn-lg" PostBackUrl="~/default.aspx" Text="Back" />
+                                <asp:Button ID="btnSignUp" runat="server" CssClass="btn btn-primary btn-lg" Text="Sign Up"  OnClick="btnSignUp_Click" OnClientClick="return confirmSignUp();" />
                             </div>
                         </asp:Panel>
 
@@ -206,5 +211,14 @@
             }
         }
     </script>
-
+    <script type="text/javascript">
+        function confirmSignUp() {
+            return confirm("Are you sure you want to register?");
+        }
+    </script>
+    <script type="text/javascript">
+        function removeSpaces(input) {
+            input.value = input.value.replace(/\s/g, '');
+        }
+    </script>
 </asp:Content>

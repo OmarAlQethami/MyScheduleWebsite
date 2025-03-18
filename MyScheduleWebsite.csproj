@@ -198,7 +198,6 @@
     <Compile Include="Account\signUp.aspx.designer.cs">
       <DependentUpon>signUp.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Account\txtArLName.cs" />
     <Compile Include="admin\AdminPage.aspx.cs">
       <DependentUpon>AdminPage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
