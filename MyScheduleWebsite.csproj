@@ -179,6 +179,7 @@
     <Content Include="styles\StudentStyles.css" />
     <Content Include="styles\styles.css" />
     <Content Include="styles\WelcomeStyles.css" />
+    <Content Include="temp\tempPage.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -291,6 +292,14 @@
     </Compile>
     <Compile Include="StudentProgressPage.aspx.designer.cs">
       <DependentUpon>StudentProgressPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="temp\ExcelToSQL.cs" />
+    <Compile Include="temp\tempPage.aspx.cs">
+      <DependentUpon>tempPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="temp\tempPage.aspx.designer.cs">
+      <DependentUpon>tempPage.aspx</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
