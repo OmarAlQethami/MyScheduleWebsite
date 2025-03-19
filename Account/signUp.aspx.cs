@@ -69,9 +69,6 @@ namespace MyScheduleWebsite.Account
                             int majorId = GetMajorId(ddlMajors.SelectedValue);
                             string currentLevel = ddlCurrentLevel.SelectedValue;
 
-                            string userFolder = Server.MapPath("~/Users/" + newUser);
-                            CreateUserFolder(userFolder);
-
                             bool isStudentCreated = CreateStudent(strStudentUniId, strFName, strLName, strArFName, strArLName,
                                                                   newEmail, currentLevel, universityId, majorId, userId);
 
@@ -90,7 +87,6 @@ namespace MyScheduleWebsite.Account
                             else
                             {
                                 Membership.DeleteUser(newUser, true);
-                                DeleteUserFolder(userFolder);
 
                                 lblOutput.Text = "Registration failed. Please try again.";
                                 lblOutput.CssClass = "alert alert-danger";
