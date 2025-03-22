@@ -419,5 +419,31 @@ namespace MyScheduleWebsite
             ";
             ClientScript.RegisterStartupScript(GetType(), "TotalHours", hoursScript, true);
         }
+
+        protected void btnNext_Click(object sender, EventArgs e)
+        {
+            if (mvSteps.ActiveViewIndex == 0)
+            {
+                mvSteps.ActiveViewIndex = 1;
+                btnNext.Text = "Confirm Order";
+            }
+            else if (mvSteps.ActiveViewIndex == 1)
+            {
+                Response.Redirect("~/OrderSuccessfulPage.aspx");
+            }
+        }
+
+        protected void btnBack_Click(object sender, EventArgs e)
+        {
+            if (mvSteps.ActiveViewIndex == 1)
+            {
+                mvSteps.ActiveViewIndex = 0;
+                btnNext.Text = "Next";
+            }
+            else
+            {
+                Response.Redirect("~/Default.aspx");
+            }
+        }
     }
 }

@@ -171,6 +171,15 @@ function updateProgressBar() {
     }
 }
 
+function SectionClicked(element) {
+    if (!element.classList.contains('selected')) {
+        element.classList.add('selected');
+    }
+    else {
+        element.classList.remove('selected');
+    }
+}
+
 function displayAlert(message) {
     var lblOutput = document.getElementById(lblOutputClientId);
     lblOutput.innerText = message;
