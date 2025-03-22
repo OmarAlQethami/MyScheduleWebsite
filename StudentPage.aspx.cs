@@ -26,6 +26,9 @@ namespace MyScheduleWebsite
             int majorId = GetMajorId(userId);
             int studentId = GetStudentId(userId);
 
+            ViewState["UniversityId"] = universityId;
+            ViewState["MajorId"] = majorId;
+
             List<string> takenSubjects = GetTakenSubjectCodes(studentId, universityId, majorId);
             if (takenSubjects.Count == 0)
             {
@@ -34,10 +37,18 @@ namespace MyScheduleWebsite
             }
             else if (!IsPostBack)
             {
+                mvSteps.ActiveViewIndex = 0;
+
                 lblGreeting.Text = "Hello " + User.Identity.Name + "!";
                 lblCurrentLevel.Text = "Current Level: " + GetCurrentLevel(userId);
 
                 BindSubjects(universityId, majorId);
+            }
+
+            if (mvSteps.ActiveViewIndex == 1)
+            {
+                // Second view initialization
+                BindSelectedSubjects();
             }
         }
 
@@ -424,11 +435,24 @@ namespace MyScheduleWebsite
         {
             if (mvSteps.ActiveViewIndex == 0)
             {
+                var selectedSubjects = hdnSelectedSubjects.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                if (!ValidateSubjects(selectedSubjects))
+                {
+                    lblOutput.Text = "Invalid subject selection";
+                    return;
+                }
+
+                ViewState["SelectedSubjects"] = selectedSubjects;
+                Session["SelectedSubjects"] = selectedSubjects;
                 mvSteps.ActiveViewIndex = 1;
                 btnNext.Text = "Confirm Order";
+
+                BindSelectedSubjects();
             }
             else if (mvSteps.ActiveViewIndex == 1)
             {
+                // TODO, Validate Final Order
                 Response.Redirect("~/OrderSuccessfulPage.aspx");
             }
         }
@@ -445,5 +469,45 @@ namespace MyScheduleWebsite
                 Response.Redirect("~/Default.aspx");
             }
         }
+
+        private bool ValidateSubjects(List<string> selectedCodes)
+        {
+            // TODO
+            return true;
+        }
+
+        private void BindSelectedSubjects()
+        {
+            subjectsinSectionsContainer.InnerHtml = "<div class='subjects-content-wrapper'>";
+
+            var selectedCodes = Session["SelectedSubjects"] as List<string>;
+            if (selectedCodes == null || selectedCodes.Count == 0)
+            {
+                subjectsinSectionsContainer.InnerHtml += "<div class='alert'>No subjects selected</div></div>";
+                return;
+            }
+
+            Guid userId = GetUserId();
+            int universityId = GetUniversityId(userId);
+            int majorId = GetMajorId(userId);
+
+            var allSubjects = ProcessSubjects(universityId, majorId);
+
+            var selectedSubjects = allSubjects
+                .Where(s => selectedCodes.Contains(s.Code))
+                .ToList();
+
+            string subjectsHtml = "";
+            foreach (var subject in selectedSubjects)
+            {
+                subjectsHtml += $@"
+            <div class='subject subject-in-sections' id='{subject.Code}' onclick='SubjectInSectionsClicked(this)'>
+                <span>{subject.EnglishName}</span>
+            </div>";
+            }
+
+            subjectsinSectionsContainer.InnerHtml += subjectsHtml + "</div>";
+        }
+
     }
 }

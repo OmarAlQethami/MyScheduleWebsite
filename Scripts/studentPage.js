@@ -41,11 +41,11 @@ function SubjectClicked(element) {
                 `showElectivePopup(${element.dataset.level}, '${slotId}', ${element.dataset.currentLevel})`
 
             );
-
             element.parentNode.replaceChild(originalSlot, element);
         } else {
             element.className = element.dataset.originalClasses;
         }
+        updateHiddenField();
     } else {
         const subjectHours = subjectCreditHoursMap[subjectCode] || 0;
         const currentHours = selectedSubjects.reduce((sum, code) =>
@@ -64,6 +64,7 @@ function SubjectClicked(element) {
 
         selectedSubjects.push(subjectCode);
         element.classList.add('selected');
+        updateHiddenField();
     }
     updateHours();
     updateProgressBar();
@@ -131,6 +132,7 @@ function showElectivePopup(level, slotId, currentLevel) {
                 popup.remove();
                 newSubject.dataset.originalClasses = 'available';
                 selectedSubjects.push(code);
+                updateHiddenField();
                 updateHours();
                 updateProgressBar();
             };
@@ -168,6 +170,20 @@ function updateProgressBar() {
     }
     if (hoursLabel) {
         hoursLabel.textContent = `Hours selected: ${totalSelected}`;
+    }
+}
+
+function updateHiddenField() {
+    var hiddenField = document.getElementById('hdnSelectedSubjects');
+    hiddenField.value = selectedSubjects.join(',');
+}
+
+function SubjectInSectionsClicked(element) {
+    if (!element.classList.contains('selected')) {
+        element.classList.add('selected');
+    }
+    else {
+        element.classList.remove('selected');
     }
 }
 

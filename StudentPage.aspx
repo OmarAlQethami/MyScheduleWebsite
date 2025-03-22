@@ -77,24 +77,8 @@
                 </div>
 
                 <div class="sections-body" id="sectionsBody">
-                    <div class="subjects-for-sections-container" id="subjectsForSectionsContainer" runat="server">
-                        <div class="subjects-content-wrapper">
-                            <div class='subject subject-for-sections' id='501461-3' onclick='SubjectForSectionsClicked(this)'>
-                                <span>Internet Technologies</span>
-                            </div>
-                            <div class='subject subject-for-sections' id='503442-3' onclick='SubjectForSectionsClicked(this)'>
-                                <span>Computer Networks</span>
-                            </div>
-                            <div class='subject subject-for-sections' id='202463-3' onclick='SubjectForSectionsClicked(this)'>
-                                <span>Advanced Mathematics</span>
-                            </div>
-                            <div class='subject subject-for-sections' id='501554-3' onclick='SubjectForSectionsClicked(this)'>
-                                <span>Distributed Systems</span>
-                            </div>
-                            <div class="subject subject-for-sections" id="501528-3" onclick='SubjectForSectionsClicked(this)'>
-                                <span>Game Design and Programming</span>
-                            </div>
-                        </div>
+                    <div class="subjects-in-sections-container" id="subjectsinSectionsContainer" runat="server">
+                        <!-- Selected subjects will be dynamically added here -->
                     </div>
                     <div class="sections-container" id="sectionsContainer" runat="server">
                         <div class="section" onclick="SectionClicked(this)">
@@ -239,6 +223,8 @@
             <asp:Button ID="btnNext" runat="server" Text="Next" OnClick="btnNext_Click" CssClass="custom-button"/>
         </div>
     </div>
+
+    <asp:HiddenField ID="hdnSelectedSubjects" runat="server" ClientIDMode="Static" />
 
     <script>
         var lblOutputClientId = '<%= lblOutput.ClientID %>';

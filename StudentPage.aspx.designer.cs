@@ -159,13 +159,13 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.Label lblOutput2;
 
         /// <summary>
-        /// subjectsForSectionsContainer control.
+        /// subjectsinSectionsContainer control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl subjectsForSectionsContainer;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl subjectsinSectionsContainer;
 
         /// <summary>
         /// sectionsContainer control.
@@ -193,5 +193,14 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnNext;
+
+        /// <summary>
+        /// hdnSelectedSubjects control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnSelectedSubjects;
     }
 }
