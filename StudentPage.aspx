@@ -80,139 +80,8 @@
                     <div class="subjects-in-sections-container" id="subjectsinSectionsContainer" runat="server">
                         <!-- Selected subjects will be dynamically added here -->
                     </div>
-                    <div class="sections-container" id="sectionsContainer" runat="server">
-                        <div class="section" onclick="SectionClicked(this)">
-                            <div class="section-rows">
-                                <div class="section-row">
-                                    <div class="info-box">
-                                        <span class="info-label">Section</span>
-                                        <span class="info-value section-number">511</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Subject</span>
-                                        <span class="info-value subject-name">Internet Technologies</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Capacity</span>
-                                        <span class="info-value capacity">28/40</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="time-info">
-                                        <span class="info-label">Day</span>
-                                        <span class="info-value day">Wednesday</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">From</span>
-                                        <span class="info-value start-time">09:00 AM</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">To</span>
-                                        <span class="info-value end-time">11:00 AM</span>
-                                    </div>
-                                    <div class="location">
-                                        <span class="info-label">Location</span>
-                                        <span class="info-value location">29204</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="info-box" style="width: 100%;">
-                                        <span class="info-label">Instructor</span>
-                                        <span class="info-value instructor-name">Ibrahim Althomali</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="section" onclick="SectionClicked(this)">
-                            <div class="section-rows">
-                                <div class="section-row">
-                                    <div class="info-box">
-                                        <span class="info-label">Section</span>
-                                        <span class="info-value section-number">434</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Subject</span>
-                                        <span class="info-value subject-name">Internet Technologies</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Capacity</span>
-                                        <span class="info-value capacity">36/40</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="time-info">
-                                        <span class="info-label">Day</span>
-                                        <span class="info-value day">Monday</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">From</span>
-                                        <span class="info-value start-time">08:00 AM</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">To</span>
-                                        <span class="info-value end-time">10:00 AM</span>
-                                    </div>
-                                    <div class="location">
-                                        <span class="info-label">Location</span>
-                                        <span class="info-value location">29102</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="info-box" style="width: 100%;">
-                                        <span class="info-label">Instructor</span>
-                                        <span class="info-value instructor-name">Ibrahim Althomali</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="section" onclick="SectionClicked(this)">
-                            <div class="section-rows">
-                                <div class="section-row">
-                                    <div class="info-box">
-                                        <span class="info-label">Section</span>
-                                        <span class="info-value section-number">488</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Subject</span>
-                                        <span class="info-value subject-name">Internet Technologies</span>
-                                    </div>
-                                    <div class="info-box">
-                                        <span class="info-label">Capacity</span>
-                                        <span class="info-value capacity">22/40</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="time-info">
-                                        <span class="info-label">Day</span>
-                                        <span class="info-value day">Sunday</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">From</span>
-                                        <span class="info-value start-time">02:00 PM</span>
-                                    </div>
-                                    <div class="time-info">
-                                        <span class="info-label">To</span>
-                                        <span class="info-value end-time">04:00 PM</span>
-                                    </div>
-                                    <div class="location">
-                                        <span class="info-label">Location</span>
-                                        <span class="info-value location">35303</span>
-                                    </div>
-                                </div>
-            
-                                <div class="section-row">
-                                    <div class="info-box" style="width: 100%;">
-                                        <span class="info-label">Instructor</span>
-                                        <span class="info-value instructor-name">Ibrahim Althomali</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="sections-container" id="sectionsContainer" runat="server" ClientIDMode="Static">
+                        <!-- Sections will be dynamically added here -->
                     </div>
                 </div>
             </asp:View>
@@ -228,6 +97,7 @@
 
     <script>
         var lblOutputClientId = '<%= lblOutput.ClientID %>';
+        var lblOutput2ClientId = '<%= lblOutput2.ClientID %>';
         var progressBarId = '<%= progressBar.ClientID %>';
         var hoursLabelId = '<%= hoursChosenLabel.ClientID %>';
     </script>

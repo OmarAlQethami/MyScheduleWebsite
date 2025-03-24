@@ -47,8 +47,8 @@ namespace MyScheduleWebsite
 
             if (mvSteps.ActiveViewIndex == 1)
             {
-                // Second view initialization
                 BindSelectedSubjects();
+                PreloadSectionsData();
             }
         }
 
@@ -81,6 +81,25 @@ namespace MyScheduleWebsite
             public string SubjectLevelMapJson { get; set; }
             public string SubjectCreditHoursMapJson { get; set; }
             public string SubjectTypeMapJson { get; set; }
+        }
+        private class Section
+        {
+            public int SectionId { get; set; }
+            public string SubjectCode { get; set; }
+            public string SubjectEnglishName { get; set; }
+            public int SectionNumber { get; set; }
+            public int Capacity { get; set; }
+            public int RegisteredStudents { get; set; }
+            public string InstructorArabicName { get; set; }
+            public List<SectionDetail> Details { get; set; } = new List<SectionDetail>();
+        }
+
+        private class SectionDetail
+        {
+            public int Day { get; set; }
+            public TimeSpan StartTime { get; set; }
+            public TimeSpan EndTime { get; set; }
+            public string Location { get; set; }
         }
 
         private Guid GetUserId()
@@ -449,6 +468,7 @@ namespace MyScheduleWebsite
                 btnNext.Text = "Confirm Order";
 
                 BindSelectedSubjects();
+                PreloadSectionsData();
             }
             else if (mvSteps.ActiveViewIndex == 1)
             {
@@ -483,7 +503,7 @@ namespace MyScheduleWebsite
             var selectedCodes = Session["SelectedSubjects"] as List<string>;
             if (selectedCodes == null || selectedCodes.Count == 0)
             {
-                subjectsinSectionsContainer.InnerHtml += "<div class='alert'>No subjects selected</div></div>";
+                subjectsinSectionsContainer.InnerHtml += "<div class='labels'>No subjects selected</div></div>";
                 return;
             }
 
@@ -501,13 +521,86 @@ namespace MyScheduleWebsite
             foreach (var subject in selectedSubjects)
             {
                 subjectsHtml += $@"
-            <div class='subject subject-in-sections' id='{subject.Code}' onclick='SubjectInSectionsClicked(this)'>
-                <span>{subject.EnglishName}</span>
-            </div>";
+                    <div class='subject subject-in-sections' id='{subject.Code}' onclick='SubjectInSectionsClicked(this)'>
+                        <span>{subject.EnglishName}</span>
+                    </div>";
             }
 
             subjectsinSectionsContainer.InnerHtml += subjectsHtml + "</div>";
         }
 
+        private List<Section> GetSectionsForSubjects(List<string> subjectCodes)
+        {
+            if (subjectCodes.Count == 0) return new List<Section>();
+
+            CRUD myCrud = new CRUD();
+            string sql = @"
+                SELECT s.sectionId, s.subjectCode, sub.subjectEnglishName, 
+                       s.sectionNumber, s.capacity, s.registeredStudents, 
+                       s.instuctorArabicName, sd.day, sd.startTime, 
+                       sd.endTime, sd.location
+                FROM sections s
+                INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+                INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+                WHERE s.curriculumId IN (1, 2)
+                  AND s.subjectCode IN ({0})";
+
+            string[] parameters = subjectCodes.Select((_, i) => $"@p{i}").ToArray();
+            sql = string.Format(sql, string.Join(",", parameters));
+
+            Dictionary<string, object> para = new Dictionary<string, object>();
+            for (int i = 0; i < subjectCodes.Count; i++)
+            {
+                para.Add($"@p{i}", subjectCodes[i]);
+            }
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, para);
+
+            var sections = dt.AsEnumerable()
+                .GroupBy(r => r.Field<int>("sectionId"))
+                .Select(g => new Section
+                {
+                    SectionId = g.Key,
+                    SubjectCode = g.First().Field<string>("subjectCode"),
+                    SubjectEnglishName = g.First().Field<string>("subjectEnglishName"),
+                    SectionNumber = g.First().Field<int>("sectionNumber"),
+                    Capacity = g.First().Field<int>("capacity"),
+                    RegisteredStudents = g.First().Field<int>("registeredStudents"),
+                    InstructorArabicName = g.First().Field<string>("instuctorArabicName"),
+                    Details = g.Select(r => new SectionDetail
+                    {
+                        Day = r.Field<int>("day"),
+                        StartTime = r.Field<TimeSpan>("startTime"),
+                        EndTime = r.Field<TimeSpan>("endTime"),
+                        Location = r.Field<string>("location")
+                    }).ToList()
+                }).ToList();
+
+            return sections;
+        }
+        private void PreloadSectionsData()
+        {
+            var selectedCodes = Session["SelectedSubjects"] as List<string> ?? new List<string>();
+            var sections = GetSectionsForSubjects(selectedCodes);
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(
+                sections,
+                Newtonsoft.Json.Formatting.None,
+                new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+                }
+            );
+
+            string script = $@"
+                window.allSections = {json};";
+
+            ClientScript.RegisterStartupScript(
+                GetType(),
+                "SectionsData",
+                script,
+                true
+            );
+        }
     }
 }

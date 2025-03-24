@@ -256,7 +256,7 @@
 
 .subject.subject-in-sections {
     margin: 10px;
-    border-color: #F4B183;
+    border-color: #7EC8D1;
     cursor: pointer;
 }
 
@@ -267,6 +267,11 @@
 .subject.subject-in-sections.selected {
     background-color: #ADD8E6;
     color: #000000;
+}
+
+.subject.subject-in-sections.done {
+    border-color: #AAAAAA;
+    background-color: #A9D18E;
 }
 
 .sections-container {
