@@ -84,6 +84,12 @@
                         <!-- Sections will be dynamically added here -->
                     </div>
                 </div>
+                
+                <div class="schedule-container">
+                    <div class="schedule-grid" id="scheduleGrid">
+
+                    </div>
+                </div>
             </asp:View>
         </asp:MultiView>
 

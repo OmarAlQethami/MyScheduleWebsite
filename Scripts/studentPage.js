@@ -195,18 +195,22 @@ function SectionClicked(element) {
     const sectionNumber = element.id;
 
     const currentSelected = selectedSections[subjectCode];
+    const section = window.allSections.find(s => s.SectionNumber.toString() === sectionNumber);
 
     if (currentSelected === sectionNumber) {
         delete selectedSections[subjectCode];
         element.classList.remove('selected');
+        removeSubjectFromSchedule(section);
     } else {
         if (currentSelected) {
             const prevSection = document.getElementById(currentSelected);
             if (prevSection) prevSection.classList.remove('selected');
+            removeSubjectFromSchedule(window.allSections.find(s => s.SectionId.toString() === currentSelected));
         }
 
         selectedSections[subjectCode] = sectionNumber;
         element.classList.add('selected');
+        addSubjectToSchedule(section);
     }
 
     const subjectElement = document.getElementById(subjectCode);
@@ -309,6 +313,119 @@ function getDayName(dayNumber) {
 function formatTime(timeSpan) {
     const date = new Date(`2000-01-01T${timeSpan}`);
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function generateScheduleGrid() {
+    const grid = document.getElementById('scheduleGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    grid.appendChild(createHeaderCell(''));
+    for (let hour = 8; hour <= 22; hour++) {
+        const timeLabel = `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'}`;
+        const header = createHeaderCell(timeLabel);
+        header.innerHTML = `<span>${timeLabel}</span>`;
+        grid.appendChild(header);
+    }
+
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+    days.forEach((day, dayIndex) => {
+        grid.appendChild(createDayLabel(day));
+        for (let hour = 8; hour <= 22; hour++) {
+            const cell = document.createElement('div');
+            cell.className = 'hour-cell';
+            cell.dataset.day = dayIndex;
+            cell.dataset.hour = hour;
+            grid.appendChild(cell);
+        }
+    });
+}
+
+function createHeaderCell(text) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-header';
+    cell.textContent = text;
+    return cell;
+}
+
+function createDayLabel(text) {
+    const cell = document.createElement('div');
+    cell.className = 'day-label';
+    cell.textContent = text;
+    return cell;
+}
+
+document.addEventListener('DOMContentLoaded', generateScheduleGrid);
+
+const subjectColors = [
+    "#9ec2e6", "#f4b083", "#fed966", "#a7d08c", "#aeaaa9",
+    "#cecdae", "#D5A6BD", "#C5A1D9", "#7FC7C0", "#BFAF98"
+];
+
+const assignedColors = {};
+
+function getSubjectColor(subjectName) {
+    if (!assignedColors[subjectName]) {
+        const colorIndex = Object.keys(assignedColors).length % subjectColors.length;
+        assignedColors[subjectName] = subjectColors[colorIndex];
+    }
+    return assignedColors[subjectName];
+}
+
+function addSubjectToSchedule(section) {
+    const container = document.querySelector('.schedule-container');
+    const grid = document.getElementById('scheduleGrid');
+
+    section.Details.forEach(detail => {
+        const dayIndex = detail.Day - 1;
+        const start = parseTime(detail.StartTime);
+        const end = parseTime(detail.EndTime);
+
+        const sampleCell = grid.querySelector(`.hour-cell[data-day="${dayIndex}"][data-hour="8"]`);
+        const cellWidth = sampleCell.offsetWidth;
+        const cellHeight = sampleCell.offsetHeight;
+
+        const startHour = start.getHours();
+        const endHour = end.getHours();
+        const duration = endHour - startHour;
+
+        const startColumn = startHour - 8;
+
+        const blockLeft = 100 + (startColumn * cellWidth) + (startColumn * 1);
+
+        const blockTop = (dayIndex + 1) * (cellHeight + 1);
+
+        const block = document.createElement('div');
+        block.className = 'scheduled-block';
+        block.style.width = `${(duration * cellWidth) + (duration - 1)}px`;
+        block.style.height = `${cellHeight}px`;
+        block.style.left = `${blockLeft}px`;
+        block.style.top = `${blockTop}px`;
+
+        const subjectColor = getSubjectColor(section.SubjectEnglishName);
+        block.style.backgroundColor = subjectColor;
+
+        const content = document.createElement('div');
+        content.className = 'scheduled-block-content';
+        content.textContent = section.SubjectEnglishName;
+        block.appendChild(content);
+
+        container.appendChild(block);
+    });
+}
+
+function removeSubjectFromSchedule(section) {
+    const grid = document.getElementById('scheduleGrid');
+    section.Details.forEach(detail => {
+        grid.querySelectorAll(`.scheduled-block[data-section-id="${section.SectionId}"]`)
+            .forEach(block => block.remove());
+    });
+}
+
+function parseTime(timeString) {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return new Date(2000, 0, 1, hours, minutes);
 }
 
 function displayAlert(message) {
