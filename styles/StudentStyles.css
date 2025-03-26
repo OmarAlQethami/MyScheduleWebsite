@@ -233,6 +233,139 @@
     border-color: #888888;
 }
 
+.subject-tooltip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: absolute;
+    background: #EEEEEE;
+    border: 1px solid #888;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    width: 250px;
+    pointer-events: none;
+    transform: scale(0.01);
+    transform-origin: left center;
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1), opacity 0.2s ease-out, visibility 0.2s linear;
+}
+
+.subject-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.tt-section {
+    padding: 10px;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+.tt-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.tt-header {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.tt-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.tt-label {
+    font-size: 0.7em;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin: 10px 0 0 0;
+}
+
+.tt-level {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.tt-hours {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.tt-value {
+    font-size: 0.9em;
+    color: #000;
+    font-weight: 400;
+    margin: 0 0 5px 0;
+    padding-bottom: 10px;
+}
+
+.tt-prerequisites {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 5px 0;
+}
+
+.tt-prerequisite-item {
+    font-size: 1em;
+    color: #444;
+    padding: 2px 0;
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.tt-no-prereq {
+    color: #888;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.tt-status {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 5px 0;
+}
+
+.status-taken {
+    background-color: #A9D18E;
+    color: #2C5F2D;
+}
+
+.status-available {
+    background-color: #7EC8D1;
+    color: #004369;
+}
+
+.status-unoffered {
+    background-color: #F4B183;
+    color: #87431D;
+}
+
+.status-unavailable {
+    background-color: #BBBBBB;
+    color: #444444;
+}
+
 .sections-body {
     display: flex;
     width: 100%;

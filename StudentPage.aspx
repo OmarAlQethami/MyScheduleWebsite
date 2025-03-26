@@ -41,6 +41,47 @@
 
                 <asp:Label ID="lblSelectedSubjects" runat="server" Text=""></asp:Label>
         
+                <div id="subjectTooltip" class="subject-tooltip" style="display: none;">
+                    <div class="tt-section">
+                        <h4 class="tt-header"><span id="ttSubjectName"></span></h4>
+                    </div>
+
+                    <div class="tt-section">
+                        <div class="tt-item">
+                            <span class="tt-label">Level</span>
+                            <span class="tt-level" id="ttLevel"></span>
+                        </div>
+                    </div>
+
+                    <div class="tt-section">
+                        <div class="tt-item">
+                            <span class="tt-label">Credit Hours</span>
+                            <span class="tt-hours" id="ttCredits"></span>
+                        </div>
+                    </div>
+
+                    <div class="tt-section">
+                        <div class="tt-item">
+                            <span class="tt-label">Status</span>
+                            <span class="tt-status" id="ttStatus"></span>
+                        </div>
+                    </div>
+
+                    <div class="tt-section">
+                        <div class="tt-item">
+                            <span class="tt-label">Type</span>
+                            <span class="tt-value" id="ttType"></span>
+                        </div>
+                    </div>
+    
+                    <div class="tt-section">
+                        <div class="tt-item">
+                            <span class="tt-label">Prerequisites</span>
+                            <ul class="tt-prerequisites" id="ttPrerequisites"></ul>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="floating-legend">
                     <div class="legend-item">
                         <div class="legend-box taken"></div>

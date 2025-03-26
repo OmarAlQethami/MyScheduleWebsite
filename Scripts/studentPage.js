@@ -117,6 +117,7 @@ function showElectivePopup(level, slotId, currentLevel) {
 
     electiveOptions.forEach(code => {
         const option = document.createElement('div');
+        option.id = code;
         const isAvailable = subjectLevelMap[code] <= currentLevel &&
             !takenSubjects.includes(code) &&
             !selectedSubjects.includes(code);
@@ -180,6 +181,91 @@ function updateProgressBar() {
     }
     if (hoursLabel) {
         hoursLabel.textContent = `Hours selected: ${totalSelected}`;
+    }
+}
+
+let hideTimeout;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltip = document.getElementById('subjectTooltip');
+
+    document.addEventListener('mouseover', function (e) {
+        const subject = e.target.closest('.subject');
+        if (!subject) return;
+
+        clearTimeout(hideTimeout);
+        tooltip.style.display = 'block';
+        void tooltip.offsetHeight;
+
+        const code = subject.id;
+        if (!subjectNameMap[code]) return;
+
+        document.getElementById('ttSubjectName').textContent = subjectNameMap[code];
+        document.getElementById('ttLevel').textContent = subjectLevelMap[code];
+        document.getElementById('ttCredits').textContent = subjectCreditHoursMap[code];
+        document.getElementById('ttType').textContent = getTypeName(subjectTypeMap[code]);
+
+        const prereqList = document.getElementById('ttPrerequisites');
+        prereqList.innerHTML = '';
+        const prereqs = subjectPrerequisites[code] || [];
+        if (prereqs.length === 0) {
+            const li = document.createElement('li');
+            li.className = 'tt-prerequisite-item tt-no-prereq';
+            li.textContent = 'No Prerequisites';
+            prereqList.appendChild(li);
+        } else {
+            prereqs.forEach(prereq => {
+                const li = document.createElement('li');
+                li.className = 'tt-prerequisite-item';
+                li.textContent = subjectNameMap[prereq] || prereq;
+                prereqList.appendChild(li);
+            });
+        }
+
+        const statusElement = document.getElementById('ttStatus');
+        const status = subject.classList.contains('taken') ? 'Taken' :
+            subject.classList.contains('available') ? 'Available' :
+            subject.classList.contains('unoffered') ? 'Unoffered' :
+            subject.classList.contains('unavailable') ? 'Unavailable' : '';
+        statusElement.textContent = status;
+        statusElement.className = `tt-status status-${status.toLowerCase()}`;
+
+        const rect = subject.getBoundingClientRect();
+        const verticalCenter = rect.top + window.scrollY + (rect.height / 2) - (tooltip.offsetHeight / 2);
+        tooltip.style.top = `${verticalCenter}px`;
+        tooltip.style.left = `${rect.right + window.scrollX + 5}px`;
+
+        setTimeout(() => tooltip.classList.add('visible'), 10);
+    });
+
+    document.addEventListener('mouseout', function (e) {
+        const subject = e.target.closest('.subject');
+        if (!subject) return;
+
+        hideTimeout = setTimeout(() => {
+            tooltip.classList.remove('visible');
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 200);
+        }, 300);
+    });
+
+    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    tooltip.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+        setTimeout(() => {
+            tooltip.style.display = 'none';
+        }, 200);
+    });
+});
+
+function getTypeName(typeId) {
+    switch (typeId) {
+        case 1: return 'Compulsory (Major)';
+        case 2: return 'Compulsory (University)';
+        case 3: return 'College Elective';
+        case 4: return 'University Elective';
+        default: return 'Unknown';
     }
 }
 
