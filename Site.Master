@@ -72,7 +72,175 @@
                     <asp:ContentPlaceHolder ID="MainContent" runat="server">
                     </asp:ContentPlaceHolder>
             </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center</title>
+    <style>
+        .help-center {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .help-header {
+            padding: 10px;
+            background: #2c3e50;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+        }
+        .help-content {
+            padding: 10px;
+            display: none;
+        }
+        .help-center.expanded .help-content {
+            display: block;
+        }
+        .recipient-options {
+            margin-bottom: 10px;
+        }
+        .recipient-option {
+            margin-right: 5px;
+        }
+        .recipient-option input {
+            display: none;
+        }
+        .recipient-option label {
+            padding: 5px 8px;
+            background: #eee;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .recipient-option input:checked + label {
+            background: #3498db;
+            color: white;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            min-height: 80px;
+        }
+        .send-btn {
+            width: 100%;
+            padding: 8px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .email-display {
+            font-size: 12px;
+            margin: 5px 0;
+            padding: 5px;
+            background: #f5f5f5;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="help-center" id="helpCenter">
+        <div class="help-header" onclick="toggleHelp()">Help Center</div>
+        <div class="help-content">
+            <div class="recipient-options" id="recipientOptions"></div>
+            <div class="email-display" id="emailDisplay">
+                Recipient email: <span id="recipientEmail"></span>
+            </div>
+            <div class="form-group">
+                <input type="text" id="messageTitle" placeholder="Title">
+            </div>
+            <div class="form-group">
+                <textarea id="messageBody" placeholder="Message"></textarea>
+            </div>
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
 
+    <script>
+        
+        const config = {
+            userRoles: {
+                admin: ['student', 'faculty'],
+                faculty: ['admin', 'student'],
+                student: ['admin', 'faculty'],
+                loggedOut: ['admin']
+            },
+            labels: {
+                admin: 'Admin',
+                faculty: 'Faculty',
+                student: 'Student'
+            },
+            emails: {
+                admin: 'admin@university.edu',
+                faculty: 'faculty@university.edu',
+                student: 'student@university.edu'
+            }
+        };
+
+        let currentUser = 'student';
+
+        function initHelp() {
+            const options = config.userRoles[currentUser] || [];
+            const html = options.map(role => `
+                <div class="recipient-option">
+                    <input type="radio" name="recipient" id="recip-${role}" value="${role}" 
+                           ${options[0] === role ? 'checked' : ''} onchange="updateEmail()">
+                    <label for="recip-${role}">Message ${config.labels[role]}</label>
+                </div>
+            `).join('');
+            document.getElementById('recipientOptions').innerHTML = html;
+            updateEmail();
+        }
+
+        function updateEmail() {
+            const recipient = document.querySelector('input[name="recipient"]:checked')?.value;
+            const emailDisplay = document.getElementById('emailDisplay');
+            if (!recipient) return;
+            
+            const showEmail = (currentUser === 'student' && recipient === 'faculty') || 
+                            (currentUser === 'faculty' && recipient === 'student');
+            
+            emailDisplay.style.display = showEmail ? 'block' : 'none';
+            document.getElementById('recipientEmail').textContent = config.emails[recipient];
+        }
+
+        function toggleHelp() {
+            document.getElementById('helpCenter').classList.toggle('expanded');
+        }
+
+        function sendMessage() {
+            const recipient = document.querySelector('input[name="recipient"]:checked')?.value;
+            const title = document.getElementById('messageTitle').value.trim();
+            const body = document.getElementById('messageBody').value.trim();
+            
+            if (!recipient || !title || !body) {
+                alert('Please complete all fields');
+                return;
+            }
+            
+            console.log('Sending to:', config.emails[recipient], 'Title:', title, 'Body:', body);
+            alert('Message sent!');
+            document.getElementById('messageTitle').value = '';
+            document.getElementById('messageBody').value = '';
+        }
+
+        window.onload = initHelp;
+    </script>
+</body>
+</html>
             <hr />
             <footer>
                 <p>&copy; <%: DateTime.Now.Year %> - My Schedule</p>
