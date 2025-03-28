@@ -72,175 +72,231 @@
                     <asp:ContentPlaceHolder ID="MainContent" runat="server">
                     </asp:ContentPlaceHolder>
             </div>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Help Center</title>
+
     <style>
         .help-center {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
-            width: 280px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            bottom: 20px;
+            left: 20px;
             z-index: 1000;
         }
-        .help-header {
-            padding: 10px;
-            background: #2c3e50;
+        
+        .help-button {
+            width: 40px;
+            height: 40px;
+            background-color: #2196F3;
             color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 5px 5px 0 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: transform 0.2s ease;
         }
+        
+        .help-button:hover {
+            transform: scale(1.1);
+        }
+        
         .help-content {
+            position: absolute;
+            bottom: 45px;
+            left: 0;
+            width: 220px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 10px;
             display: none;
+            font-size: 12px;
         }
+        
         .help-center.expanded .help-content {
             display: block;
         }
-        .recipient-options {
+        
+        .email-options {
             margin-bottom: 10px;
         }
-        .recipient-option {
-            margin-right: 5px;
-        }
-        .recipient-option input {
-            display: none;
-        }
-        .recipient-option label {
-            padding: 5px 8px;
-            background: #eee;
-            border-radius: 3px;
+        
+        .email-option {
+            display: block;
+            width: 100%;
+            padding: 6px;
+            margin-bottom: 4px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
             cursor: pointer;
+            border-radius: 3px;
+            font-size: 11px;
+            text-align: center;
         }
-        .recipient-option input:checked + label {
-            background: #3498db;
-            color: white;
+        
+        .email-option:hover {
+            background-color: #e9e9e9;
         }
-        .form-group {
-            margin-bottom: 10px;
-        }
-        .form-group input, .form-group textarea {
+        
+        .email-title {
             width: 100%;
             padding: 5px;
+            margin-bottom: 8px;
             border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 11px;
         }
-        textarea {
-            min-height: 80px;
-        }
-        .send-btn {
+        
+        .email-message {
             width: 100%;
-            padding: 8px;
-            background: #2c3e50;
+            height: 70px;
+            padding: 5px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            resize: vertical;
+            font-size: 11px;
+        }
+        
+        .send-button {
+            width: 100%;
+            padding: 6px;
+            background-color: #2196F3;
             color: white;
             border: none;
+            border-radius: 3px;
             cursor: pointer;
+            font-size: 11px;
         }
-        .email-display {
+        
+        .send-button:hover {
+            background-color: #0b7dda;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: none;
+            border: none;
             font-size: 12px;
-            margin: 5px 0;
-            padding: 5px;
-            background: #f5f5f5;
-            display: none;
+            cursor: pointer;
+            color: #777;
         }
     </style>
-</head>
-<body>
-    <div class="help-center" id="helpCenter">
-        <div class="help-header" onclick="toggleHelp()">Help Center</div>
-        <div class="help-content">
-            <div class="recipient-options" id="recipientOptions"></div>
-            <div class="email-display" id="emailDisplay">
-                Recipient email: <span id="recipientEmail"></span>
-            </div>
-            <div class="form-group">
-                <input type="text" id="messageTitle" placeholder="Title">
-            </div>
-            <div class="form-group">
-                <textarea id="messageBody" placeholder="Message"></textarea>
-            </div>
-            <button class="send-btn" onclick="sendMessage()">Send</button>
-        </div>
+
+
+<div class="help-center" id="helpCenter">
+    <div class="help-button" onclick="toggleHelpCenter()">?</div>
+    <div class="help-content">
+        <button class="close-btn" onclick="toggleHelpCenter()">×</button>
+        <div class="email-options" id="emailOptions"></div>
+        <input type="text" placeholder="Email Title" class="email-title" id="emailTitle">
+        <textarea placeholder="Type your message here..." class="email-message" id="emailMessage"></textarea>
+        <button class="send-button" onclick="submitMessage()">Send</button>
     </div>
+</div>
 
-    <script>
-        
-        const config = {
-            userRoles: {
-                admin: ['student', 'faculty'],
-                faculty: ['admin', 'student'],
-                student: ['admin', 'faculty'],
-                loggedOut: ['admin']
-            },
-            labels: {
-                admin: 'Admin',
-                faculty: 'Faculty',
-                student: 'Student'
-            },
-            emails: {
-                admin: 'admin@university.edu',
-                faculty: 'faculty@university.edu',
-                student: 'student@university.edu'
-            }
-        };
+<script>
+    const currentUserType = 'admin';
 
-        let currentUser = 'student';
+    const recipientEmails = {
+        admin: 'admin@university.edu',
+        faculty: 'faculty@university.edu',
+        student: 'student@university.edu'
+    };
 
-        function initHelp() {
-            const options = config.userRoles[currentUser] || [];
-            const html = options.map(role => `
-                <div class="recipient-option">
-                    <input type="radio" name="recipient" id="recip-${role}" value="${role}" 
-                           ${options[0] === role ? 'checked' : ''} onchange="updateEmail()">
-                    <label for="recip-${role}">Message ${config.labels[role]}</label>
-                </div>
-            `).join('');
-            document.getElementById('recipientOptions').innerHTML = html;
-            updateEmail();
+    document.addEventListener('DOMContentLoaded', function () {
+        renderEmailOptions();
+    });
+
+    function toggleHelpCenter() {
+        const helpCenter = document.getElementById('helpCenter');
+        helpCenter.classList.toggle('expanded');
+    }
+
+    function renderEmailOptions() {
+        const emailOptions = document.getElementById('emailOptions');
+        emailOptions.innerHTML = '';
+
+        switch (currentUserType) {
+            case 'admin':
+                emailOptions.innerHTML = `
+                    <button class="email-option" data-email="${recipientEmails.faculty}">Email Faculty</button>
+                    <button class="email-option" data-email="${recipientEmails.student}">Email Student</button>
+                `;
+                break;
+            case 'faculty':
+                emailOptions.innerHTML = `
+                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
+                    <button class="email-option" data-email="${recipientEmails.student}">Email Student</button>
+                `;
+                break;
+            case 'student':
+                emailOptions.innerHTML = `
+                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
+                    <button class="email-option" data-email="${recipientEmails.faculty}">Email Faculty</button>
+                `;
+                break;
+            default:
+                emailOptions.innerHTML = `
+                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
+                `;
         }
 
-        function updateEmail() {
-            const recipient = document.querySelector('input[name="recipient"]:checked')?.value;
-            const emailDisplay = document.getElementById('emailDisplay');
-            if (!recipient) return;
-            
-            const showEmail = (currentUser === 'student' && recipient === 'faculty') || 
-                            (currentUser === 'faculty' && recipient === 'student');
-            
-            emailDisplay.style.display = showEmail ? 'block' : 'none';
-            document.getElementById('recipientEmail').textContent = config.emails[recipient];
+        document.querySelectorAll('.email-option').forEach(option => {
+            option.addEventListener('click', function () {
+                const recipientEmail = this.getAttribute('data-email');
+                document.getElementById('emailTitle').value = '';
+                document.getElementById('emailMessage').value = '';
+
+                const isStudentFaculty = (currentUserType === 'student' && recipientEmail === recipientEmails.faculty) ||
+                    (currentUserType === 'faculty' && recipientEmail === recipientEmails.student);
+
+                if (isStudentFaculty) {
+                    alert(`Please contact: ${recipientEmail}`);
+                    toggleHelpCenter();
+                }
+            });
+        });
+    }
+
+    function submitMessage() {
+        const title = document.getElementById('emailTitle').value;
+        const body = document.getElementById('emailMessage').value;
+
+        if (!title || !body) {
+            alert('Please fill in both title and message body');
+            return;
         }
 
-        function toggleHelp() {
-            document.getElementById('helpCenter').classList.toggle('expanded');
+        const selectedOption = document.querySelector('.email-option:active, .email-option:focus');
+        if (!selectedOption) {
+            alert('Please select a recipient first');
+            return;
         }
 
-        function sendMessage() {
-            const recipient = document.querySelector('input[name="recipient"]:checked')?.value;
-            const title = document.getElementById('messageTitle').value.trim();
-            const body = document.getElementById('messageBody').value.trim();
-            
-            if (!recipient || !title || !body) {
-                alert('Please complete all fields');
-                return;
-            }
-            
-            console.log('Sending to:', config.emails[recipient], 'Title:', title, 'Body:', body);
-            alert('Message sent!');
-            document.getElementById('messageTitle').value = '';
-            document.getElementById('messageBody').value = '';
-        }
+        const recipientEmail = selectedOption.getAttribute('data-email');
 
-        window.onload = initHelp;
-    </script>
-</body>
-</html>
+        console.log('Message submitted:', {
+            senderType: currentUserType,
+            recipientEmail: recipientEmail,
+            title: title,
+            body: body,
+            timestamp: new Date().toISOString()
+        });
+
+        document.getElementById('emailTitle').value = '';
+        document.getElementById('emailMessage').value = '';
+
+        alert('Message sent successfully!');
+        toggleHelpCenter();
+    }
+</script>
+
             <hr />
             <footer>
                 <p>&copy; <%: DateTime.Now.Year %> - My Schedule</p>
