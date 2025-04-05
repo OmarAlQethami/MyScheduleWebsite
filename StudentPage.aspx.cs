@@ -41,9 +41,8 @@ namespace MyScheduleWebsite
 
                 lblGreeting.Text = "Hello " + User.Identity.Name + "!";
                 lblCurrentLevel.Text = "Current Level: " + GetCurrentLevel(userId);
-
-                BindSubjects(universityId, majorId);
             }
+            BindSubjects(universityId, majorId);
 
             if (mvSteps.ActiveViewIndex == 1)
             {
@@ -225,7 +224,7 @@ namespace MyScheduleWebsite
             var data = ProcessSubjectsData(subjects);
             var renderResult = RenderSubjectsHtmlAndJson(data, takenSubjects, currentLevel);
 
-            RegisterClientScripts(data, renderResult, currentLevel);
+            RegisterClientScripts(data, renderResult);
             UpdateProgressLabels(subjects);
         }
 
@@ -412,7 +411,11 @@ namespace MyScheduleWebsite
             if (subject.Level > GetCurrentLevel(GetUserId()))
                 return "unavailable";
 
-            if (subject.Prerequisites.Any() && !subject.Prerequisites.All(p => takenSubjectCodes.Contains(p)))
+            var missingPrerequisites = subject.Prerequisites
+                .Where(p => !takenSubjectCodes.Contains(p))
+                .ToList();
+
+            if (missingPrerequisites.Any())
             {
                 return "unavailable";
             }
@@ -422,7 +425,7 @@ namespace MyScheduleWebsite
             return "available";
         }
 
-        private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult, int currentLevel)
+        private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult)
         {
             ClientScript.RegisterStartupScript(GetType(), "Prerequisites", renderResult.PrerequisitesJson, true);
             ClientScript.RegisterStartupScript(GetType(), "SubjectNameMap", renderResult.SubjectNameMapJson, true);
@@ -458,7 +461,6 @@ namespace MyScheduleWebsite
 
                 if (!ValidateSubjects(selectedSubjects))
                 {
-                    lblOutput.Text = "Invalid subject selection";
                     return;
                 }
 
@@ -492,7 +494,68 @@ namespace MyScheduleWebsite
 
         private bool ValidateSubjects(List<string> selectedCodes)
         {
-            // TODO
+            List<string> errors = new List<string>();
+
+            if (selectedCodes == null || selectedCodes.Count == 0)
+            {
+                errors.Add("No subjects selected.");
+                lblOutput.Text = string.Join("<br />", errors);
+                return false;
+            }
+
+            Guid userId = GetUserId();
+            int studentId = GetStudentId(userId);
+            int universityId = (int)ViewState["UniversityId"];
+            int majorId = (int)ViewState["MajorId"];
+            List<string> takenSubjects = GetTakenSubjectCodes(studentId, universityId, majorId);
+            List<Subject> allSubjects = ProcessSubjects(universityId, majorId);
+            List<Subject> selectedSubjects = new List<Subject>();
+
+            foreach (string code in selectedCodes)
+            {
+                Subject subject = allSubjects.FirstOrDefault(s => s.Code == code);
+                if (subject == null)
+                {
+                    errors.Add($"Subject with code {code} does not exist.");
+                    continue;
+                }
+                selectedSubjects.Add(subject);
+
+                string status = GetSubjectStatusClass(subject, takenSubjects);
+                if (status != "available" && status != "unoffered")
+                {
+                    errors.Add($"Subject {subject.EnglishName} ({code}) is not available for selection.");
+                }
+            }
+
+            decimal totalHours = selectedSubjects.Sum(s => s.CreditHours);
+            if (totalHours < 12)
+            {
+                errors.Add($"Total credit hours ({totalHours}) is less than the minimum required 12.");
+            }
+            else if (totalHours > 20)
+            {
+                errors.Add($"Total credit hours ({totalHours}) exceeds the maximum allowed 20.");
+            }
+
+            foreach (Subject subject in selectedSubjects)
+            {
+                foreach (string prereq in subject.Prerequisites)
+                {
+                    if (!takenSubjects.Contains(prereq))
+                    {
+                        string prereqName = allSubjects.FirstOrDefault(s => s.Code == prereq)?.EnglishName ?? prereq;
+                        errors.Add($"Subject {subject.EnglishName} requires {prereqName} which has not been taken.");
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                lblOutput.Text = string.Join("<br />", errors);
+                lblOutput.ForeColor = Color.Red;
+                return false;
+            }
             return true;
         }
 

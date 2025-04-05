@@ -118,9 +118,12 @@ function showElectivePopup(level, slotId, currentLevel) {
     electiveOptions.forEach(code => {
         const option = document.createElement('div');
         option.id = code;
+        const prerequisites = subjectPrerequisites[code] || [];
+        const hasAllPrerequisites = prerequisites.every(p => takenSubjects.includes(p));
         const isAvailable = subjectLevelMap[code] <= currentLevel &&
             !takenSubjects.includes(code) &&
-            !selectedSubjects.includes(code);
+            !selectedSubjects.includes(code) &&
+            hasAllPrerequisites;
 
         option.className = `subject elective-option ${isAvailable ? 'available' : 'unavailable'}`;
         option.textContent = subjectNameMap[code];
@@ -132,6 +135,13 @@ function showElectivePopup(level, slotId, currentLevel) {
                 newSubject.className = 'subject available selected';
                 newSubject.id = code;
                 newSubject.innerHTML = `<span>${subjectNameMap[code]}</span>`;
+                const subjectHours = subjectCreditHoursMap[code] || 0;
+                const currentHours = selectedSubjects.reduce((sum, code) =>
+                    sum + (subjectCreditHoursMap[code] || 0), 0);
+                if (currentHours + subjectHours > 20) {
+                    displayAlert("You have reached the maximum limit of 20 hours.");
+                    return;
+                }
                 newSubject.onclick = () => SubjectClicked(newSubject);
                 newSubject.dataset.slotId = slotId;
                 newSubject.dataset.slotClasses = slot.className;
@@ -147,6 +157,12 @@ function showElectivePopup(level, slotId, currentLevel) {
                 updateHours();
                 updateProgressBar();
             };
+        }
+        else {
+            option.title = "Missing prerequisites: " +
+                prerequisites.filter(p => !takenSubjects.includes(p))
+                    .map(p => subjectNameMap[p] || p)
+                    .join(", ");
         }
         popup.appendChild(option);
     });
@@ -286,12 +302,24 @@ function SectionClicked(element) {
     if (currentSelected === sectionNumber) {
         delete selectedSections[subjectCode];
         element.classList.remove('selected');
-        removeSubjectFromSchedule(section);
+        const sectionToRemove = window.allSections.find(s =>
+            s.SubjectCode === subjectCode &&
+            s.SectionNumber.toString() === sectionNumber
+        );
+        if (sectionToRemove) {
+            removeSubjectFromSchedule(sectionToRemove);
+        }
     } else {
         if (currentSelected) {
+            const oldSection = window.allSections.find(s =>
+                s.SubjectCode === subjectCode &&
+                s.SectionNumber.toString() === currentSelected
+            );
+            if (oldSection) {
+                removeSubjectFromSchedule(oldSection);
+            }
             const prevSection = document.getElementById(currentSelected);
             if (prevSection) prevSection.classList.remove('selected');
-            removeSubjectFromSchedule(window.allSections.find(s => s.SectionId.toString() === currentSelected));
         }
 
         selectedSections[subjectCode] = sectionNumber;
@@ -484,6 +512,7 @@ function addSubjectToSchedule(section) {
 
         const block = document.createElement('div');
         block.className = 'scheduled-block';
+        block.dataset.sectionId = section.SectionNumber;
         block.style.width = `${(duration * cellWidth) + (duration - 1)}px`;
         block.style.height = `${cellHeight}px`;
         block.style.left = `${blockLeft}px`;
@@ -502,9 +531,9 @@ function addSubjectToSchedule(section) {
 }
 
 function removeSubjectFromSchedule(section) {
-    const grid = document.getElementById('scheduleGrid');
+    const container = document.querySelector('.schedule-container');
     section.Details.forEach(detail => {
-        grid.querySelectorAll(`.scheduled-block[data-section-id="${section.SectionId}"]`)
+        container.querySelectorAll(`.scheduled-block[data-section-id="${section.SectionNumber}"]`)
             .forEach(block => block.remove());
     });
 }
