@@ -73,229 +73,175 @@
                     </asp:ContentPlaceHolder>
             </div>
 
-    <style>
-        .help-center {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-        
-        .help-button {
-            width: 40px;
-            height: 40px;
-            background-color: #2196F3;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            border: none;
-            transition: transform 0.2s ease;
-        }
-        
-        .help-button:hover {
-            transform: scale(1.1);
-        }
-        
-        .help-content {
-            position: absolute;
-            bottom: 45px;
-            left: 0;
-            width: 220px;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            display: none;
-            font-size: 12px;
-        }
-        
-        .help-center.expanded .help-content {
-            display: block;
-        }
-        
-        .email-options {
-            margin-bottom: 10px;
-        }
-        
-        .email-option {
-            display: block;
-            width: 100%;
-            padding: 6px;
-            margin-bottom: 4px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            border-radius: 3px;
-            font-size: 11px;
-            text-align: center;
-        }
-        
-        .email-option:hover {
-            background-color: #e9e9e9;
-        }
-        
-        .email-title {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 11px;
-        }
-        
-        .email-message {
-            width: 100%;
-            height: 70px;
-            padding: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            resize: vertical;
-            font-size: 11px;
-        }
-        
-        .send-button {
-            width: 100%;
-            padding: 6px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        
-        .send-button:hover {
-            background-color: #0b7dda;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: none;
-            border: none;
-            font-size: 12px;
-            cursor: pointer;
-            color: #777;
-        }
-    </style>
+  
+  <style>
+    
+    .help-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #007bff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+
+    .help-button:hover {
+      transform: rotate(15deg) scale(1.1);
+    }
+
+    .help-box {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      width: 320px;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .message-option {
+      background: linear-gradient(145deg, #e6e6e6, #ffffff);
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease-in-out;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .message-option:hover {
+      background: #d9f0ff;
+      transform: translateY(-2px);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 14px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .email-display {
+      font-size: 14px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 8px;
+    }
+  </style>
 
 
-<div class="help-center" id="helpCenter">
-    <div class="help-button" onclick="toggleHelpCenter()">?</div>
-    <div class="help-content">
-        <button class="close-btn" onclick="toggleHelpCenter()">×</button>
-        <div class="email-options" id="emailOptions"></div>
-        <input type="text" placeholder="Email Title" class="email-title" id="emailTitle">
-        <textarea placeholder="Type your message here..." class="email-message" id="emailMessage"></textarea>
-        <button class="send-button" onclick="submitMessage()">Send</button>
-    </div>
+<div class="help-button" onclick="toggleHelpBox()">؟</div>
+
+<div class="help-box" id="helpBox">
+  <div id="messageOptions"></div>
+  <div id="emailDisplay" class="email-display" style="display:none;"></div>
+  <input type="text" id="title" placeholder="Title" style="display:none;" />
+  <textarea id="body" rows="4" placeholder="Write your message here..." style="display:none;"></textarea>
+  <button style="display:none;" onclick="sendMessage()">Send</button>
 </div>
 
 <script>
-    const currentUserType = 'admin';
+    const helpBox = document.getElementById('helpBox');
+    const messageOptions = document.getElementById('messageOptions');
+    const emailDisplay = document.getElementById('emailDisplay');
+    const titleField = document.getElementById('title');
+    const bodyField = document.getElementById('body');
+    const sendBtn = helpBox.querySelector('button');
 
-    const recipientEmails = {
-        admin: 'admin@university.edu',
-        faculty: 'faculty@university.edu',
-        student: 'student@university.edu'
+    let userRole = "student"; // change to 'admin', 'faculty', 'student', or 'guest'
+
+    const recipients = {
+        admin: ["Message Faculty", "Message Student"],
+        faculty: ["Message Admin", "Message Student"],
+        student: ["Message Admin", "Message Faculty"],
+        guest: ["Message Admin"]
     };
 
-    document.addEventListener('DOMContentLoaded', function () {
-        renderEmailOptions();
-    });
+    const emails = {
+        "Message Admin": "admin@example.com",
+        "Message Faculty": "faculty@example.com",
+        "Message Student": "student@example.com"
+    };
 
-    function toggleHelpCenter() {
-        const helpCenter = document.getElementById('helpCenter');
-        helpCenter.classList.toggle('expanded');
+    function toggleHelpBox() {
+        helpBox.style.display = helpBox.style.display === 'flex' ? 'none' : 'flex';
+        if (helpBox.style.display === 'flex') {
+            showOptions();
+        }
     }
 
-    function renderEmailOptions() {
-        const emailOptions = document.getElementById('emailOptions');
-        emailOptions.innerHTML = '';
+    function showOptions() {
+        messageOptions.innerHTML = '';
+        emailDisplay.style.display = 'none';
+        titleField.style.display = 'none';
+        bodyField.style.display = 'none';
+        sendBtn.style.display = 'none';
 
-        switch (currentUserType) {
-            case 'admin':
-                emailOptions.innerHTML = `
-                    <button class="email-option" data-email="${recipientEmails.faculty}">Email Faculty</button>
-                    <button class="email-option" data-email="${recipientEmails.student}">Email Student</button>
-                `;
-                break;
-            case 'faculty':
-                emailOptions.innerHTML = `
-                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
-                    <button class="email-option" data-email="${recipientEmails.student}">Email Student</button>
-                `;
-                break;
-            case 'student':
-                emailOptions.innerHTML = `
-                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
-                    <button class="email-option" data-email="${recipientEmails.faculty}">Email Faculty</button>
-                `;
-                break;
-            default:
-                emailOptions.innerHTML = `
-                    <button class="email-option" data-email="${recipientEmails.admin}">Email Admin</button>
-                `;
-        }
-
-        document.querySelectorAll('.email-option').forEach(option => {
-            option.addEventListener('click', function () {
-                const recipientEmail = this.getAttribute('data-email');
-                document.getElementById('emailTitle').value = '';
-                document.getElementById('emailMessage').value = '';
-
-                const isStudentFaculty = (currentUserType === 'student' && recipientEmail === recipientEmails.faculty) ||
-                    (currentUserType === 'faculty' && recipientEmail === recipientEmails.student);
-
-                if (isStudentFaculty) {
-                    alert(`Please contact: ${recipientEmail}`);
-                    toggleHelpCenter();
-                }
-            });
+        recipients[userRole].forEach(option => {
+            const div = document.createElement('div');
+            div.className = 'message-option';
+            div.innerText = option;
+            div.onclick = () => selectRecipient(option);
+            messageOptions.appendChild(div);
         });
     }
 
-    function submitMessage() {
-        const title = document.getElementById('emailTitle').value;
-        const body = document.getElementById('emailMessage').value;
+    function selectRecipient(option) {
+        messageOptions.innerHTML = '';
+        emailDisplay.innerText = `To: ${emails[option]}`;
+        emailDisplay.style.display = 'block';
+        titleField.style.display = 'block';
+        bodyField.style.display = 'block';
+        sendBtn.style.display = 'block';
+    }
 
-        if (!title || !body) {
-            alert('Please fill in both title and message body');
-            return;
-        }
-
-        const selectedOption = document.querySelector('.email-option:active, .email-option:focus');
-        if (!selectedOption) {
-            alert('Please select a recipient first');
-            return;
-        }
-
-        const recipientEmail = selectedOption.getAttribute('data-email');
-
-        console.log('Message submitted:', {
-            senderType: currentUserType,
-            recipientEmail: recipientEmail,
-            title: title,
-            body: body,
-            timestamp: new Date().toISOString()
-        });
-
-        document.getElementById('emailTitle').value = '';
-        document.getElementById('emailMessage').value = '';
-
-        alert('Message sent successfully!');
-        toggleHelpCenter();
+    function sendMessage() {
+        alert("Your message has been sent externally.");
+        toggleHelpBox();
+        titleField.value = "";
+        bodyField.value = "";
     }
 </script>
+
 
             <hr />
             <footer>
