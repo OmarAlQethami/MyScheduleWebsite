@@ -293,6 +293,8 @@ function updateHiddenField() {
 const selectedSections = {};
 
 function SectionClicked(element) {
+    displayAlert2('');
+
     const subjectCode = element.getAttribute('data-subject-code');
     const sectionNumber = element.id;
 
@@ -310,6 +312,24 @@ function SectionClicked(element) {
             removeSubjectFromSchedule(sectionToRemove);
         }
     } else {
+        const conflicts = [];
+
+        Object.entries(selectedSections).forEach(([existingSubjCode, existingSectionNum]) => {
+            const existingSection = window.allSections.find(s =>
+                s.SubjectCode === existingSubjCode &&
+                s.SectionNumber.toString() === existingSectionNum
+            );
+
+            if (existingSection && sectionsConflict(section, existingSection)) {
+                conflicts.push(existingSection.SubjectEnglishName);
+            }
+        });
+
+        if (conflicts.length > 0) {
+            displayAlert2(`Time conflict with: ${conflicts.join(', ')}`);
+            return;
+        }
+
         if (currentSelected) {
             const oldSection = window.allSections.find(s =>
                 s.SubjectCode === subjectCode &&
@@ -331,6 +351,9 @@ function SectionClicked(element) {
     if (subjectElement) {
         subjectElement.classList.toggle('done', !!selectedSections[subjectCode]);
     }
+
+    document.getElementById('hdnSelectedSections').value =
+        JSON.stringify(selectedSections);
 }
 
 function SubjectInSectionsClicked(element) {
@@ -541,6 +564,29 @@ function removeSubjectFromSchedule(section) {
 function parseTime(timeString) {
     const [hours, minutes] = timeString.split(':').map(Number);
     return new Date(2000, 0, 1, hours, minutes);
+}
+
+function sectionsConflict(a, b) {
+    return a.Details.some(aDetail =>
+        b.Details.some(bDetail =>
+            aDetail.Day === bDetail.Day &&
+            timesOverlap(aDetail.StartTime, aDetail.EndTime, bDetail.StartTime, bDetail.EndTime)
+        )
+    );
+}
+
+function timesOverlap(start1, end1, start2, end2) {
+    const toMinutes = time => {
+        const [hours, minutes] = time.split(':');
+        return parseInt(hours) * 60 + parseInt(minutes);
+    };
+
+    const s1 = toMinutes(start1);
+    const e1 = toMinutes(end1);
+    const s2 = toMinutes(start2);
+    const e2 = toMinutes(end2);
+
+    return s1 < e2 && e1 > s2;
 }
 
 function displayAlert(message) {

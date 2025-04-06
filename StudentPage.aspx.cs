@@ -1,4 +1,5 @@
 ﻿using MyScheduleWebsite.App_Code;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -183,8 +184,8 @@ namespace MyScheduleWebsite
                 FROM studentsProgress sp 
                 INNER JOIN subjects s ON sp.subjectId = s.subjectId 
                 WHERE sp.studentId = @studentId 
-                  AND s.universityId = @universityId 
-                  AND s.majorId = @majorId";
+                AND s.universityId = @universityId 
+                AND s.majorId = @majorId";
             Dictionary<string, object> myPara = new Dictionary<string, object>();
             myPara.Add("@studentId", studentId);
             myPara.Add("@universityId", universityId);
@@ -474,8 +475,16 @@ namespace MyScheduleWebsite
             }
             else if (mvSteps.ActiveViewIndex == 1)
             {
-                // TODO, Validate Final Order
-                Response.Redirect("~/OrderSuccessfulPage.aspx");
+                List<string> errors = ValidateSections();
+                if (errors.Count > 0)
+                {
+                    lblOutput2.Text = string.Join("<br />", errors);
+                    lblOutput2.ForeColor = Color.Red;
+                }
+                else if (ConfirmOrder())
+                {
+                    Response.Redirect("~/OrderSuccessfulPage.aspx");
+                }
             }
         }
 
@@ -602,11 +611,11 @@ namespace MyScheduleWebsite
                        s.sectionNumber, s.capacity, s.registeredStudents, 
                        s.instuctorArabicName, sd.day, sd.startTime, 
                        sd.endTime, sd.location
-                FROM sections s
-                INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
-                INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
-                WHERE s.curriculumId IN (1, 2)
-                  AND s.subjectCode IN ({0})";
+                       FROM sections s
+                       INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+                       INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+                       WHERE s.curriculumId IN (1, 2)
+                       AND s.subjectCode IN ({0})";
 
             string[] parameters = subjectCodes.Select((_, i) => $"@p{i}").ToArray();
             sql = string.Format(sql, string.Join(",", parameters));
@@ -664,6 +673,290 @@ namespace MyScheduleWebsite
                 script,
                 true
             );
+        }
+        private List<string> ValidateSections()
+        {
+            List<string> errors = new List<string>();
+            var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
+            var selectedSections = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(hdnSelectedSections.Value);
+
+            foreach (var subjectCode in selectedSubjects)
+            {
+                if (!selectedSections.ContainsKey(subjectCode))
+                {
+                    errors.Add($"{GetSubjectName(subjectCode)} ({subjectCode}) requires a section selection");
+                }
+            }
+
+            List<Section> validSections = new List<Section>();
+            foreach (var kvp in selectedSections)
+            {
+                var section = GetSectionDetails(kvp.Key, kvp.Value);
+                if (section == null)
+                {
+                    errors.Add($"{kvp.Key}-{kvp.Value}: Invalid section");
+                    continue;
+                }
+
+                if (section.RegisteredStudents >= section.Capacity)
+                {
+                    errors.Add($"{section.SubjectEnglishName} Section {section.SectionNumber} is full");
+                }
+                else
+                {
+                    validSections.Add(section);
+                }
+            }
+
+            for (int i = 0; i < validSections.Count; i++)
+            {
+                for (int j = i + 1; j < validSections.Count; j++)
+                {
+                    if (SectionsConflict(validSections[i], validSections[j]))
+                    {
+                        errors.Add($"Schedule conflict between {validSections[i].SubjectEnglishName} " +
+                                   $"(Section {validSections[i].SectionNumber}) and " +
+                                   $"{validSections[j].SubjectEnglishName} (Section {validSections[j].SectionNumber})");
+                    }
+                }
+            }
+
+            return errors;
+        }
+
+        private string GetSubjectName(string subjectCode)
+        {
+            CRUD crud = new CRUD();
+            DataTable dt = crud.getDTPassSqlDic(
+                "SELECT subjectEnglishName FROM subjects WHERE subjectCode = @code",
+                new Dictionary<string, object> { { "@code", subjectCode } }
+            );
+            return dt.Rows.Count > 0 ? dt.Rows[0]["subjectEnglishName"].ToString() : subjectCode;
+        }
+
+        private Section GetSectionDetails(string subjectCode, string sectionNumber)
+        {
+            int universityId = (int)ViewState["UniversityId"];
+            int majorId = (int)ViewState["MajorId"];
+
+            CRUD crud = new CRUD();
+            DataTable dt = crud.getDTPassSqlDic(
+                @"SELECT s.*, sub.subjectEnglishName, sd.day, sd.startTime, sd.endTime 
+                FROM sections s
+                INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+                INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+                WHERE s.subjectCode = @code 
+                AND s.sectionNumber = @num
+                AND sub.universityId = @universityId 
+                AND sub.majorId = @majorId",
+                new Dictionary<string, object> {
+                    { "@code", subjectCode },
+                    { "@num", sectionNumber },
+                    { "@universityId", universityId },
+                    { "@majorId", majorId }
+                    }
+            );
+
+            if (dt.Rows.Count == 0) return null;
+
+            return new Section
+            {
+                SubjectCode = subjectCode,
+                SectionNumber = Convert.ToInt32(sectionNumber),
+                SubjectEnglishName = dt.Rows[0]["subjectEnglishName"].ToString(),
+                Capacity = Convert.ToInt32(dt.Rows[0]["capacity"]),
+                RegisteredStudents = Convert.ToInt32(dt.Rows[0]["registeredStudents"]),
+                Details = dt.AsEnumerable().Select(row => new SectionDetail
+                {
+                    Day = Convert.ToInt32(row["day"]),
+                    StartTime = (TimeSpan)row["startTime"],
+                    EndTime = (TimeSpan)row["endTime"]
+                }).ToList()
+            };
+        }
+
+        private bool SectionsConflict(Section a, Section b)
+        {
+            foreach (var aDetail in a.Details)
+            {
+                foreach (var bDetail in b.Details)
+                {
+                    if (aDetail.Day == bDetail.Day &&
+                        TimesOverlap(aDetail.StartTime, aDetail.EndTime, bDetail.StartTime, bDetail.EndTime))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool TimesOverlap(TimeSpan start1, TimeSpan end1, TimeSpan start2, TimeSpan end2)
+        {
+            return start1 < end2 && end1 > start2;
+        }
+
+        private bool ConfirmOrder()
+        {
+            CRUD myCrud = new CRUD();
+            try
+            {
+                Guid userId = GetUserId();
+                int studentId = GetStudentId(userId);
+                int universityId = (int)ViewState["UniversityId"];
+                int majorId = (int)ViewState["MajorId"];
+
+                int curriculumId = 1;
+
+                var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
+                decimal totalHours = 0;
+
+                foreach (string subjectCode in selectedSubjects)
+                {
+                    CRUD creditCrud = new CRUD();
+                    try
+                    {
+                        DataTable dtCredit = creditCrud.getDTPassSqlDic(
+                            @"SELECT creditHours FROM subjects 
+                            WHERE subjectCode = @code 
+                            AND universityId = @univId 
+                            AND majorId = @majorId",
+                            new Dictionary<string, object>
+                            {
+                        { "@code", subjectCode },
+                        { "@univId", universityId },
+                        { "@majorId", majorId }
+                            });
+
+                        if (dtCredit.Rows.Count > 0 && dtCredit.Rows[0]["creditHours"] != DBNull.Value)
+                        {
+                            totalHours += Convert.ToDecimal(dtCredit.Rows[0]["creditHours"]);
+                        }
+                    }
+                    finally
+                    {
+                        creditCrud.con?.Dispose();
+                    }
+                }
+
+                int orderId;
+                CRUD orderCrud = new CRUD();
+                try
+                {
+                    orderId = Convert.ToInt32(orderCrud.InsertUpdateDeleteViaSqlDicRtnIdentity(
+                        @"INSERT INTO orders (curriculumId, studentId, totalCreditHours, orderDate, status)
+                        OUTPUT INSERTED.orderId
+                        VALUES (@curriculumId, @studentId, @totalHours, GETDATE(), 'Approved')",
+                        new Dictionary<string, object>
+                        {
+                    { "@curriculumId", curriculumId },
+                    { "@studentId", studentId },
+                    { "@totalHours", totalHours }
+                        }));
+                }
+                finally
+                {
+                    orderCrud.con?.Dispose();
+                }
+
+                var selectedSections = JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    hdnSelectedSections.Value);
+
+                foreach (var kvp in selectedSections)
+                {
+                    string subjectCode = kvp.Key;
+                    string sectionNumber = kvp.Value;
+
+                    int subjectId;
+                    CRUD subjectCrud = new CRUD();
+                    try
+                    {
+                        DataTable dtSubject = subjectCrud.getDTPassSqlDic(
+                            @"SELECT subjectId FROM subjects 
+                    WHERE subjectCode = @code 
+                      AND universityId = @univId 
+                      AND majorId = @majorId",
+                            new Dictionary<string, object>
+                            {
+                        { "@code", subjectCode },
+                        { "@univId", universityId },
+                        { "@majorId", majorId }
+                            });
+
+                        if (dtSubject.Rows.Count == 0)
+                            throw new Exception($"Invalid subject: {subjectCode}");
+
+                        subjectId = Convert.ToInt32(dtSubject.Rows[0]["subjectId"]);
+                    }
+                    finally
+                    {
+                        subjectCrud.con?.Dispose();
+                    }
+
+                    int sectionId;
+                    CRUD sectionCrud = new CRUD();
+                    try
+                    {
+                        string sectionSql = @"
+                        SELECT s.sectionId 
+                        FROM sections s
+                        INNER JOIN subjects sub 
+                        ON s.subjectCode = sub.subjectCode
+                        WHERE s.subjectCode = @code 
+                        AND s.sectionNumber = @num 
+                        AND sub.universityId = @univId 
+                        AND sub.majorId = @majorId";
+
+                        DataTable dtSection = sectionCrud.getDTPassSqlDic(sectionSql,
+                            new Dictionary<string, object>
+                            {
+                                { "@code", subjectCode },
+                                { "@num", sectionNumber },
+                                { "@univId", universityId },
+                                { "@majorId", majorId }
+                            });
+
+                        if (dtSection.Rows.Count == 0)
+                            throw new Exception($"Invalid section: {subjectCode}-{sectionNumber}");
+
+                        sectionId = Convert.ToInt32(dtSection.Rows[0]["sectionId"]);
+                    }
+                    finally
+                    {
+                        sectionCrud.con?.Dispose();
+                    }
+
+                    CRUD detailCrud = new CRUD();
+                    try
+                    {
+                        detailCrud.InsertUpdateDelete(
+                            @"INSERT INTO orderDetails (orderId, subjectId, sectionId) 
+                            VALUES (@orderId, @subjectId, @sectionId)",
+                            new Dictionary<string, object>
+                            {
+                                { "@orderId", orderId },
+                                { "@subjectId", subjectId },
+                                { "@sectionId", sectionId }
+                            });
+                    }
+                    finally
+                    {
+                        detailCrud.con?.Dispose();
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                lblOutput2.Text = $"Order failed: {ex.Message}";
+                lblOutput2.ForeColor = Color.Red;
+                return false;
+            }
+            finally
+            {
+                myCrud.con?.Dispose();
+            }
         }
     }
 }
