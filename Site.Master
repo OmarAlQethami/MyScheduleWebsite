@@ -88,13 +88,15 @@
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 24px;
-      font-weight: 600;
-      font-family: 'Courier New', monospace;
+      font-size: 28px; 
+      font-weight: 100; 
+      font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; 
       cursor: pointer;
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
       transition: all 0.3s ease;
+
     }
+
 
     .help-button:hover {
       transform: rotate(15deg) scale(1.1);
@@ -106,12 +108,12 @@
       left: 20px;
       width: 320px;
       background-color: white;
-      border-radius: 16px;
+      border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      padding: 20px;
+      padding: 10px;
       display: none;
       flex-direction: column;
-      gap: 12px;
+      gap: 6px;
       animation: fadeIn 0.3s ease-in-out;
     }
 
@@ -122,18 +124,18 @@
 
     .message-option {
       background: linear-gradient(145deg, #e6e6e6, #ffffff);
-      padding: 12px;
-      border-radius: 12px;
+      padding: 15px;
+      border-radius: 25px;
       cursor: pointer;
       text-align: center;
       transition: all 0.2s ease-in-out;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 14px;
     }
 
     .message-option:hover {
       background: #d9f0ff;
-      transform: translateY(-2px);
+      transform: translateY(-7px);
     }
 
     input, textarea {
@@ -148,12 +150,19 @@
     button {
       background-color: #28a745;
       color: white;
-      padding: 10px;
+      padding: 0; 
       border: none;
-      border-radius: 12px;
+      border-radius: 30px; 
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.3s ease;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 70px; 
+      height: 30px; 
+      margin: 0 auto; 
     }
 
     button:hover {
@@ -161,7 +170,7 @@
     }
 
     .email-display {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: bold;
       color: #555;
       margin-bottom: 8px;
