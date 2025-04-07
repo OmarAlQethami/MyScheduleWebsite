@@ -138,7 +138,7 @@
       transform: translateY(-7px);
     }
 
-    input, textarea {
+     .input-style { 
       width: 100%;
       padding: 12px;
       border: 1px solid #ccc;
@@ -148,7 +148,7 @@
       margin: 5px 0;
     }
 
-    button {
+     .button-class {
       background-color: #28a745;
       color: white;
       padding: 0; 
