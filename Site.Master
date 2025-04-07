@@ -180,17 +180,17 @@
   </style>
 
 
-<div class="help-button" onclick="toggleHelpBox()">?</div>
+  <div class="help-button" onclick="toggleHelpBox()">?</div>
 
-<div class="help-box" id="helpBox">
+  <div class="help-box" id="helpBox">
   <div id="messageOptions"></div>
   <div id="emailDisplay" class="email-display" style="display:none;"></div>
   <input type="text" id="title" placeholder="Title" style="display:none;" />
   <textarea id="body" rows="4" placeholder="Write your message here..." style="display:none;"></textarea>
   <button style="display:none;" onclick="sendMessage()">Send</button>
-</div>
+ </div>
 
-<script>
+ <script>
     const helpBox = document.getElementById('helpBox');
     const messageOptions = document.getElementById('messageOptions');
     const emailDisplay = document.getElementById('emailDisplay');
@@ -251,7 +251,7 @@
         titleField.value = "";
         bodyField.value = "";
     }
-</script>
+  </script>
 
 
             <hr />
