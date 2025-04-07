@@ -198,7 +198,7 @@
     const bodyField = document.getElementById('body');
     const sendBtn = helpBox.querySelector('button');
 
-    let userRole = "student"; // change to 'admin', 'faculty', 'student', or 'guest'
+    let userRole = "student"; 
 
     const recipients = {
         admin: ["Message Faculty", "Message Student"],
