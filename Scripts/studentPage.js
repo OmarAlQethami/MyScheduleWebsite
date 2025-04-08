@@ -98,12 +98,12 @@ function updateHours() {
 
     const collegeHoursElement = document.getElementById(lblElectiveCollegeHoursTakenId);
     if (collegeHoursElement) {
-        collegeHoursElement.textContent = `Elective College Hours Selected: ${college} of ${totalElectiveCollegeHours}`;
+        collegeHoursElement.textContent = `Elective College Hours Selected: ${college} of ${12}`;
     }
 
     const universityHoursElement = document.getElementById(lblElectiveUniversityHoursTakenId);
     if (universityHoursElement) {
-        universityHoursElement.textContent = `Elective University Hours Selected: ${university} of ${totalElectiveUniversityHours}`;
+        universityHoursElement.textContent = `Elective University Hours Selected: ${university} of ${4}`;
     }
 }
 
@@ -587,6 +587,18 @@ function timesOverlap(start1, end1, start2, end2) {
     const e2 = toMinutes(end2);
 
     return s1 < e2 && e1 > s2;
+}
+
+const modal = document.getElementById('recommendationModal');
+if (modal) {
+    modal.style.display = 'flex';
+}
+
+const closeButton = document.querySelector('.close-button');
+if (closeButton) {
+    closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
 }
 
 function displayAlert(message) {

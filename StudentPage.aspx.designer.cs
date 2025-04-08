@@ -33,6 +33,15 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.Label lblCurrentLevel;
 
         /// <summary>
+        /// lblGraduation control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblGraduation;
+
+        /// <summary>
         /// lblHoursTaken control.
         /// </summary>
         /// <remarks>

@@ -121,9 +121,9 @@ function updateHours() {
     document.getElementById(lblHoursSelectedId).innerText =
         `Compulsory Hours Selected: ${selectedCompulsory} of ${totalCompulsoryHours}`;
     document.getElementById(lblElectiveCollegeHoursSelectedId).innerText =
-        `Elective College Hours Selected: ${selectedCollege} of ${totalElectiveCollegeHours}`;
+        `Elective College Hours Selected: ${selectedCollege} of ${12}`;
     document.getElementById(lblElectiveUniversityHoursSelectedId).innerText =
-        `Elective University Hours Selected: ${selectedUniversity} of ${totalElectiveUniversityHours}`;
+        `Elective University Hours Selected: ${selectedUniversity} of ${4}`;
 }
 
 function showElectivePopup(level, slotId) {
@@ -140,7 +140,7 @@ function showElectivePopup(level, slotId) {
 
     electiveOptionsList.forEach(function (option) {
         var optionDiv = document.createElement("div");
-        optionDiv.className = "elective-option";
+        optionDiv.className = "subject elective-option";
         optionDiv.innerText = option.name;
         optionDiv.onclick = function (e) {
             e.stopPropagation();

@@ -227,6 +227,22 @@ namespace MyScheduleWebsite
 
             RegisterClientScripts(data, renderResult);
             UpdateProgressLabels(subjects);
+
+            if (subjects.Any())
+            {
+                int maxLevel = subjects.Max(s => s.Level);
+                int remainingSemesters = maxLevel - currentLevel;
+
+                if (remainingSemesters <= 0)
+                {
+                    lblGraduation.Text = "Graduation In: This Semester";
+                }
+                else
+                {
+                    lblGraduation.Text = $"Graduation In: {remainingSemesters} " +
+                                       $"{(remainingSemesters == 1 ? "Semester" : "Semesters")}";
+                }
+            }
         }
 
         private List<Subject> ProcessSubjects(int universityId, int majorId)
@@ -823,9 +839,9 @@ namespace MyScheduleWebsite
                             AND majorId = @majorId",
                             new Dictionary<string, object>
                             {
-                        { "@code", subjectCode },
-                        { "@univId", universityId },
-                        { "@majorId", majorId }
+                                { "@code", subjectCode },
+                                { "@univId", universityId },
+                                { "@majorId", majorId }
                             });
 
                         if (dtCredit.Rows.Count > 0 && dtCredit.Rows[0]["creditHours"] != DBNull.Value)
@@ -849,9 +865,9 @@ namespace MyScheduleWebsite
                         VALUES (@curriculumId, @studentId, @totalHours, GETDATE(), 'Approved')",
                         new Dictionary<string, object>
                         {
-                    { "@curriculumId", curriculumId },
-                    { "@studentId", studentId },
-                    { "@totalHours", totalHours }
+                            { "@curriculumId", curriculumId },
+                            { "@studentId", studentId },
+                            { "@totalHours", totalHours }
                         }));
                 }
                 finally
@@ -873,14 +889,14 @@ namespace MyScheduleWebsite
                     {
                         DataTable dtSubject = subjectCrud.getDTPassSqlDic(
                             @"SELECT subjectId FROM subjects 
-                    WHERE subjectCode = @code 
-                      AND universityId = @univId 
-                      AND majorId = @majorId",
+                            WHERE subjectCode = @code 
+                            AND universityId = @univId 
+                            AND majorId = @majorId",
                             new Dictionary<string, object>
                             {
-                        { "@code", subjectCode },
-                        { "@univId", universityId },
-                        { "@majorId", majorId }
+                                { "@code", subjectCode },
+                                { "@univId", universityId },
+                                { "@majorId", majorId }
                             });
 
                         if (dtSubject.Rows.Count == 0)

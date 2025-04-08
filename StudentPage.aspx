@@ -5,9 +5,10 @@
 
     <div class="main-container">
         <div class="info">
-            <asp:Label ID="lblGreeting" runat="server" Text="Hello, name"></asp:Label>
+            <asp:Label ID="lblGreeting" runat="server" Text="Hello, N/A"></asp:Label>
             <div class="label-center">
-                <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: "></asp:Label>
+                <asp:Label ID="lblCurrentLevel" class="label-center-labels" runat="server" Text="Current Level: N/A"></asp:Label>
+                <asp:Label ID="lblGraduation" class="label-center-labels" runat="server" Text="Graduation In: N/A"></asp:Label>
             </div>
             <div class="hours-taken-container">
                 <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
@@ -102,6 +103,21 @@
                     <div class="legend-item">
                         <div class="legend-box unavailable"></div>
                         <span>Unavailable</span>
+                    </div>
+                </div>
+
+                <div class="modal-overlay" id="recommendationModal">
+                    <div class="modal-content">
+                        <div class="close-button">
+                            <span class="close-x">&times;</span>
+                        </div>
+                        <h3>Based on your academic progress, we recommend these subjects:</h3>
+                        <br />
+                        <asp:Label CssClass="labels" runat="server">
+                            // TODO
+                        </asp:Label>
+                        <br /> <br />
+                        <h4>Feel free to edit the suggestion if you like.</h4>
                     </div>
                 </div>
             </asp:View>
