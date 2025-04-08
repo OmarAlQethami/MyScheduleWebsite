@@ -4,10 +4,21 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <link rel="stylesheet" href="/styles/AdminStyles.css">
-
-    <div>
+    <div class="admin-container">
+        <div class="sidebar-menu">
+            <br />
+            <h3>Admin Menu</h3>
+            <ul>
+                <li><a href="ManageUsers.aspx"> Sign Up a new Faculty Member</a></li>
+                <li><a href="ManageRoles.aspx"> Sign Up a new departmentHead Member</a></li>
+                <li><a href="Reports.aspx"> Register a new University</a></li>
+                <li><a href="Logout.aspx">Logout</a></li>
+            </ul>
+        </div>
+    
     <h3> User Role Management Console</h3>
-    <div>
+        <br />
+    <div class="admin-container">
         <table border="1">
             <tr>
                 <th>
@@ -49,8 +60,8 @@
             </tr>
         </table>
     </div>
-
-       <table  border="2">
+ </div>
+       <table>
            <tr>
                <td colspan ="5" align="center" >
                    <asp:Label ID="lblMsg" runat="server"  Text=""></asp:Label>
@@ -156,8 +167,6 @@
     
         <br />
 
-
-    </div>
     <fieldset   style="width: auto; ">
         <legend>Users & Roles</legend>
         <table cellpadding="10" style= "">
@@ -312,10 +321,10 @@
                 </td>
             </tr>
             <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    &nbsp;</td>
+                <td class="style2" style="height: 20px">
+                    </td>
+                <td style="height: 20px">
+                    </td>
             </tr>
             <tr>
                 <td class="style2">
@@ -332,16 +341,230 @@
                     &nbsp;</td>
             </tr>
             <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
+                <td class="style2" style="height: 20px">
+                    </td>
+                <td style="height: 20px">
                     <asp:Label ID="lblSignUpOutput" runat="server"></asp:Label>
                 </td>
             </tr>
         </table>
         
         <br />
-        
+
+        <table class="style1">
+            <tr><td colspan="2"></td></tr>
+            <tr>
+                <td class="style2" style="height: 20px">
+                    <strong>Sign Up a new departmentHead Member:</strong></td>
+                <td style="height: 20px">
+                    </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    English First Name:</td>
+                <td>
+                    <asp:TextBox ID="txtFName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    English
+                    Last Name:</td>
+                <td>
+                    <asp:TextBox ID="txtLName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Arabic First Name:</td>
+                <td>
+                    <asp:TextBox ID="txtArFName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Arabic Last Name:</td>
+                <td>
+                    <asp:TextBox ID="txtArLName1" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Email:</td>
+                <td>
+                    <asp:TextBox ID="txtEmail2" runat="server" autocomplete="off"></asp:TextBox>
+                    
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Username:</td>
+                <td>
+                    <asp:TextBox ID="txtUserName2" runat="server" autocomplete="off"></asp:TextBox>
+  
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    Password:</td>
+                <td>
+                    <asp:TextBox ID="txtPass1" runat="server" TextMode="Password"></asp:TextBox> 
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    University:</td>
+                <td>
+                    <asp:DropDownList ID="ddlUniversity1" runat="server" DataSourceID="SqlDataSource2" DataTextField="universityEnglishName" DataValueField="universityEnglishName" OnSelectedIndexChanged="ddlUniversity1_SelectedIndexChanged" AutoPostBack="True" AppendDataBoundItems="True">
+                        <asp:ListItem Text="Choose a University" Value="" Selected="True"></asp:ListItem>
+                    </asp:DropDownList>
+
+                    <asp:SqlDataSource ID="SqlDataSource2" runat="server" 
+                        ConnectionString="<%$ ConnectionStrings:MyScheduleWebsiteConStr %>" 
+                        SelectCommand="SELECT [universityEnglishName] FROM [universities]">
+                    </asp:SqlDataSource>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="style2" style="height: 22px">
+                    Major:</td>
+                <td style="height: 22px">
+                    <asp:DropDownList ID="ddlMajors1" runat="server" AutoPostBack="True">
+                        <asp:ListItem Text="Choose a Major" Value="" Selected="True"></asp:ListItem>
+                    </asp:DropDownList>
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    <asp:Button ID="btnSignUp1" runat="server" ForeColor="#0000FF" style="font-weight: bold" onclick="btnSignUp1_Click" 
+                        Text="Sign Up" OnClientClick="return confirm('Are all your information correct?')"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="style2">
+                    &nbsp;</td>
+                <td>
+                    <asp:Label ID="lblSignUpOutput1" runat="server"></asp:Label>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+       <table>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style3" style="height: 20px; width: 286px;"><strong>Register a new University:</strong></td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            University English Name:</td>
+        <td>
+            <asp:TextBox ID="txtUName" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            University Arabic Name:</td>
+        <td>
+            <asp:TextBox ID="txtUArName" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Enter Majors:</td>
+        <td>
+            <asp:TextBox ID="txtMajors" runat="server" placeholder="Enter Major" Width="279px"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Enter Arabic Majors:</td>
+        <td>
+            <asp:TextBox ID="txtArMajors" runat="server" placeholder="ادخل التخصص" Width="280px"></asp:TextBox>
+        </td>
+    </tr>
+    <tr>
+        <td class="style3" style="width: 286px">
+            Total Credit Hours:</td>
+        <td>
+            <asp:TextBox ID="txtTotal" runat="server" autocomplete="off"></asp:TextBox>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>  
+        <td>
+            <asp:Button ID="btnAddMajors" runat="server" ForeColor="#0000FF" style="font-weight: bold" onclick="btnAddMajors_Click" 
+                Text="addition" OnClientClick="return confirm('Are all your information correct?')"/>
+        </td>
+        <td class="style2">
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            &nbsp;</td>
+    </tr>
+    <tr>
+        <td class="style2" style="width: 286px">
+            &nbsp;</td>
+        <td>
+            <asp:Label ID="lblMajorsOutput" runat="server"></asp:Label>
+        </td>
+    </tr>
+</table>
     
     </div>
     
