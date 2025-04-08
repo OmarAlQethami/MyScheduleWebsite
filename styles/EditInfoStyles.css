@@ -1,2 +1,18 @@
-﻿body {
+﻿h3 {
+    margin-top: 20px;
+    color: #333;
+}
+
+label {
+    margin-top: 10px;
+    display: block;
+}
+
+.form-control {
+    width: 300px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    margin-right: 10px;
 }
