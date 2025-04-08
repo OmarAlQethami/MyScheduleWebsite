@@ -3,7 +3,7 @@
 %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link rel="stylesheet" href="~/styles/AdminStyles.css">
+    <link rel="stylesheet" href="/styles/AdminStyles.css">
 
     <div>
     <h3> User Role Management Console</h3>
