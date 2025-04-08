@@ -488,12 +488,70 @@ namespace MyScheduleWebsite.admin
                 return;
             }
         }
+        protected void btnSignUp1_Click(object sender, EventArgs e)
+        {
+            string newUser = txtUserName2.Text.ToString();
+            string newPassword = txtPass1.Text.ToString();
+            string newEmail = txtEmail2.Text.ToString();
+
+            if (!Membership.ValidateUser(newUser, newPassword))
+            {
+                MembershipUser newUserObj = Membership.CreateUser(newUser, newPassword, newEmail);
+                Guid userId = (Guid)newUserObj.ProviderUserKey;
+
+                string strFName1 = txtFName1.Text;
+                string strLName1 = txtLName1.Text;
+                string strArFName1 = txtArFName1.Text;
+                string strArLName1 = txtArLName1.Text;
+                string strEmail2 = txtEmail2.Text;
+                string strUniversity1 = ddlUniversity1.SelectedValue;
+                string strMajor1 = ddlMajors1.SelectedValue;
+
+                int universityId = GetUniversityId(strUniversity1);
+                int majorId = GetMajorId(strMajor1);
+
+                CRUD myCrud = new CRUD();
+                string mySql = @"INSERT INTO departmentHead (departmentHeadEnglishFirstName, departmentHeadEnglishLastName,
+                           departmentHeadArabicFirstName, departmentHeadArabicLastName, email, universityId, majorId, UserId)
+                           VALUES (@fName, @lName, @arFName, @arLName, @email, @universityId, @majorId, @UserId)";
+
+                Dictionary<string, object> myPara = new Dictionary<string, object>();
+                myPara.Add("@fName", strFName1);
+                myPara.Add("@lName", strLName1);
+                myPara.Add("@arFName", strArFName1);
+                myPara.Add("@arLName", strArLName1);
+                myPara.Add("@email", strEmail2);
+                myPara.Add("@universityId", universityId);
+                myPara.Add("@majorId", majorId);
+                myPara.Add("@UserId", userId);
+                int rtn = myCrud.InsertUpdateDelete(mySql, myPara);
+                if (rtn >= 1)
+                {
+                    Roles.AddUserToRole(newUser, "departmentHead");
+                    lblSignUpOutput.Text = "departmentHead User Created Successfully. Send to him his Username and Password";
+                }
+                else
+                {
+                    lblSignUpOutput.Text = "Signing up has failed. Please try again.";
+                }
+            }
+            else
+            {
+                lblSignUpOutput.Text = "The Username you chose is unavailable. Please try with a different username.";
+                return;
+            }
+        }
 
 
         protected void ddlUniversity_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedUniversity = ddlUniversity.SelectedValue;
             PopulateMajors(selectedUniversity);
+        }
+        protected void ddlUniversity1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedUniversity = ddlUniversity1.SelectedValue;
+            PopulateMajors1(selectedUniversity);
         }
 
         private void PopulateMajors(string universityName)
@@ -513,11 +571,29 @@ namespace MyScheduleWebsite.admin
             }
             ddlMajors.Items.Insert(0, new ListItem("Choose a Major", "0"));
         }
+        private void PopulateMajors1(string universityName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = "SELECT majorEnglishName FROM majors WHERE universityId = (SELECT UniversityId from Universities WHERE universityEnglishName = @universityName)";
+
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@universityName", universityName);
+
+            using (SqlDataReader dr = myCrud.getDrPassSql(mySql, myPara))
+            {
+                ddlMajors1.DataSource = dr;
+                ddlMajors1.DataTextField = "MajorEnglishName";
+                ddlMajors1.DataValueField = "MajorEnglishName";
+                ddlMajors1.DataBind();
+            }
+            ddlMajors1.Items.Insert(0, new ListItem("Choose a Major", "0"));
+        }
+
 
         private int GetUniversityId(string universityName)
         {
             CRUD myCrud = new CRUD();
-            string mySql = "SELECT universityId FROM universities WHERE universityEnglishName = @universityName";
+            string mySql = @"SELECT universityId FROM universities WHERE universityEnglishName = @universityName";
             Dictionary<string, object> myPara = new Dictionary<string, object>();
             myPara.Add("@universityName", universityName);
 
@@ -528,7 +604,7 @@ namespace MyScheduleWebsite.admin
                     return dr.GetInt32(0);
                 }
             }
-            throw new Exception("University ID not found.");
+            return 0;
         }
         private int GetMajorId(string majorName)
         {
@@ -544,8 +620,124 @@ namespace MyScheduleWebsite.admin
                     return dr.GetInt32(0);
                 }
             }
-            throw new Exception("Major ID not found.");
+            return 0;
         }
 
+        protected void btnAddMajors_Click(object sender, EventArgs e)
+        {
+            string universityName = txtUName.Text.Trim();
+            string universityArName = txtUArName.Text.Trim();
+            string majorsInput = txtMajors.Text.Trim();
+            string majorsArInput = txtArMajors.Text.Trim();
+            string totalCreditHours = txtTotal.Text.Trim();
+
+            if (string.IsNullOrEmpty(universityName) || string.IsNullOrEmpty(universityArName))
+            {
+                lblMajorsOutput.Text = "Please Enter University Name.";
+                lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            if (string.IsNullOrEmpty(majorsInput) || string.IsNullOrEmpty(majorsArInput))
+            {
+                lblMajorsOutput.Text = "Please Enter at Least One Major.";
+                lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            try
+            {
+                int universityId = GetUniversityId(universityName);
+                int majorId = GetMajorId(majorsInput);
+
+                if (universityId == 0)
+                {
+                    universityId = SaveUniversity(universityName, universityArName);
+                }
+
+                if (majorId == 0)
+                {
+                    SaveMajor(universityId, majorsArInput, majorsInput, totalCreditHours);
+                }
+
+
+                string[] majors = txtMajors.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] majorsAr = txtArMajors.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (majors.Length == 0 || majorsAr.Length == 0)
+                {
+                    lblMajorsOutput.Text = "Please enter at least one major in both English and Arabic.";
+                    lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+                    return;
+                }
+
+                if (majors.Length != majorsAr.Length)
+                {
+                    lblMajorsOutput.Text = "The number of majors in English and Arabic is not equal.";
+                    lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+                    return;
+                }
+
+
+                for (int i = 0; i < majorsAr.Length; i++)
+                {
+                    string majorAr = majorsAr[i].Trim();
+                    string major = majors[i].Trim();
+                }
+                if (universityId == 0 || majorId == 0)
+                {
+                    lblMajorsOutput.Text = "The university and major have been added successfully! Enter Another major.";
+                    lblMajorsOutput.ForeColor = System.Drawing.Color.Green;
+                }
+                else
+                {
+                    lblMajorsOutput.Text = "The major or university Already Exists.";
+                    lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+                }
+                
+                txtMajors.Text = "";
+                txtArMajors.Text = "";
+                txtTotal.Text = "";
+            }
+            catch (Exception ex)
+            {
+                lblMajorsOutput.Text = "Error: " + ex.Message;
+                lblMajorsOutput.ForeColor = System.Drawing.Color.Red;
+            }
+        }
+
+
+        private int SaveUniversity(string universityName, string universityArName)
+        {
+            CRUD myCrud = new CRUD();
+            string mySql = @"INSERT INTO universities (universityEnglishName, universityArabicName) 
+                              VALUES (@universityEnglishName, @universityArabicName); 
+                              SELECT SCOPE_IDENTITY();";
+
+            Dictionary<string, object> myPara = new Dictionary<string, object>();
+            myPara.Add("@UniversityEnglishName", universityName);
+            myPara.Add("@universityArabicName", universityArName);
+
+            int universityId = Convert.ToInt32(myCrud.InsertUpdateDelete(mySql, myPara));
+            return universityId;
+        }
+
+
+        private int SaveMajor(int universityId, string majorsArInput, string majorsInput, string totalCreditHours)
+        {
+                CRUD myCrud = new CRUD();
+                string mySql = @"INSERT INTO majors (majorEnglishName, majorArabicName, universityId, totalCreditHours) 
+                         VALUES (@majorEnglishName, @majorArabicName, @universityId, @totalCreditHours)";
+
+                Dictionary<string, object> myPara = new Dictionary<string, object>();
+                myPara.Add("@majorEnglishName", majorsInput);
+                myPara.Add("@majorArabicName", majorsArInput);
+                myPara.Add("@universityId", universityId);
+                myPara.Add("@totalCreditHours", totalCreditHours);
+
+            int majorId = Convert.ToInt32(myCrud.InsertUpdateDelete(mySql, myPara));
+            return majorId;
+
+        }
     }
 }

@@ -1,2 +1,16 @@
-﻿body {
+﻿.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar-menu {
+    width: 350px;
+    background: #333;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    right: 0 !important;
+    top: 0;
+    overflow-y: auto;
 }

@@ -11,7 +11,7 @@ namespace MyScheduleWebsite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            // TEST
         }
         protected void Logout_Click(object sender, EventArgs e)
         {
