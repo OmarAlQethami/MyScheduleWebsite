@@ -27,17 +27,18 @@
 
         <label for="ddlCurrentLevel">Current Level:</label>
         <asp:DropDownList ID="ddlCurrentLevel" runat="server" CssClass="form-control">
-            <asp:ListItem Text="1" Value="1" />
-            <asp:ListItem Text="2" Value="2" />
-            <asp:ListItem Text="3" Value="3" />
-            <asp:ListItem Text="4" Value="4" />
-            <asp:ListItem Text="5" Value="5" />
-            <asp:ListItem Text="6" Value="6" />
-            <asp:ListItem Text="7" Value="7" />
-            <asp:ListItem Text="8" Value="8" />
-            <asp:ListItem Text="9" Value="9" />
-            <asp:ListItem Text="10" Value="10" />
+            <asp:ListItem Text="Choose your current level" Value="" Selected="True"></asp:ListItem>
         </asp:DropDownList>
+
+        
+        <label for="txtCurrentPasswordStudent">Current Password:</label>
+        <asp:TextBox ID="txtCurrentPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtNewPasswordStudent">New Password:</label>
+        <asp:TextBox ID="txtNewPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtConfirmPasswordStudent">Confirm New Password:</label>
+        <asp:TextBox ID="txtConfirmPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
 
         <asp:Button ID="btnSaveStudent" runat="server" Text="Save Student Info" CssClass="btn btn-primary" OnClick="btnSaveStudent_Click" />
     </asp:Panel>
@@ -49,10 +50,14 @@
         <label for="txtAdminEmail">Email:</label>
         <asp:TextBox ID="txtAdminEmail" runat="server" CssClass="form-control" />
 
+        <h4>Change Password</h4>
+        <label for="txtCurrentPasswordAdmin">Current Password:</label>
+        <asp:TextBox ID="txtCurrentPasswordAdmin" runat="server" CssClass="form-control" TextMode="Password" />
+
         <label for="txtNewPassword">New Password:</label>
         <asp:TextBox ID="txtNewPassword" runat="server" CssClass="form-control" TextMode="Password" />
 
-        <label for="txtConfirmPassword">Confirm Password:</label>
+        <label for="txtConfirmPassword">Confirm New Password:</label>
         <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" TextMode="Password" />
 
         <asp:Button ID="btnSaveAdmin" runat="server" Text="Save Admin Info" CssClass="btn btn-primary" OnClick="btnSaveAdmin_Click" />
@@ -65,6 +70,16 @@
         <label for="txtFacultyEmail">Email:</label>
         <asp:TextBox ID="txtFacultyEmail" runat="server" CssClass="form-control" />
 
+        <h4>Change Password</h4>
+        <label for="txtCurrentPasswordFaculty">Current Password:</label>
+        <asp:TextBox ID="txtCurrentPasswordFaculty" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtNewPasswordFaculty">New Password:</label>
+        <asp:TextBox ID="txtNewPasswordFaculty" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtConfirmPasswordFaculty">Confirm New Password:</label>
+        <asp:TextBox ID="txtConfirmPasswordFaculty" runat="server" CssClass="form-control" TextMode="Password" />
+
         <asp:Button ID="btnSaveFaculty" runat="server" Text="Save Faculty Info" CssClass="btn btn-primary" OnClick="btnSaveFaculty_Click" />
     </asp:Panel>
 
@@ -73,7 +88,6 @@
         <asp:Button ID="btnBack" runat="server" Text="Back to Home" CssClass="btn btn-secondary" OnClick="btnBack_Click" />
     </div>
 
-   
     <!-- OUTPUT MESSAGE -->
     <asp:Label ID="lblOutput" runat="server" CssClass="text-success" Style="margin-top: 20px; display:block;" />
 

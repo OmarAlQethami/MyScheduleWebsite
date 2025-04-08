@@ -78,6 +78,33 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.DropDownList ddlCurrentLevel;
 
         /// <summary>
+        /// txtCurrentPasswordStudent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtCurrentPasswordStudent;
+
+        /// <summary>
+        /// txtNewPasswordStudent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNewPasswordStudent;
+
+        /// <summary>
+        /// txtConfirmPasswordStudent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmPasswordStudent;
+
+        /// <summary>
         /// btnSaveStudent control.
         /// </summary>
         /// <remarks>
@@ -103,6 +130,15 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtAdminEmail;
+
+        /// <summary>
+        /// txtCurrentPasswordAdmin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtCurrentPasswordAdmin;
 
         /// <summary>
         /// txtNewPassword control.
@@ -148,6 +184,33 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtFacultyEmail;
+
+        /// <summary>
+        /// txtCurrentPasswordFaculty control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtCurrentPasswordFaculty;
+
+        /// <summary>
+        /// txtNewPasswordFaculty control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNewPasswordFaculty;
+
+        /// <summary>
+        /// txtConfirmPasswordFaculty control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmPasswordFaculty;
 
         /// <summary>
         /// btnSaveFaculty control.
