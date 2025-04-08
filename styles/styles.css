@@ -5,8 +5,15 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Rubik';
+    src: url('../fonts/rubik-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
-    font-family: 'Lato', sans-serif !important;
+    font-family: 'Lato', 'Rubik', sans-serif !important;
 }
 
 .top-container {
