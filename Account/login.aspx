@@ -1,63 +1,30 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="login.aspx.cs" 
+<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="login.aspx.cs" 
     Inherits="MyScheduleWebsite.Account.login" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link rel="stylesheet" href="/styles/SignInStyles.css">
+    <link rel="stylesheet" href="/styles/SignInStyles.css" />
 
-      <div>
-    
-        <table class="style1">
-            <tr><td colspan="2"></td></tr>
-            <tr>
-                <td class="style2">
-                    <strong>Login</strong></td>
-                <td>
-                    Welcome</td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    User Name</td>
-                <td>
-                    <asp:TextBox ID="txtUserName" runat="server" autocomplete="off" style="font-size: medium"></asp:TextBox>
-  
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    Password</td>
-                <td>
-                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" style="font-size: medium"></asp:TextBox> 
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    &nbsp;</td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    <asp:Button ID="btnLogin" runat="server" ForeColor="#0000FF" style="font-weight: bold; font-size: medium;" onclick="btnLogin_Click" 
-                        Text="Login" />
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    <asp:Button ID="btnCancel" runat="server" Text="Cancel" PostBackUrl="~/default.aspx" ForeColor="#FF3300" style="font-weight: bold; font-size: medium;"/>
-                </td>
-            </tr>
-            <tr>
-                <td class="style2">
-                    &nbsp;</td>
-                <td>
-                    <asp:Label ID="lblOutput" runat="server"></asp:Label>
-                </td>
-            </tr>
-        </table>
-    
+    <div class="login-container">
+        <div class="login-card">
+            <h2 class="login-title">Welcome Back to<br>My Schedule</h2>
+
+            <div class="form-group">
+                <label for="txtUserName">Username</label>
+                <asp:TextBox ID="txtUserName" runat="server" CssClass="form-control" autocomplete="off" />
+            </div>
+
+            <div class="form-group">
+                <label for="txtPassword">Password</label>
+                <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" CssClass="form-control" />
+            </div>
+
+            <asp:Label ID="lblOutput" runat="server" CssClass="output-label" />
+
+            <div class="button-group">
+                <asp:Button ID="btnLogin" runat="server" Text="Login" CssClass="btn btn-primary" OnClick="btnLogin_Click" />
+                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" PostBackUrl="~/default.aspx" />
+            </div>
+        </div>
     </div>
 </asp:Content>
