@@ -2,7 +2,7 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link rel="stylesheet" href="~/styles/WelcomeStyles.css">
+    <link rel="stylesheet" href="/styles/WelcomeStyles.css">
 
     <div>
         <h2>Welcome to our website</h2>

@@ -133,6 +133,7 @@
     <Content Include="admin\Web.config" />
     <Content Include="Account\Web.config" />
     <Content Include="env.config" />
+    <Content Include="fonts\lato-regular.woff" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="OrderSuccessfulPage.aspx" />
     <Content Include="Scripts\bootstrap.js" />
@@ -142,6 +143,7 @@
     <Content Include="Scripts\jquery-3.4.1.slim.js" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\studentProgress.js" />
     <Content Include="Scripts\WebForms\DetailsView.js" />
     <Content Include="Scripts\WebForms\Focus.js" />
     <Content Include="Scripts\WebForms\GridView.js" />
