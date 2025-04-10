@@ -113,11 +113,10 @@
                         </div>
                         <h3>Based on your academic progress, we recommend these subjects:</h3>
                         <br />
-                        <asp:Label CssClass="labels" runat="server">
-                            // TODO
-                        </asp:Label>
-                        <br /> <br />
-                        <h4>Feel free to edit the suggestion if you like.</h4>
+                        <h4>These subjects will be Auto-Selected, Feel free to edit the suggestion if you like.</h4>
+                        <br />
+                        <asp:Label ID="lblRecommendations" CssClass="labels" runat="server">N/A</asp:Label>
+                        
                     </div>
                 </div>
             </asp:View>
@@ -158,6 +157,7 @@
 
     <asp:HiddenField ID="hdnSelectedSubjects" runat="server" ClientIDMode="Static" />
     <asp:HiddenField ID="hdnSelectedSections" runat="server" ClientIDMode="Static"/>
+    <%--<asp:HiddenField ID="hdnRecommendedSubjects" runat="server" ClientIDMode="Static" />--%>
 
     <script>
         var lblOutputClientId = '<%= lblOutput.ClientID %>';

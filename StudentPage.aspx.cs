@@ -27,6 +27,8 @@ namespace MyScheduleWebsite
             int majorId = GetMajorId(userId);
             int studentId = GetStudentId(userId);
 
+            SqlConnection.ClearAllPools();
+
             ViewState["UniversityId"] = universityId;
             ViewState["MajorId"] = majorId;
 
@@ -64,6 +66,7 @@ namespace MyScheduleWebsite
             public bool IsCompulsory => TypeId == 1 || TypeId == 2;
             public bool IsElectiveCollege => TypeId == 3;
             public bool IsElectiveUniversity => TypeId == 4;
+            public double Score { get; set; }
         }
 
         private class BindSubjectsData
@@ -174,10 +177,12 @@ namespace MyScheduleWebsite
             DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
             return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["studentId"]) : 0;
         }
-        
+
         private List<string> GetTakenSubjectCodes(int studentId, int universityId, int majorId)
         {
             List<string> takenSubjects = new List<string>();
+            var allSubjects = ProcessSubjects(universityId, majorId) ?? new List<Subject>();
+
             CRUD myCrud = new CRUD();
             string mySql = @"
                 SELECT s.subjectCode 
@@ -186,16 +191,31 @@ namespace MyScheduleWebsite
                 WHERE sp.studentId = @studentId 
                 AND s.universityId = @universityId 
                 AND s.majorId = @majorId";
+
             Dictionary<string, object> myPara = new Dictionary<string, object>();
             myPara.Add("@studentId", studentId);
             myPara.Add("@universityId", universityId);
             myPara.Add("@majorId", majorId);
+
             DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
+
             foreach (DataRow row in dt.Rows)
             {
-                takenSubjects.Add(row["subjectCode"].ToString());
+                string code = row["subjectCode"].ToString().Trim();
+                takenSubjects.Add(code);
+
+                var subject = allSubjects.FirstOrDefault(s =>
+                    s.Code.Trim().Equals(code, StringComparison.OrdinalIgnoreCase)
+                );
+
+                if (subject != null && (subject.IsElectiveCollege || subject.IsElectiveUniversity))
+                {
+                    var slotId = $"{subject.Level}-{(subject.IsElectiveCollege ? "College" : "University")}";
+                    takenSubjects.Add(slotId);
+                }
             }
-            return takenSubjects;
+
+            return takenSubjects.Distinct().ToList();
         }
 
         protected DataTable GetSubjects(int universityId, int majorId)
@@ -243,6 +263,34 @@ namespace MyScheduleWebsite
                                        $"{(remainingSemesters == 1 ? "Semester" : "Semesters")}";
                 }
             }
+
+            var recommended = CalculateRecommendedSubjects(subjects, takenSubjects, currentLevel)
+                 .Take(10)
+                 .ToList();
+
+            //var hdnRecommended = new HiddenField();
+            //hdnRecommended.ID = "hdnRecommendedSubjects";
+            //hdnRecommended.Value = JsonConvert.SerializeObject(recommended.Select(s => s.Code));
+            //this.Form.Controls.Add(hdnRecommended);
+
+            lblRecommendations.Text = @"
+                <table class='recommendation-table'>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Level</th>
+                        <th>Credit Hours</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                    </tr>
+                    " + string.Join("", recommended.Select(s => $@"
+                    <tr>
+                        <td>{s.EnglishName}</td>
+                        <td>{s.Level}</td>
+                        <td>{s.CreditHours}</td>
+                        <td>{(s.IsCompulsory ? "Compulsory" : s.IsElectiveCollege ? "Elective College" : "Elective University")}</td>
+                        <td class='score-cell'>{s.Score:0.00}</td>
+                    </tr>")) + @"
+                </table>";
         }
 
         private List<Subject> ProcessSubjects(int universityId, int majorId)
@@ -263,6 +311,7 @@ namespace MyScheduleWebsite
                     Prerequisites = GetPrerequisites(row["prerequisites"].ToString())
                 });
             }
+            SqlConnection.ClearAllPools();
             return subjects;
         }
 
@@ -425,6 +474,13 @@ namespace MyScheduleWebsite
             if (takenSubjectCodes.Contains(subject.Code))
                 return "taken";
 
+            if (subject.IsElectiveCollege || subject.IsElectiveUniversity)
+            {
+                var slotIdentifier = $"{subject.Level}-{(subject.IsElectiveCollege ? "College" : "University")}";
+                if (takenSubjectCodes.Any(t => t.StartsWith(slotIdentifier)))
+                    return "unavailable";
+            }
+
             if (subject.Level > GetCurrentLevel(GetUserId()))
                 return "unavailable";
 
@@ -584,6 +640,159 @@ namespace MyScheduleWebsite
             return true;
         }
 
+        private List<Subject> CalculateRecommendedSubjects(List<Subject> allSubjects, List<string> takenSubjects, int currentLevel)
+        {
+            var availableSubjects = allSubjects
+                .Where(s => GetSubjectStatusClass(s, takenSubjects) == "available")
+                .ToList();
+
+            if (!availableSubjects.Any()) return availableSubjects;
+
+            var prerequisiteImpact = new Dictionary<string, int>();
+            foreach (var subject in allSubjects)
+            {
+                foreach (var prereq in subject.Prerequisites)
+                {
+                    prerequisiteImpact[prereq] = prerequisiteImpact.ContainsKey(prereq)
+                        ? prerequisiteImpact[prereq] + 1
+                        : 1;
+                }
+            }
+
+            var prereqMax = prerequisiteImpact.Values.DefaultIfEmpty(0).Max();
+            var maxValues = new
+            {
+                LevelDiff = Math.Max(availableSubjects.Max(s => currentLevel - s.Level), 1),
+                PrereqImpact = prereqMax > 0 ? prereqMax : 1,
+                CreditHours = availableSubjects.Max(s => s.CreditHours)
+            };
+
+            var maxCreditHours = Math.Max(maxValues.CreditHours, 1m);
+            bool finalYear = allSubjects.Any() && (allSubjects.Max(s => s.Level) - currentLevel) <= 1;
+
+            foreach (var subject in availableSubjects)
+            {
+                prerequisiteImpact.TryGetValue(subject.Code, out int prereqCount);
+
+                var scores = new
+                {
+                    LevelPriority = (double)(currentLevel - subject.Level) / maxValues.LevelDiff,
+                    Compulsory = subject.IsCompulsory ? 1.0 : 0.0,
+                    PrerequisiteCriticality = (double)prereqCount / maxValues.PrereqImpact,
+                    CreditHours = (double)subject.CreditHours / (double)maxCreditHours,
+                    GraduationUrgency = (finalYear && subject.IsCompulsory) ? 1.0 : 0.0
+                };
+
+                subject.Score =
+                    (scores.LevelPriority * 0.25d) +
+                    (scores.Compulsory * 0.35d) +
+                    (scores.PrerequisiteCriticality * 0.2d) +
+                    (scores.CreditHours * 0.1d) +
+                    (scores.GraduationUrgency * 0.1d);
+            }
+
+            var pastLevelSubjects = availableSubjects
+                .Where(s => s.Level < currentLevel)
+                .OrderByDescending(s => s.Score)
+                .ToList();
+
+            var currentLevelSubjects = availableSubjects
+                .Where(s => s.Level == currentLevel)
+                .ToList();
+
+            bool isLate = pastLevelSubjects.Any();
+            int targetHours = isLate ? 20 : 18;
+
+            var recommendation = new List<Subject>();
+
+            AddToRecommendation(pastLevelSubjects, recommendation, targetHours);
+
+            var currentCompulsory = currentLevelSubjects
+                .Where(s => s.IsCompulsory)
+                .OrderByDescending(s => s.Score)
+                .ToList();
+
+            var electiveSlots = currentLevelSubjects
+                .Where(s => s.IsElectiveCollege || s.IsElectiveUniversity)
+                .GroupBy(s => new { s.Level, Type = s.IsElectiveCollege ? "College" : "University" })
+                .Select(g => g.OrderByDescending(s => s.Score).First())
+                .ToList();
+
+            var mandatoryCurrent = currentCompulsory
+                .Concat(electiveSlots)
+                .OrderByDescending(s => s.Score)
+                .ToList();
+
+            AddToRecommendation(mandatoryCurrent, recommendation, targetHours);
+
+            var remainingSubjects = availableSubjects
+                .Except(pastLevelSubjects)
+                .Except(mandatoryCurrent)
+                .OrderByDescending(s => s.Score)
+                .ToList();
+
+            AddToRecommendation(remainingSubjects, recommendation, targetHours);
+
+            if (GetTotalHours(recommendation) < 12)
+            {
+                var fallback = availableSubjects
+                    .OrderByDescending(s => s.Level < currentLevel)
+                    .ThenByDescending(s => s.Score)
+                    .ToList();
+
+                recommendation.Clear();
+                AddToRecommendation(fallback, recommendation, 12);
+            }
+
+            return recommendation.OrderByDescending(s => s.Score).ToList();
+        }
+
+        private void AddToRecommendation(List<Subject> source, List<Subject> destination, int targetHours)
+        {
+            int currentTotal = GetTotalHours(destination);
+            int currentLevel = GetCurrentLevel(GetUserId());
+            var orderedSource = source
+                .OrderByDescending(s => s.Level < currentLevel)
+                .ThenByDescending(s => s.Score)
+                .ToList();
+
+            foreach (var subject in orderedSource)
+            {
+                if (currentTotal >= targetHours) break;
+                if (currentTotal + subject.CreditHours > 20) continue;
+                if (IsElectiveSlotFilled(subject, destination)) continue;
+
+                if ((currentTotal + subject.CreditHours < 12) &&
+                    (currentTotal + subject.CreditHours + (12 - currentTotal - subject.CreditHours) > 20))
+                {
+                    continue;
+                }
+
+                destination.Add(subject);
+                currentTotal += (int)subject.CreditHours;
+            }
+        }
+
+        private bool IsElectiveSlotFilled(Subject subject, List<Subject> selected)
+        {
+            if (!subject.IsElectiveCollege && !subject.IsElectiveUniversity) return false;
+
+            // Note to self, this is wrong, change it later.
+            if (subject.Level == 10)
+            {
+                int count = selected.Count(s => s.IsElectiveCollege || s.IsElectiveUniversity);
+                return count >= 2;
+            }
+
+            var slotKey = $"{subject.Level}-{(subject.IsElectiveCollege ? "College" : "University")}";
+            return selected.Any(s =>
+                (s.IsElectiveCollege || s.IsElectiveUniversity) &&
+                $"{s.Level}-{(s.IsElectiveCollege ? "College" : "University")}" == slotKey);
+        }
+
+        private int GetTotalHours(List<Subject> subjects) =>
+            subjects.Sum(s => (int)Math.Ceiling(s.CreditHours));
+
         private void BindSelectedSubjects()
         {
             subjectsinSectionsContainer.InnerHtml = "<div class='subjects-content-wrapper'>";
@@ -664,6 +873,8 @@ namespace MyScheduleWebsite
                     }).ToList()
                 }).ToList();
 
+            SqlConnection.ClearAllPools();
+
             return sections;
         }
         private void PreloadSectionsData()
@@ -679,6 +890,8 @@ namespace MyScheduleWebsite
                     NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
                 }
             );
+
+            SqlConnection.ClearAllPools();
 
             string script = $@"
                 window.allSections = {json};";
@@ -814,14 +1027,12 @@ namespace MyScheduleWebsite
 
         private bool ConfirmOrder()
         {
-            CRUD myCrud = new CRUD();
             try
             {
                 Guid userId = GetUserId();
                 int studentId = GetStudentId(userId);
                 int universityId = (int)ViewState["UniversityId"];
                 int majorId = (int)ViewState["MajorId"];
-
                 int curriculumId = 1;
 
                 var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
@@ -830,50 +1041,35 @@ namespace MyScheduleWebsite
                 foreach (string subjectCode in selectedSubjects)
                 {
                     CRUD creditCrud = new CRUD();
-                    try
-                    {
-                        DataTable dtCredit = creditCrud.getDTPassSqlDic(
-                            @"SELECT creditHours FROM subjects 
-                            WHERE subjectCode = @code 
-                            AND universityId = @univId 
-                            AND majorId = @majorId",
-                            new Dictionary<string, object>
-                            {
-                                { "@code", subjectCode },
-                                { "@univId", universityId },
-                                { "@majorId", majorId }
-                            });
-
-                        if (dtCredit.Rows.Count > 0 && dtCredit.Rows[0]["creditHours"] != DBNull.Value)
-                        {
-                            totalHours += Convert.ToDecimal(dtCredit.Rows[0]["creditHours"]);
-                        }
-                    }
-                    finally
-                    {
-                        creditCrud.con?.Dispose();
-                    }
-                }
-
-                int orderId;
-                CRUD orderCrud = new CRUD();
-                try
-                {
-                    orderId = Convert.ToInt32(orderCrud.InsertUpdateDeleteViaSqlDicRtnIdentity(
-                        @"INSERT INTO orders (curriculumId, studentId, totalCreditHours, orderDate, status)
-                        OUTPUT INSERTED.orderId
-                        VALUES (@curriculumId, @studentId, @totalHours, GETDATE(), 'Approved')",
+                    DataTable dtCredit = creditCrud.getDTPassSqlDic(
+                        @"SELECT creditHours FROM subjects 
+                        WHERE subjectCode = @code 
+                        AND universityId = @univId 
+                        AND majorId = @majorId",
                         new Dictionary<string, object>
                         {
-                            { "@curriculumId", curriculumId },
-                            { "@studentId", studentId },
-                            { "@totalHours", totalHours }
-                        }));
+                            { "@code", subjectCode },
+                            { "@univId", universityId },
+                            { "@majorId", majorId }
+                        });
+
+                    if (dtCredit.Rows.Count > 0 && dtCredit.Rows[0]["creditHours"] != DBNull.Value)
+                    {
+                        totalHours += Convert.ToDecimal(dtCredit.Rows[0]["creditHours"]);
+                    }
                 }
-                finally
-                {
-                    orderCrud.con?.Dispose();
-                }
+
+                CRUD orderCrud = new CRUD();
+                int orderId = Convert.ToInt32(orderCrud.InsertUpdateDeleteViaSqlDicRtnIdentity(
+                    @"INSERT INTO orders (curriculumId, studentId, totalCreditHours, orderDate, status)
+                    OUTPUT INSERTED.orderId
+                    VALUES (@curriculumId, @studentId, @totalHours, GETDATE(), 'Approved')",
+                    new Dictionary<string, object>
+                    {
+                        { "@curriculumId", curriculumId },
+                        { "@studentId", studentId },
+                        { "@totalHours", totalHours }
+                    }));
 
                 var selectedSections = JsonConvert.DeserializeObject<Dictionary<string, string>>(
                     hdnSelectedSections.Value);
@@ -883,37 +1079,26 @@ namespace MyScheduleWebsite
                     string subjectCode = kvp.Key;
                     string sectionNumber = kvp.Value;
 
-                    int subjectId;
                     CRUD subjectCrud = new CRUD();
-                    try
-                    {
-                        DataTable dtSubject = subjectCrud.getDTPassSqlDic(
-                            @"SELECT subjectId FROM subjects 
-                            WHERE subjectCode = @code 
-                            AND universityId = @univId 
-                            AND majorId = @majorId",
-                            new Dictionary<string, object>
-                            {
-                                { "@code", subjectCode },
-                                { "@univId", universityId },
-                                { "@majorId", majorId }
-                            });
+                    DataTable dtSubject = subjectCrud.getDTPassSqlDic(
+                        @"SELECT subjectId FROM subjects 
+                        WHERE subjectCode = @code 
+                        AND universityId = @univId 
+                        AND majorId = @majorId",
+                        new Dictionary<string, object>
+                        {
+                            { "@code", subjectCode },
+                            { "@univId", universityId },
+                            { "@majorId", majorId }
+                        });
 
-                        if (dtSubject.Rows.Count == 0)
-                            throw new Exception($"Invalid subject: {subjectCode}");
+                    if (dtSubject.Rows.Count == 0)
+                        throw new Exception($"Invalid subject: {subjectCode}");
 
-                        subjectId = Convert.ToInt32(dtSubject.Rows[0]["subjectId"]);
-                    }
-                    finally
-                    {
-                        subjectCrud.con?.Dispose();
-                    }
+                    int subjectId = Convert.ToInt32(dtSubject.Rows[0]["subjectId"]);
 
-                    int sectionId;
                     CRUD sectionCrud = new CRUD();
-                    try
-                    {
-                        string sectionSql = @"
+                    string sectionSql = @"
                         SELECT s.sectionId 
                         FROM sections s
                         INNER JOIN subjects sub 
@@ -923,42 +1108,30 @@ namespace MyScheduleWebsite
                         AND sub.universityId = @univId 
                         AND sub.majorId = @majorId";
 
-                        DataTable dtSection = sectionCrud.getDTPassSqlDic(sectionSql,
-                            new Dictionary<string, object>
-                            {
-                                { "@code", subjectCode },
-                                { "@num", sectionNumber },
-                                { "@univId", universityId },
-                                { "@majorId", majorId }
-                            });
+                    DataTable dtSection = sectionCrud.getDTPassSqlDic(sectionSql,
+                        new Dictionary<string, object>
+                        {
+                            { "@code", subjectCode },
+                            { "@num", sectionNumber },
+                            { "@univId", universityId },
+                            { "@majorId", majorId }
+                        });
 
-                        if (dtSection.Rows.Count == 0)
-                            throw new Exception($"Invalid section: {subjectCode}-{sectionNumber}");
+                    if (dtSection.Rows.Count == 0)
+                        throw new Exception($"Invalid section: {subjectCode}-{sectionNumber}");
 
-                        sectionId = Convert.ToInt32(dtSection.Rows[0]["sectionId"]);
-                    }
-                    finally
-                    {
-                        sectionCrud.con?.Dispose();
-                    }
+                    int sectionId = Convert.ToInt32(dtSection.Rows[0]["sectionId"]);
 
                     CRUD detailCrud = new CRUD();
-                    try
-                    {
-                        detailCrud.InsertUpdateDelete(
-                            @"INSERT INTO orderDetails (orderId, subjectId, sectionId) 
-                            VALUES (@orderId, @subjectId, @sectionId)",
-                            new Dictionary<string, object>
-                            {
-                                { "@orderId", orderId },
-                                { "@subjectId", subjectId },
-                                { "@sectionId", sectionId }
-                            });
-                    }
-                    finally
-                    {
-                        detailCrud.con?.Dispose();
-                    }
+                    detailCrud.InsertUpdateDelete(
+                        @"INSERT INTO orderDetails (orderId, subjectId, sectionId) 
+                        VALUES (@orderId, @subjectId, @sectionId)",
+                        new Dictionary<string, object>
+                        {
+                            { "@orderId", orderId },
+                            { "@subjectId", subjectId },
+                            { "@sectionId", sectionId }
+                        });
                 }
 
                 return true;
@@ -968,10 +1141,6 @@ namespace MyScheduleWebsite
                 lblOutput2.Text = $"Order failed: {ex.Message}";
                 lblOutput2.ForeColor = Color.Red;
                 return false;
-            }
-            finally
-            {
-                myCrud.con?.Dispose();
             }
         }
     }

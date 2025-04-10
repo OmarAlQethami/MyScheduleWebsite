@@ -650,13 +650,41 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-    .close-button:hover {
-        background: #cc0000;
-    }
+.close-button:hover {
+    background: #cc0000;
+}
 
 .close-x {
     color: white;
     font-size: 32px;
     line-height: 1;
     margin-top: -2px;
+}
+
+.recommendation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.recommendation-table th {
+    background-color: #f8f9fa;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.recommendation-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.recommendation-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.score-cell {
+    font-weight: bold;
+    color: #2c3e50;
 }

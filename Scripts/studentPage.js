@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+let takenElectiveSlots = new Set();
+
 function SubjectClicked(element) {
     const subjectCode = element.id;
     const lblOutput = document.getElementById(lblOutputClientId);
@@ -27,6 +29,7 @@ function SubjectClicked(element) {
         element.classList.remove('selected');
 
         const slotId = element.dataset.slotId;
+        if (slotId) takenElectiveSlots.delete(slotId);
         if (slotId) {
             const originalSlot = document.createElement('div');
             originalSlot.id = slotId;
@@ -44,6 +47,19 @@ function SubjectClicked(element) {
 
             );
             element.parentNode.replaceChild(originalSlot, element);
+
+            if (element.classList.contains('elective-slot')) {
+                const level = element.dataset.level;
+                const type = element.classList.contains('college') ? 'College' : 'University';
+                const slotId = `${level}-${type}`;
+
+                if (takenElectiveSlots.has(slotId)) {
+                    displayAlert("You can only choose one elective per slot");
+                    return;
+                }
+                takenElectiveSlots.add(slotId);
+                element.dataset.slotId = slotId;
+            }
         } else {
             element.className = element.dataset.originalClasses;
         }
@@ -124,6 +140,16 @@ function showElectivePopup(level, slotId, currentLevel) {
             !takenSubjects.includes(code) &&
             !selectedSubjects.includes(code) &&
             hasAllPrerequisites;
+
+        const slotType = slotId.includes("College") ? "College" : "University";
+        const fullSlotId = `${level}-${slotType}`;
+
+        electiveOptions.forEach(code => {
+            if (takenElectiveSlots.has(fullSlotId)) {
+                option.classList.add('unavailable');
+                option.title = "This elective slot is already filled";
+            }
+        });
 
         option.className = `subject elective-option ${isAvailable ? 'available' : 'unavailable'}`;
         option.textContent = subjectNameMap[code];
@@ -600,6 +626,18 @@ if (closeButton) {
         modal.style.display = 'none';
     });
 }
+
+//document.addEventListener('DOMContentLoaded', () => {
+//    setTimeout(() => {
+//        const recommendedSubjects = JSON.parse(document.getElementById('hdnRecommendedSubjects').value);
+//        recommendedSubjects.forEach(code => {
+//            const subjectElement = document.getElementById(code);
+//            if (subjectElement && !subjectElement.classList.contains('selected')) {
+//                SubjectClicked(subjectElement);
+//            }
+//        });
+//    }, 500);
+//});
 
 function displayAlert(message) {
     var lblOutput = document.getElementById(lblOutputClientId);
