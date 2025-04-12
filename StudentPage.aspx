@@ -157,7 +157,8 @@
 
     <asp:HiddenField ID="hdnSelectedSubjects" runat="server" ClientIDMode="Static" />
     <asp:HiddenField ID="hdnSelectedSections" runat="server" ClientIDMode="Static"/>
-    <%--<asp:HiddenField ID="hdnRecommendedSubjects" runat="server" ClientIDMode="Static" />--%>
+    <asp:HiddenField ID="hdnRecommendedSubjects" runat="server" ClientIDMode="Static" />
+    <asp:HiddenField ID="hdnCurrentLevel" runat="server" ClientIDMode="Static"/>
 
     <script>
         var lblOutputClientId = '<%= lblOutput.ClientID %>';

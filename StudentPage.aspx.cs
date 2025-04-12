@@ -264,14 +264,22 @@ namespace MyScheduleWebsite
                 }
             }
 
-            var recommended = CalculateRecommendedSubjects(subjects, takenSubjects, currentLevel)
-                 .Take(10)
-                 .ToList();
+            hdnCurrentLevel.Value = GetCurrentLevel(GetUserId()).ToString();
 
-            //var hdnRecommended = new HiddenField();
-            //hdnRecommended.ID = "hdnRecommendedSubjects";
-            //hdnRecommended.Value = JsonConvert.SerializeObject(recommended.Select(s => s.Code));
-            //this.Form.Controls.Add(hdnRecommended);
+            var recommended = CalculateRecommendedSubjects(subjects, takenSubjects, currentLevel)
+                           .Take(10)
+                           .Select(s => new {
+                               Code = s.Code,
+                               EnglishName = s.EnglishName,
+                               Level = s.Level,
+                               CreditHours = s.CreditHours,
+                               TypeId = s.TypeId,
+                               Score = s.Score
+                           })
+                           .ToList();
+
+
+            hdnRecommendedSubjects.Value = JsonConvert.SerializeObject(recommended.Select(r => r.Code));
 
             lblRecommendations.Text = @"
                 <table class='recommendation-table'>
@@ -287,7 +295,8 @@ namespace MyScheduleWebsite
                         <td>{s.EnglishName}</td>
                         <td>{s.Level}</td>
                         <td>{s.CreditHours}</td>
-                        <td>{(s.IsCompulsory ? "Compulsory" : s.IsElectiveCollege ? "Elective College" : "Elective University")}</td>
+                        <td>{(s.TypeId == 1 || s.TypeId == 2 ? "Compulsory" :
+                     s.TypeId == 3 ? "Elective College" : "Elective University")}</td>
                         <td class='score-cell'>{s.Score:0.00}</td>
                     </tr>")) + @"
                 </table>";
@@ -360,52 +369,14 @@ namespace MyScheduleWebsite
                         ref subjectTypeMapJson);
                 }
 
-                var compulsorySubjects = group.Where(s => s.IsCompulsory);
-                foreach (var subject in compulsorySubjects)
+                foreach (var subject in group.Where(s => s.IsCompulsory))
                 {
                     RenderSubjectHtml(subject, takenSubjectCodes);
                 }
 
-                var electiveSubjects = group.Where(s => s.IsElectiveCollege || s.IsElectiveUniversity).ToList();
+                var electives = group.Where(s => s.IsElectiveCollege || s.IsElectiveUniversity).ToList();
+                CreateElectiveSlots(electives, group.Key, ref electivePlaceholderCounter, currentLevel, takenSubjectCodes);
 
-                if (electiveSubjects.Any())
-                {
-                    string slotText = $"Elective ({electivePlaceholderCounter})";
-                    var takenElective = electiveSubjects.FirstOrDefault(s => takenSubjectCodes.Contains(s.Code));
-                    if (takenElective != null)
-                    {
-                        subjectsContainer.InnerHtml += $@"
-                            <div class='subject taken elective' id='{takenElective.Code}'>
-                                <span>{slotText} - {takenElective.EnglishName}</span>
-                            </div>";
-                    }
-                    else
-                    {
-                        string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
-                        bool isSlotUnavailable = group.Key > currentLevel;
-                        string slotClass = isSlotUnavailable ? "subject elective-slot unavailable-slot" : "subject elective-slot";
-
-                        subjectsContainer.InnerHtml +=
-                            $"<div class='{slotClass}' id='{placeholderId}' data-level='{group.Key}' data-current-level='{currentLevel}' " +
-                            $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\", {currentLevel})'>" +
-                            "<span>Elective (" + electivePlaceholderCounter + ")</span></div>";
-
-                    }
-                    electivePlaceholderCounter++;
-
-                    // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
-                    if (electivePlaceholderCounter == 6)
-                    {
-                        string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
-                        bool isSlotUnavailable = group.Key > currentLevel;
-                        string slotClass = isSlotUnavailable ? "subject elective-slot unavailable-slot" : "subject elective-slot";
-
-                        subjectsContainer.InnerHtml +=
-                            $"<div class='{slotClass}' id='{placeholderId}' data-level='{group.Key}' " +
-                                $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\", {currentLevel})'>" +
-                                "<span>Elective (" + electivePlaceholderCounter + ")</span></div>";
-                    }
-                }
                 subjectsContainer.InnerHtml += "</div>";
             }
 
@@ -423,6 +394,61 @@ namespace MyScheduleWebsite
                 SubjectCreditHoursMapJson = subjectCreditHoursMapJson,
                 SubjectTypeMapJson = subjectTypeMapJson
             };
+        }
+
+        private void CreateElectiveSlots(List<Subject> electives, int level, ref int counter, int currentLevel, List<string> takenSubjectCodes)
+        {
+            if (!electives.Any()) return;
+
+            var takenElective = electives.FirstOrDefault(s => takenSubjectCodes.Contains(s.Code));
+            var slotNumber = counter++;
+
+            if (takenElective != null)
+            {
+                subjectsContainer.InnerHtml += $@"
+            <div class='subject taken elective' id='{takenElective.Code}'
+                 data-level='{level}',
+                 data-current-level='{currentLevel}'>
+                <span>Elective ({slotNumber}) - {takenElective.EnglishName}</span>
+            </div>";
+            }
+            else
+            {
+                bool isSlotUnavailable = level > currentLevel;
+                string slotClass = isSlotUnavailable ?
+                    "subject elective-slot unavailable-slot" :
+                    "subject elective-slot";
+
+                subjectsContainer.InnerHtml += $@"
+                    <div class='{slotClass}' 
+                         id='elective_placeholder_{slotNumber}'
+                         data-level='{level}'
+                         data-current-level='{currentLevel}'
+                         data-max-selections='{(level == 10 ? 2 : 1)}'
+                         onclick='showElectivePopup({level}, this)'>
+                        <span>Elective ({slotNumber})</span>
+                    </div>";
+            }
+
+            // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+            if (counter == 6)
+            {
+                string placeholderId = $"elective_placeholder_{counter}";
+                bool isSlotUnavailable = level > currentLevel;
+                string slotClass = isSlotUnavailable ?
+                    "subject elective-slot unavailable-slot" :
+                    "subject elective-slot";
+
+                subjectsContainer.InnerHtml += $@"
+                    <div class='{slotClass}' 
+                         id='elective_placeholder_{slotNumber}'
+                         data-level='{level}'
+                         data-current-level='{currentLevel}'
+                         data-max-selections='{(level == 10 ? 2 : 1)}'
+                         onclick='showElectivePopup({level}, this)'>
+                        <span>Elective ({slotNumber})</span>
+                    </div>";
+            }
         }
 
         private void AddSubjectToJsonMaps(Subject subject,

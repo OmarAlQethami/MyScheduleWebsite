@@ -29,39 +29,30 @@ function SubjectClicked(element) {
         element.classList.remove('selected');
 
         const slotId = element.dataset.slotId;
-        if (slotId) takenElectiveSlots.delete(slotId);
         if (slotId) {
-            const originalSlot = document.createElement('div');
-            originalSlot.id = slotId;
-            originalSlot.className = element.dataset.slotClasses;
-            originalSlot.innerHTML = element.dataset.slotHtml;
-            originalSlot.setAttribute('data-level', element.dataset.level);
-            originalSlot.setAttribute('data-current-level', element.dataset.currentLevel);
+            takenElectiveSlots.delete(slotId);
 
-            const electiveNumber = element.dataset.electiveNumber;
-            originalSlot.innerHTML = `<span>Elective (${electiveNumber})</span>`;
+            if (element.dataset.originalSlotHTML) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = element.dataset.originalSlotHTML;
+                const restoredSlot = tempDiv.firstElementChild;
 
-            originalSlot.setAttribute(
-                'onclick',
-                `showElectivePopup(${element.dataset.level}, '${slotId}', ${element.dataset.currentLevel})`
-
-            );
-            element.parentNode.replaceChild(originalSlot, element);
-
-            if (element.classList.contains('elective-slot')) {
-                const level = element.dataset.level;
-                const type = element.classList.contains('college') ? 'College' : 'University';
-                const slotId = `${level}-${type}`;
-
-                if (takenElectiveSlots.has(slotId)) {
-                    displayAlert("You can only choose one elective per slot");
-                    return;
+                // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+                if (element.dataset.level === "10") {
+                    restoredSlot.dataset.slotType = "level10";
+                    restoredSlot.dataset.maxSlots = "2";
                 }
-                takenElectiveSlots.add(slotId);
-                element.dataset.slotId = slotId;
+
+                restoredSlot.onclick = function () {
+                    showElectivePopup(
+                        parseInt(this.dataset.level),
+                        this
+                    );
+                };
+                element.parentNode.replaceChild(restoredSlot, element);
             }
         } else {
-            element.className = element.dataset.originalClasses;
+            element.className = element.dataset.originalClasses || '';
         }
         updateHiddenField();
     } else {
@@ -75,15 +66,34 @@ function SubjectClicked(element) {
         }
 
         if (element.classList.contains('elective-slot')) {
-            element.dataset.slotId = element.id;
-            element.dataset.slotClasses = element.className;
-            element.dataset.electiveNumber = element.id.split('_').pop();
+            // Note to self, these conditions down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+            const isLevel10 = element.dataset.level === "10";
+            const slotId = isLevel10 ?
+                `level10-slot-${Date.now()}` :
+                `${element.dataset.level}-${Date.now()}`;
+
+            if (!isLevel10 && takenElectiveSlots.has(slotId)) {
+                displayAlert("This elective slot is already filled.");
+                return;
+            }
+
+            if (isLevel10) {
+                const level10Selections = Array.from(takenElectiveSlots).filter(id => id.startsWith('level10'));
+                if (level10Selections.length >= 2) {
+                    displayAlert("Maximum 2 electives allowed in level 10");
+                    return;
+                }
+            }
+
+            element.dataset.slotId = slotId;
+            takenElectiveSlots.add(slotId);
         }
 
         selectedSubjects.push(subjectCode);
         element.classList.add('selected');
         updateHiddenField();
     }
+
     updateHours();
     updateProgressBar();
 }
@@ -123,7 +133,13 @@ function updateHours() {
     }
 }
 
-function showElectivePopup(level, slotId, currentLevel) {
+function showElectivePopup(level, slotElement) {
+    const currentLevel = parseInt(slotElement.dataset.currentLevel) || 0;
+
+    // Note to self, this variable down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+    const isLevel10 = level === 10;
+    const maxSelections = isLevel10 ? 2 : 1;
+
     const electiveOptions = window.electiveOptions[level] || [];
     const takenSubjects = Array.from(document.querySelectorAll('.subject.taken'))
         .map(el => el.id);
@@ -135,70 +151,69 @@ function showElectivePopup(level, slotId, currentLevel) {
         const option = document.createElement('div');
         option.id = code;
         const prerequisites = subjectPrerequisites[code] || [];
+
         const hasAllPrerequisites = prerequisites.every(p => takenSubjects.includes(p));
+        const existingSelections = Array.from(popup.children).filter(opt =>
+            selectedSubjects.includes(opt.id) || takenSubjects.includes(opt.id)
+        ).length;
+
         const isAvailable = subjectLevelMap[code] <= currentLevel &&
             !takenSubjects.includes(code) &&
             !selectedSubjects.includes(code) &&
-            hasAllPrerequisites;
-
-        const slotType = slotId.includes("College") ? "College" : "University";
-        const fullSlotId = `${level}-${slotType}`;
-
-        electiveOptions.forEach(code => {
-            if (takenElectiveSlots.has(fullSlotId)) {
-                option.classList.add('unavailable');
-                option.title = "This elective slot is already filled";
-            }
-        });
+            hasAllPrerequisites &&
+            existingSelections < maxSelections;
 
         option.className = `subject elective-option ${isAvailable ? 'available' : 'unavailable'}`;
         option.textContent = subjectNameMap[code];
 
         if (isAvailable) {
             option.onclick = () => {
-                const slot = document.getElementById(slotId);
-                const newSubject = document.createElement('div');
-                newSubject.className = 'subject available selected';
-                newSubject.id = code;
-                newSubject.innerHTML = `<span>${subjectNameMap[code]}</span>`;
+                if (!slotElement || !slotElement.parentNode) {
+                    return;
+                }
+
                 const subjectHours = subjectCreditHoursMap[code] || 0;
-                const currentHours = selectedSubjects.reduce((sum, code) =>
-                    sum + (subjectCreditHoursMap[code] || 0), 0);
+                const currentHours = selectedSubjects.reduce((sum, c) =>
+                    sum + (subjectCreditHoursMap[c] || 0), 0);
+
                 if (currentHours + subjectHours > 20) {
                     displayAlert("You have reached the maximum limit of 20 hours.");
                     return;
                 }
+
+                const newSubject = document.createElement('div');
+                newSubject.className = 'subject available selected';
+                newSubject.id = code;
+                newSubject.innerHTML = `<span>${subjectNameMap[code]}</span>`;
+
+                newSubject.dataset.originalSlotHTML = slotElement.outerHTML;
+                newSubject.dataset.slotId = slotElement.id;
+                newSubject.dataset.level = slotElement.dataset.level;
+                newSubject.dataset.currentLevel = currentLevel;
+
                 newSubject.onclick = () => SubjectClicked(newSubject);
-                newSubject.dataset.slotId = slotId;
-                newSubject.dataset.slotClasses = slot.className;
-                newSubject.dataset.slotHtml = slot.innerHTML;
-                newSubject.dataset.level = slot.dataset.level;
-                newSubject.dataset.currentLevel = slot.dataset.currentLevel;
-                newSubject.dataset.electiveNumber = slotId.split('_').pop();
-                slot.parentNode.replaceChild(newSubject, slot);
+
+                slotElement.parentNode.replaceChild(newSubject, slotElement);
+
                 popup.remove();
-                newSubject.dataset.originalClasses = 'available';
                 selectedSubjects.push(code);
                 updateHiddenField();
                 updateHours();
                 updateProgressBar();
             };
         }
-        else {
-            option.title = "Missing prerequisites: " +
-                prerequisites.filter(p => !takenSubjects.includes(p))
-                    .map(p => subjectNameMap[p] || p)
-                    .join(", ");
-        }
         popup.appendChild(option);
     });
 
+    if (slotElement) {
+        const rect = slotElement.getBoundingClientRect();
+        popup.style.position = 'absolute';
+        popup.style.top = `${rect.bottom + window.scrollY}px`;
+        popup.style.left = `${rect.left + window.scrollX}px`;
+        popup.style.backgroundColor = '#EEEEEE';
+    }
+
     document.body.appendChild(popup);
-    const rect = document.getElementById(slotId).getBoundingClientRect();
-    popup.style.position = 'absolute';
-    popup.style.top = `${rect.bottom + window.scrollY}px`;
-    popup.style.left = `${rect.left + window.scrollX}px`;
-    popup.style.backgroundColor = '#EEEEEE';
 
     setTimeout(() => {
         document.addEventListener('click', function closePopup(e) {
@@ -627,17 +642,116 @@ if (closeButton) {
     });
 }
 
-//document.addEventListener('DOMContentLoaded', () => {
-//    setTimeout(() => {
-//        const recommendedSubjects = JSON.parse(document.getElementById('hdnRecommendedSubjects').value);
-//        recommendedSubjects.forEach(code => {
-//            const subjectElement = document.getElementById(code);
-//            if (subjectElement && !subjectElement.classList.contains('selected')) {
-//                SubjectClicked(subjectElement);
-//            }
-//        });
-//    }, 500);
-//});
+document.addEventListener('DOMContentLoaded', () => {
+    const hdn = document.getElementById('hdnRecommendedSubjects').value;
+    const currentLevel = parseInt(document.getElementById('hdnCurrentLevel').value);
+
+    try {
+        const recommendedSubjects = hdn ? JSON.parse(hdn) : [];
+        const level10Electives = [];
+        const otherElectives = [];
+
+        // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+        recommendedSubjects.forEach(code => {
+            const strCode = String(code);
+            if ([3, 4].includes(subjectTypeMap[strCode])) {
+                const level = subjectLevelMap[strCode];
+                if (level === 10) {
+                    level10Electives.push(strCode);
+                } else {
+                    otherElectives.push(strCode);
+                }
+            }
+        });
+
+        const level10Slots = document.querySelectorAll('.elective-slot[data-level="10"]');
+        let slotsFilled = 0;
+
+        level10Electives.forEach((strCode, index) => {
+            if (slotsFilled >= 2) return;
+            const slot = level10Slots[index];
+
+            // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+            if (slot && !slot.classList.contains('taken')) {
+                const newSubject = document.createElement('div');
+                newSubject.className = 'subject available selected';
+                newSubject.id = strCode;
+                newSubject.innerHTML = `<span>${subjectNameMap[strCode]}</span>`;
+                newSubject.onclick = () => SubjectClicked(newSubject);
+
+                const slotId = `level10-slot-${index}`;
+                newSubject.dataset.slotId = slotId;
+                newSubject.dataset.originalSlotHTML = slot.outerHTML;
+                newSubject.dataset.level = 10;
+                newSubject.dataset.currentLevel = currentLevel;
+                newSubject.dataset.isLevel10 = true;
+
+                slot.parentNode.replaceChild(newSubject, slot);
+                selectedSubjects.push(strCode);
+                slotsFilled++;
+            }
+        });
+
+        otherElectives.forEach(strCode => {
+            const level = subjectLevelMap[strCode];
+            const slots = document.querySelectorAll(`.elective-slot[data-level="${level}"]`);
+
+            slots.forEach(slot => {
+                if (!slot.classList.contains('taken') && !slot.classList.contains('selected')) {
+                    const newSubject = document.createElement('div');
+                    newSubject.className = 'subject available selected';
+                    newSubject.id = strCode;
+                    newSubject.innerHTML = `<span>${subjectNameMap[strCode]}</span>`;
+                    newSubject.onclick = () => SubjectClicked(newSubject);
+
+                    newSubject.dataset.originalSlotHTML = slot.outerHTML;
+                    newSubject.dataset.slotId = slot.id;
+                    newSubject.dataset.level = level;
+                    newSubject.dataset.currentLevel = currentLevel;
+
+                    slot.parentNode.replaceChild(newSubject, slot);
+                    selectedSubjects.push(strCode);
+                    return;
+                }
+            });
+        });
+
+        recommendedSubjects.forEach(code => {
+            const strCode = String(code);
+            if (![3, 4].includes(subjectTypeMap[strCode])) {
+                const subjectElement = document.getElementById(strCode);
+                if (subjectElement && !subjectElement.classList.contains('selected')) {
+                    const subjectHours = subjectCreditHoursMap[strCode] || 0;
+                    const currentHours = selectedSubjects.reduce((sum, c) =>
+                        sum + (subjectCreditHoursMap[c] || 0), 0);
+
+                    if (currentHours + subjectHours <= 20) {
+                        SubjectClicked(subjectElement);
+                    }
+                }
+            }
+        });
+
+        updateHiddenField();
+        updateHours();
+        updateProgressBar();
+
+    } catch (err) {
+        displayAlert(`Recommendation error: ${err.message}`);
+        console.error("Recommendation error details:", err);
+    }
+});
+
+function replaceSlotWithSubject(slotElement, subjectCode) {
+    const originalHTML = slotElement.outerHTML;
+    const newSubject = document.createElement('div');
+    newSubject.className = 'subject available selected';
+    newSubject.id = subjectCode;
+    newSubject.innerHTML = `<span>${subjectNameMap[subjectCode]}</span>`;
+    newSubject.dataset.originalSlot = originalHTML;
+    newSubject.onclick = () => SubjectClicked(newSubject);
+    slotElement.parentNode.replaceChild(newSubject, slotElement);
+}
 
 function displayAlert(message) {
     var lblOutput = document.getElementById(lblOutputClientId);
