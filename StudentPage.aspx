@@ -5,7 +5,7 @@
 
     <div class="main-container">
         <div class="info">
-            <asp:Label ID="lblGreeting" runat="server" Text="Hello, N/A"></asp:Label>
+            <asp:Label ID="lblGreeting" CssClass="lbl-greeting" runat="server" Text="Hello, N/A"></asp:Label>
             <div class="label-center">
                 <asp:Label ID="lblCurrentLevel" class="label-center-labels" runat="server" Text="Current Level: N/A"></asp:Label>
                 <asp:Label ID="lblGraduation" class="label-center-labels" runat="server" Text="Graduation In: N/A"></asp:Label>

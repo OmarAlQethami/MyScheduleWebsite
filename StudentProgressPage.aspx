@@ -6,7 +6,7 @@
 
     <div class="main-container">
         <div class="info">
-            <asp:Label ID="lblGreeting" runat="server" Text="Hello, N/A"></asp:Label>
+            <asp:Label ID="lblGreeting" class="lbl-greeting" runat="server" Text="Hello, N/A"></asp:Label>
             <div class="label-center">
                 <asp:Label ID="lblCurrentLevel" runat="server" Text="Current Level: N/A"></asp:Label>
             </div>
@@ -16,9 +16,9 @@
                 <asp:Label ID="lblElectiveCollegeHoursSelected" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
             </div>
         </div>
-        <div class="choose-labels">
+        <div class="choose-labels-progress">
             <div class="choose-label-wrapper">
-                <asp:Label ID="lblChoose1" runat="server" CssClass="labels" Text="Choose your previously taken subjects:"></asp:Label>
+                <asp:Label ID="lblChoose1" runat="server" CssClass="labels" Text="Select your previously taken subjects:"></asp:Label>
             </div>
             <div class="lbl-output">
                 <asp:Label ID="lblOutput" runat="server" CssClass="labels" Text=""></asp:Label>
