@@ -4,20 +4,20 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <link rel="stylesheet" href="/styles/AdminStyles.css">
-    <div class="admin-container">
-        <div class="sidebar-menu">
-            <br />
-            <h3>Admin Menu</h3>
-            <ul>
-                <li><a href="ManageUsers.aspx"> Sign Up a new Faculty Member</a></li>
-                <li><a href="ManageRoles.aspx"> Sign Up a new departmentHead Member</a></li>
-                <li><a href="Reports.aspx"> Register a new University</a></li>
-                <li><a href="Logout.aspx">Logout</a></li>
-            </ul>
-        </div>
-    
-    <h3> User Role Management Console</h3>
+   <div class="admin-container">
+     <div class="sidebar-menu">
         <br />
+        <h3>Admin Menu</h3>
+        <ul>
+            <li><a href="ManageUsers.aspx"> Sign Up a new Faculty Member</a></li>
+            <li><a href="ManageRoles.aspx"> Sign Up a new departmentHead Member</a></li>
+            <li><a href="Reports.aspx"> Register a new University</a></li>
+            <li><a href="Logout.aspx">Logout</a></li>
+        </ul>
+     </div>
+
+    <h3> User Role Management Console</h3>
+    <br />
     <div class="admin-container">
         <table border="1">
             <tr>
@@ -29,38 +29,36 @@
                 </th>
                 <th>
                     <asp:Button ID="btnUserRoleAssign" runat="server" 
-                    Text="Link User Role" OnClick="btnUserRoleAssign_Click" Width="120px" Visible="true" />
+                    Text="Link User Role" OnClick="btnUserRoleAssign_Click" />
                 </th>
             </tr>
             <tr>
-                <td valign="top">
+                <td class="top-align">
                     <asp:CheckBoxList ID="cBLRoles" runat="server"></asp:CheckBoxList>
                 </td>
-                 <td valign="top">
-                    <asp:CheckBoxList ID="cBLUsers" runat="server">
-                    </asp:CheckBoxList>
+                 <td class="top-align">
+                    <asp:CheckBoxList ID="cBLUsers" runat="server"></asp:CheckBoxList>
                 </td>
-                 <td valign="top">
-                    <asp:Button ID="btnUnlinkUserRoles" runat="server" OnClick="btnUnlinkUserRoles_Click" Text="Unlink User Role" Width="120px" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    &nbsp;</td>
-                <td>
-                     <asp:Button ID="btnDeleteRoles" runat="server" OnClick="btnDeleteRoles_Click" Text="Delete Roles" Width="120px" />
+                 <td class="top-align">
+                    <asp:Button ID="btnUnlinkUserRoles" runat="server" OnClick="btnUnlinkUserRoles_Click" Text="Unlink User Role" />
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
-                    &nbsp;</td>
+                <td colspan="2">&nbsp;</td>
                 <td>
-                    <asp:Button ID="btnDeleteUsers" runat="server" OnClick="btnDeleteUsers_Click" Text="Delete Users" Width="120px" />
+                     <asp:Button ID="btnDeleteRoles" runat="server" OnClick="btnDeleteRoles_Click" Text="Delete Roles" />
                 </td>
             </tr>
-        </table>
-    </div>
- </div>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+                <td>
+                    <asp:Button ID="btnDeleteUsers" runat="server" OnClick="btnDeleteUsers_Click" Text="Delete Users" />
+                </td>
+            </tr>
+         </table>
+      </div>
+  </div>
+
        <table>
            <tr>
                <td colspan ="5" align="center" >
@@ -167,52 +165,7 @@
     
         <br />
 
-    <fieldset   style="width: auto; ">
-        <legend>Users & Roles</legend>
-        <table cellpadding="10" style= "">
-            <tr>
-                <td colspan="3">
-                </td>
-            </tr>
-            <tr>
-                <td valign="top">
-                 DB Users
-                    <asp:GridView ID="gvUsers" runat="server">
-                    </asp:GridView>
-                </td>            
-                <td valign="top">
-                 DB Roles
-                    <asp:GridView ID="gvRoles" runat="server">
-                    </asp:GridView>
-                    <asp:ObjectDataSource ID="ObjGetAllRoles" runat="server" SelectMethod="GetAllRoles"
-                        TypeName="System.Web.Security.Roles"></asp:ObjectDataSource>
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td valign="top">
-                    None Ansi InnerJoin
-                    <asp:GridView ID="gvNonAnsiInnerJoin" runat="server">
-                    </asp:GridView>
-                </td>
-                <td valign="top">
-                    Inner Join
-                    <asp:GridView ID="gvInnerJoin" runat="server">
-                    </asp:GridView>
-                </td>
-                <td valign="top">
-                    LeftOuter Join Role
-                    <asp:GridView ID="gvLeftOuterJoin" runat="server">
-                    </asp:GridView>
-                </td>
-                <td valign="top">
-                    RightOuter Join Role
-                    <asp:GridView ID="gvRightOuterJoin" runat="server">
-                    </asp:GridView>
-                </td>
-            </tr>
-        </table>
-    </fieldset>
+    
 
     <br />
     <br />
@@ -355,7 +308,7 @@
             <tr><td colspan="2"></td></tr>
             <tr>
                 <td class="style2" style="height: 20px">
-                    <strong>Sign Up a new departmentHead Member:</strong></td>
+                    <strong>Sign Up a new Department Head Member:</strong></td>
                 <td style="height: 20px">
                     </td>
             </tr>
@@ -546,7 +499,7 @@
             &nbsp;</td>  
         <td>
             <asp:Button ID="btnAddMajors" runat="server" ForeColor="#0000FF" style="font-weight: bold" onclick="btnAddMajors_Click" 
-                Text="addition" OnClientClick="return confirm('Are all your information correct?')"/>
+                Text="Reqister" OnClientClick="return confirm('Are all your information correct?')"/>
         </td>
         <td class="style2">
             &nbsp;</td>

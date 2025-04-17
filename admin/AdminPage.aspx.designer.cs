@@ -213,69 +213,6 @@ namespace MyScheduleWebsite.admin
         protected global::System.Web.UI.WebControls.ObjectDataSource srcRoles;
 
         /// <summary>
-        /// gvUsers control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvUsers;
-
-        /// <summary>
-        /// gvRoles control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvRoles;
-
-        /// <summary>
-        /// ObjGetAllRoles control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ObjectDataSource ObjGetAllRoles;
-
-        /// <summary>
-        /// gvNonAnsiInnerJoin control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvNonAnsiInnerJoin;
-
-        /// <summary>
-        /// gvInnerJoin control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvInnerJoin;
-
-        /// <summary>
-        /// gvLeftOuterJoin control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvLeftOuterJoin;
-
-        /// <summary>
-        /// gvRightOuterJoin control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvRightOuterJoin;
-
-        /// <summary>
         /// txtFName control.
         /// </summary>
         /// <remarks>
