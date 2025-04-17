@@ -15,7 +15,6 @@
             <li><a href="Logout.aspx">Logout</a></li>
         </ul>
      </div>
-
     <h3> User Role Management Console</h3>
     <br />
     <div class="admin-container">
