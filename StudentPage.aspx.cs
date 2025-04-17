@@ -84,6 +84,7 @@ namespace MyScheduleWebsite
             public string SubjectLevelMapJson { get; set; }
             public string SubjectCreditHoursMapJson { get; set; }
             public string SubjectTypeMapJson { get; set; }
+            public string SubjectOfferedMapJson { get; set; }
         }
         private class Section
         {
@@ -104,6 +105,8 @@ namespace MyScheduleWebsite
             public TimeSpan EndTime { get; set; }
             public string Location { get; set; }
         }
+
+        int curriculumId = 1;
 
         private Guid GetUserId()
         {
@@ -264,6 +267,11 @@ namespace MyScheduleWebsite
                 }
             }
 
+            var subjectOfferedMap = subjects.ToDictionary(
+                s => s.Code,
+                s => IsSubjectOffered(s.Code, universityId, majorId, curriculumId)
+            );
+
             hdnCurrentLevel.Value = GetCurrentLevel(GetUserId()).ToString();
 
             var recommended = CalculateRecommendedSubjects(subjects, takenSubjects, currentLevel)
@@ -352,6 +360,16 @@ namespace MyScheduleWebsite
             string subjectLevelMapJson = "var subjectLevelMap = {";
             string subjectCreditHoursMapJson = "var subjectCreditHoursMap = {";
             string subjectTypeMapJson = "var subjectTypeMap = {";
+            string subjectOfferedMapJson = "var subjectOfferedMap = {";
+
+            Guid userId = GetUserId();
+            int universityId = GetUniversityId(userId);
+            int majorId = GetMajorId(userId);
+
+            var offeredSubjects = data.Subjects.ToDictionary(
+                s => s.Code,
+                s => IsSubjectOffered(s.Code, universityId, majorId, curriculumId)
+            );
 
             var groupedSubjects = data.Subjects.GroupBy(s => s.Level).OrderBy(g => g.Key);
 
@@ -361,12 +379,13 @@ namespace MyScheduleWebsite
 
                 foreach (var subject in group)
                 {
-                    AddSubjectToJsonMaps(subject,
+                    AddSubjectToJsonMaps(subject, offeredSubjects,
                         ref prerequisitesJson,
                         ref subjectNameMapJson,
                         ref subjectLevelMapJson,
                         ref subjectCreditHoursMapJson,
-                        ref subjectTypeMapJson);
+                        ref subjectTypeMapJson,
+                        ref subjectOfferedMapJson);
                 }
 
                 foreach (var subject in group.Where(s => s.IsCompulsory))
@@ -385,6 +404,7 @@ namespace MyScheduleWebsite
             subjectLevelMapJson = subjectLevelMapJson.TrimEnd(',') + "};";
             subjectCreditHoursMapJson = subjectCreditHoursMapJson.TrimEnd(',') + "};";
             subjectTypeMapJson = subjectTypeMapJson.TrimEnd(',') + "};";
+            subjectOfferedMapJson = subjectOfferedMapJson.TrimEnd(',') + "};";
 
             return new SubjectsRenderResult
             {
@@ -392,7 +412,8 @@ namespace MyScheduleWebsite
                 SubjectNameMapJson = subjectNameMapJson,
                 SubjectLevelMapJson = subjectLevelMapJson,
                 SubjectCreditHoursMapJson = subjectCreditHoursMapJson,
-                SubjectTypeMapJson = subjectTypeMapJson
+                SubjectTypeMapJson = subjectTypeMapJson,
+                SubjectOfferedMapJson = subjectOfferedMapJson
             };
         }
 
@@ -446,29 +467,33 @@ namespace MyScheduleWebsite
                          data-current-level='{currentLevel}'
                          data-max-selections='{(level == 10 ? 2 : 1)}'
                          onclick='showElectivePopup({level}, this)'>
-                        <span>Elective ({slotNumber})</span>
+                        <span>Elective ({slotNumber + 1})</span>
                     </div>";
             }
         }
 
         private void AddSubjectToJsonMaps(Subject subject,
+            Dictionary<string, bool> offeredSubjects,
             ref string prerequisitesJson,
             ref string subjectNameMapJson,
             ref string subjectLevelMapJson,
             ref string subjectCreditHoursMapJson,
-            ref string subjectTypeMapJson)
+            ref string subjectTypeMapJson,
+            ref string subjectOfferedMapJson)
         {
-            prerequisitesJson += $"'{subject.Code}': [{string.Join(",", subject.Prerequisites.Select(p => $"'{p}'"))}],";
-            subjectNameMapJson += $"'{subject.Code}': '{subject.EnglishName.Replace("'", "\\'")}',";
-            subjectLevelMapJson += $"'{subject.Code}': {subject.Level},";
-            subjectCreditHoursMapJson += $"'{subject.Code}': {subject.CreditHours},";
-            subjectTypeMapJson += $"'{subject.Code}': {subject.TypeId},";
+                    prerequisitesJson += $"'{subject.Code}': [{string.Join(",", subject.Prerequisites.Select(p => $"'{p}'"))}],";
+                    subjectNameMapJson += $"'{subject.Code}': '{subject.EnglishName.Replace("'", "\\'")}',";
+                    subjectLevelMapJson += $"'{subject.Code}': {subject.Level},";
+                    subjectCreditHoursMapJson += $"'{subject.Code}': {subject.CreditHours},";
+                    subjectTypeMapJson += $"'{subject.Code}': {subject.TypeId},";
+                    bool isOffered = offeredSubjects[subject.Code];
+                    subjectOfferedMapJson += $"'{subject.Code}': {isOffered.ToString().ToLower()},";
         }
 
         private void RenderSubjectHtml(Subject subject, List<string> takenSubjectCodes)
         {
             string statusClass = GetSubjectStatusClass(subject, takenSubjectCodes);
-            bool isClickable = statusClass == "available";
+            bool isClickable = statusClass == "available" || statusClass == "unoffered";
             string onClickHandler = isClickable ? "onclick='SubjectClicked(this)'" : "";
 
             subjectsContainer.InnerHtml += $@"
@@ -519,9 +544,40 @@ namespace MyScheduleWebsite
                 return "unavailable";
             }
 
-            // I need later to alter this to have "unoffered" based on the curriculum
+            bool isOffered = IsSubjectOffered(
+                subject.Code,
+                (int)ViewState["UniversityId"],
+                (int)ViewState["MajorId"],
+                curriculumId
+            );
+
+            if (!isOffered)
+                return "unoffered";
 
             return "available";
+        }
+
+        private bool IsSubjectOffered(string subjectCode, int universityId, int majorId, int curriculumId)
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"
+                SELECT COUNT(*) 
+                FROM sections s
+                INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+                WHERE s.curriculumId = @curriculumId
+                AND sub.subjectCode = @subjectCode
+                AND sub.universityId = @universityId
+                AND sub.majorId = @majorId";
+
+                Dictionary<string, object> parameters = new Dictionary<string, object> {
+                    { "@curriculumId", curriculumId },
+                    { "@subjectCode", subjectCode },
+                    { "@universityId", universityId },
+                    { "@majorId", majorId }
+                };
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
+            return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
         }
 
         private void RegisterClientScripts(BindSubjectsData data, SubjectsRenderResult renderResult)
@@ -531,6 +587,7 @@ namespace MyScheduleWebsite
             ClientScript.RegisterStartupScript(GetType(), "SubjectLevelMap", renderResult.SubjectLevelMapJson, true);
             ClientScript.RegisterStartupScript(GetType(), "CreditHoursMap", renderResult.SubjectCreditHoursMapJson, true);
             ClientScript.RegisterStartupScript(GetType(), "SubjectTypeMap", renderResult.SubjectTypeMapJson, true);
+            ClientScript.RegisterStartupScript(GetType(), "SubjectOfferedMap", renderResult.SubjectOfferedMapJson, true);
 
             var electivesByLevel = data.Subjects
                 .Where(s => (s.IsElectiveCollege || s.IsElectiveUniversity))
@@ -669,7 +726,8 @@ namespace MyScheduleWebsite
         private List<Subject> CalculateRecommendedSubjects(List<Subject> allSubjects, List<string> takenSubjects, int currentLevel)
         {
             var availableSubjects = allSubjects
-                .Where(s => GetSubjectStatusClass(s, takenSubjects) == "available")
+                .Where(s => GetSubjectStatusClass(s, takenSubjects) == "available" ||
+                           GetSubjectStatusClass(s, takenSubjects) == "unoffered")
                 .ToList();
 
             if (!availableSubjects.Any()) return availableSubjects;
@@ -706,15 +764,15 @@ namespace MyScheduleWebsite
                     Compulsory = subject.IsCompulsory ? 1.0 : 0.0,
                     PrerequisiteCriticality = (double)prereqCount / maxValues.PrereqImpact,
                     CreditHours = (double)subject.CreditHours / (double)maxCreditHours,
-                    GraduationUrgency = (finalYear && subject.IsCompulsory) ? 1.0 : 0.0
+                    //GraduationUrgency = (finalYear && subject.IsCompulsory) ? 1.0 : 0.0
                 };
 
                 subject.Score =
-                    (scores.LevelPriority * 0.25d) +
-                    (scores.Compulsory * 0.35d) +
-                    (scores.PrerequisiteCriticality * 0.2d) +
-                    (scores.CreditHours * 0.1d) +
-                    (scores.GraduationUrgency * 0.1d);
+                    (scores.LevelPriority * 0.3d) +
+                    (scores.Compulsory * 0.3d) +
+                    (scores.PrerequisiteCriticality * 0.25d) +
+                    (scores.CreditHours * 0.15d);// +
+                    //(scores.GraduationUrgency * 0.1d)
             }
 
             var pastLevelSubjects = availableSubjects
@@ -833,25 +891,34 @@ namespace MyScheduleWebsite
             Guid userId = GetUserId();
             int universityId = GetUniversityId(userId);
             int majorId = GetMajorId(userId);
+            int studentId = GetStudentId(userId);
 
             var allSubjects = ProcessSubjects(universityId, majorId);
+            List<string> takenSubjects = GetTakenSubjectCodes(studentId, universityId, majorId);
 
-            var selectedSubjects = allSubjects
+            var subjects = allSubjects
                 .Where(s => selectedCodes.Contains(s.Code))
+                .Select(s => new {
+                    Subject = s,
+                    Status = GetSubjectStatusClass(s, takenSubjects)
+                })
+                .OrderBy(x => x.Status == "unoffered")
                 .ToList();
 
             string subjectsHtml = "";
-            foreach (var subject in selectedSubjects)
+            foreach (var subject in subjects)
             {
                 subjectsHtml += $@"
-                    <div class='subject subject-in-sections' id='{subject.Code}' onclick='SubjectInSectionsClicked(this)'>
-                        <span>{subject.EnglishName}</span>
-                    </div>";
+            <div class='subject subject-in-sections {(subject.Status == "unoffered" ? "unoffered" : "")}' 
+                 id='{subject.Subject.Code}' 
+                 onclick='SubjectInSectionsClicked(this)'>
+                <span>{subject.Subject.EnglishName}</span>
+            </div>";
             }
 
             subjectsinSectionsContainer.InnerHtml += subjectsHtml + "</div>";
         }
-
+        
         private List<Section> GetSectionsForSubjects(List<string> subjectCodes)
         {
             if (subjectCodes.Count == 0) return new List<Section>();
@@ -865,13 +932,14 @@ namespace MyScheduleWebsite
                        FROM sections s
                        INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
                        INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
-                       WHERE s.curriculumId IN (1, 2)
+                       WHERE s.curriculumId = @curriculumId
                        AND s.subjectCode IN ({0})";
 
             string[] parameters = subjectCodes.Select((_, i) => $"@p{i}").ToArray();
             sql = string.Format(sql, string.Join(",", parameters));
 
             Dictionary<string, object> para = new Dictionary<string, object>();
+            para.Add("@curriculumId", curriculumId);
             for (int i = 0; i < subjectCodes.Count; i++)
             {
                 para.Add($"@p{i}", subjectCodes[i]);

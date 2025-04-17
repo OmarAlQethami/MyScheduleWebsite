@@ -123,7 +123,7 @@
 
             <asp:View ID="viewSections" runat="server">
                 <!-- Sections Page -->
-                <div class="choose-labels">
+                <div class="choose-labels-sections">
                     <div class="choose-label-wrapper">
                         <asp:Label ID="lblChoose2" runat="server" CssClass="labels" Text="Choose your desired sections:"></asp:Label>
                     </div>

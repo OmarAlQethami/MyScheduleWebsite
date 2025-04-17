@@ -157,16 +157,25 @@ function showElectivePopup(level, slotElement) {
             selectedSubjects.includes(opt.id) || takenSubjects.includes(opt.id)
         ).length;
 
-        const isAvailable = subjectLevelMap[code] <= currentLevel &&
+        const isOffered = window.subjectOfferedMap[code];
+        const isAvailable = isOffered &&
+            subjectLevelMap[code] <= currentLevel &&
             !takenSubjects.includes(code) &&
             !selectedSubjects.includes(code) &&
             hasAllPrerequisites &&
             existingSelections < maxSelections;
 
-        option.className = `subject elective-option ${isAvailable ? 'available' : 'unavailable'}`;
+        const isNotOffered = !isOffered &&
+            subjectLevelMap[code] <= currentLevel &&
+            !takenSubjects.includes(code) &&
+            !selectedSubjects.includes(code) &&
+            hasAllPrerequisites &&
+            existingSelections < maxSelections;
+
+        option.className = `subject elective-option ${isOffered ? (isAvailable ? 'available' : 'unavailable') : 'unoffered'}`;
         option.textContent = subjectNameMap[code];
 
-        if (isAvailable) {
+        if (isAvailable || isNotOffered) {
             option.onclick = () => {
                 if (!slotElement || !slotElement.parentNode) {
                     return;
@@ -182,7 +191,12 @@ function showElectivePopup(level, slotElement) {
                 }
 
                 const newSubject = document.createElement('div');
-                newSubject.className = 'subject available selected';
+                if (isAvailable) {
+                    newSubject.className = 'subject available selected';
+                } else if (isNotOffered) {
+                    newSubject.className = 'subject unoffered selected';
+                }
+                
                 newSubject.id = code;
                 newSubject.innerHTML = `<span>${subjectNameMap[code]}</span>`;
 
@@ -244,76 +258,79 @@ function updateProgressBar() {
 let hideTimeout;
 
 document.addEventListener('DOMContentLoaded', () => {
-    const tooltip = document.getElementById('subjectTooltip');
+    const isFirstView = document.getElementById(lblHoursTakenId) && document.getElementById('subjectTooltip');
+    if (isFirstView) {
+        const tooltip = document.getElementById('subjectTooltip');
 
-    document.addEventListener('mouseover', function (e) {
-        const subject = e.target.closest('.subject');
-        if (!subject) return;
+        document.addEventListener('mouseover', function (e) {
+            const subject = e.target.closest('.subject');
+            if (!subject) return;
 
-        clearTimeout(hideTimeout);
-        tooltip.style.display = 'block';
-        void tooltip.offsetHeight;
+            clearTimeout(hideTimeout);
+            tooltip.style.display = 'block';
+            void tooltip.offsetHeight;
 
-        const code = subject.id;
-        if (!subjectNameMap[code]) return;
+            const code = subject.id;
+            if (!subjectNameMap[code]) return;
 
-        document.getElementById('ttSubjectName').textContent = subjectNameMap[code];
-        document.getElementById('ttLevel').textContent = subjectLevelMap[code];
-        document.getElementById('ttCredits').textContent = subjectCreditHoursMap[code];
-        document.getElementById('ttType').textContent = getTypeName(subjectTypeMap[code]);
+            document.getElementById('ttSubjectName').textContent = subjectNameMap[code];
+            document.getElementById('ttLevel').textContent = subjectLevelMap[code];
+            document.getElementById('ttCredits').textContent = subjectCreditHoursMap[code];
+            document.getElementById('ttType').textContent = getTypeName(subjectTypeMap[code]);
 
-        const prereqList = document.getElementById('ttPrerequisites');
-        prereqList.innerHTML = '';
-        const prereqs = subjectPrerequisites[code] || [];
-        if (prereqs.length === 0) {
-            const li = document.createElement('li');
-            li.className = 'tt-prerequisite-item tt-no-prereq';
-            li.textContent = 'No Prerequisites';
-            prereqList.appendChild(li);
-        } else {
-            prereqs.forEach(prereq => {
+            const prereqList = document.getElementById('ttPrerequisites');
+            prereqList.innerHTML = '';
+            const prereqs = subjectPrerequisites[code] || [];
+            if (prereqs.length === 0) {
                 const li = document.createElement('li');
-                li.className = 'tt-prerequisite-item';
-                li.textContent = subjectNameMap[prereq] || prereq;
+                li.className = 'tt-prerequisite-item tt-no-prereq';
+                li.textContent = 'No Prerequisites';
                 prereqList.appendChild(li);
-            });
-        }
+            } else {
+                prereqs.forEach(prereq => {
+                    const li = document.createElement('li');
+                    li.className = 'tt-prerequisite-item';
+                    li.textContent = subjectNameMap[prereq] || prereq;
+                    prereqList.appendChild(li);
+                });
+            }
 
-        const statusElement = document.getElementById('ttStatus');
-        const status = subject.classList.contains('taken') ? 'Taken' :
-            subject.classList.contains('available') ? 'Available' :
-            subject.classList.contains('unoffered') ? 'Unoffered' :
-            subject.classList.contains('unavailable') ? 'Unavailable' : '';
-        statusElement.textContent = status;
-        statusElement.className = `tt-status status-${status.toLowerCase()}`;
+            const statusElement = document.getElementById('ttStatus');
+            const status = subject.classList.contains('taken') ? 'Taken' :
+                subject.classList.contains('available') ? 'Available' :
+                    subject.classList.contains('unoffered') ? 'Unoffered' :
+                        subject.classList.contains('unavailable') ? 'Unavailable' : '';
+            statusElement.textContent = status;
+            statusElement.className = `tt-status status-${status.toLowerCase()}`;
 
-        const rect = subject.getBoundingClientRect();
-        const verticalCenter = rect.top + window.scrollY + (rect.height / 2) - (tooltip.offsetHeight / 2);
-        tooltip.style.top = `${verticalCenter}px`;
-        tooltip.style.left = `${rect.right + window.scrollX + 5}px`;
+            const rect = subject.getBoundingClientRect();
+            const verticalCenter = rect.top + window.scrollY + (rect.height / 2) - (tooltip.offsetHeight / 2);
+            tooltip.style.top = `${verticalCenter}px`;
+            tooltip.style.left = `${rect.right + window.scrollX + 5}px`;
 
-        setTimeout(() => tooltip.classList.add('visible'), 10);
-    });
+            setTimeout(() => tooltip.classList.add('visible'), 10);
+        });
 
-    document.addEventListener('mouseout', function (e) {
-        const subject = e.target.closest('.subject');
-        if (!subject) return;
+        document.addEventListener('mouseout', function (e) {
+            const subject = e.target.closest('.subject');
+            if (!subject) return;
 
-        hideTimeout = setTimeout(() => {
+            hideTimeout = setTimeout(() => {
+                tooltip.classList.remove('visible');
+                setTimeout(() => {
+                    tooltip.style.display = 'none';
+                }, 200);
+            }, 300);
+        });
+
+        tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+        tooltip.addEventListener('mouseleave', () => {
             tooltip.classList.remove('visible');
             setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 200);
-        }, 300);
-    });
-
-    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-    tooltip.addEventListener('mouseleave', () => {
-        tooltip.classList.remove('visible');
-        setTimeout(() => {
-            tooltip.style.display = 'none';
-        }, 200);
-    });
+        });
+    }
 });
 
 function getTypeName(typeId) {
@@ -410,6 +427,7 @@ function SubjectInSectionsClicked(element) {
     }
 
     const wasSelected = element.classList.contains('selected');
+    const subjectName = element.querySelector('span').textContent;
 
     document.querySelectorAll('.subject-in-sections').forEach(subject => {
         subject.classList.remove('selected');
@@ -424,7 +442,12 @@ function SubjectInSectionsClicked(element) {
 
         container.innerHTML = sections.length > 0
             ? buildSectionsHtml(sections)
-            : '<div class="labels">No sections available</div>';
+            : `<div class="no-sections-message">
+                   <div class="section-heading">No sections available for ${subjectName}</div>
+                    <div class="section-notice">As it is unoffered this semester</div>
+                   <div class="section-notice">You will be placed on a waitlist upon confirming.</div>
+               </div>`;
+
     }
 
     if (!wasSelected) {
@@ -645,107 +668,115 @@ if (closeButton) {
 document.addEventListener('DOMContentLoaded', () => {
     const hdn = document.getElementById('hdnRecommendedSubjects').value;
     const currentLevel = parseInt(document.getElementById('hdnCurrentLevel').value);
+    const isFirstView = document.getElementById('subjectTooltip');
 
-    try {
-        const recommendedSubjects = hdn ? JSON.parse(hdn) : [];
-        const level10Electives = [];
-        const otherElectives = [];
+    if (isFirstView) {
 
-        // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
-        recommendedSubjects.forEach(code => {
-            const strCode = String(code);
-            if ([3, 4].includes(subjectTypeMap[strCode])) {
-                const level = subjectLevelMap[strCode];
-                if (level === 10) {
-                    level10Electives.push(strCode);
-                } else {
-                    otherElectives.push(strCode);
-                }
-            }
-        });
-
-        const level10Slots = document.querySelectorAll('.elective-slot[data-level="10"]');
-        let slotsFilled = 0;
-
-        level10Electives.forEach((strCode, index) => {
-            if (slotsFilled >= 2) return;
-            const slot = level10Slots[index];
+        try {
+            const recommendedSubjects = hdn ? JSON.parse(hdn) : [];
+            const level10Electives = [];
+            const otherElectives = [];
 
             // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
-            if (slot && !slot.classList.contains('taken')) {
-                const newSubject = document.createElement('div');
-                newSubject.className = 'subject available selected';
-                newSubject.id = strCode;
-                newSubject.innerHTML = `<span>${subjectNameMap[strCode]}</span>`;
-                newSubject.onclick = () => SubjectClicked(newSubject);
+            recommendedSubjects.forEach(code => {
+                const strCode = String(code);
+                if ([3, 4].includes(subjectTypeMap[strCode])) {
+                    const level = subjectLevelMap[strCode];
+                    if (level === 10) {
+                        level10Electives.push(strCode);
+                    } else {
+                        otherElectives.push(strCode);
+                    }
+                }
+            });
 
-                const slotId = `level10-slot-${index}`;
-                newSubject.dataset.slotId = slotId;
-                newSubject.dataset.originalSlotHTML = slot.outerHTML;
-                newSubject.dataset.level = 10;
-                newSubject.dataset.currentLevel = currentLevel;
-                newSubject.dataset.isLevel10 = true;
+            const level10Slots = document.querySelectorAll('.elective-slot[data-level="10"]');
+            let slotsFilled = 0;
 
-                slot.parentNode.replaceChild(newSubject, slot);
-                selectedSubjects.push(strCode);
-                slotsFilled++;
-            }
-        });
+            level10Electives.forEach((strCode, index) => {
+                if (slotsFilled >= 2) return;
+                const slot = level10Slots[index];
 
-        otherElectives.forEach(strCode => {
-            const level = subjectLevelMap[strCode];
-            const slots = document.querySelectorAll(`.elective-slot[data-level="${level}"]`);
-
-            slots.forEach(slot => {
-                if (!slot.classList.contains('taken') && !slot.classList.contains('selected')) {
+                // Note to self, this condition down here is wrong, it shouldn't be hardcoded, but we'll keep it for now until it is implemented in the DB.
+                if (slot && !slot.classList.contains('taken')) {
+                    const isOffered = window.subjectOfferedMap[strCode];
                     const newSubject = document.createElement('div');
-                    newSubject.className = 'subject available selected';
+                    newSubject.className = `subject ${isOffered ? 'available' : 'unoffered'} selected`;
                     newSubject.id = strCode;
                     newSubject.innerHTML = `<span>${subjectNameMap[strCode]}</span>`;
                     newSubject.onclick = () => SubjectClicked(newSubject);
 
+                    const slotId = `level10-slot-${index}`;
+                    newSubject.dataset.slotId = slotId;
                     newSubject.dataset.originalSlotHTML = slot.outerHTML;
-                    newSubject.dataset.slotId = slot.id;
-                    newSubject.dataset.level = level;
+                    newSubject.dataset.level = 10;
                     newSubject.dataset.currentLevel = currentLevel;
+                    newSubject.dataset.isLevel10 = true;
 
                     slot.parentNode.replaceChild(newSubject, slot);
                     selectedSubjects.push(strCode);
-                    return;
+                    slotsFilled++;
                 }
             });
-        });
 
-        recommendedSubjects.forEach(code => {
-            const strCode = String(code);
-            if (![3, 4].includes(subjectTypeMap[strCode])) {
-                const subjectElement = document.getElementById(strCode);
-                if (subjectElement && !subjectElement.classList.contains('selected')) {
-                    const subjectHours = subjectCreditHoursMap[strCode] || 0;
-                    const currentHours = selectedSubjects.reduce((sum, c) =>
-                        sum + (subjectCreditHoursMap[c] || 0), 0);
+            otherElectives.forEach(strCode => {
+                const level = subjectLevelMap[strCode];
+                const slots = document.querySelectorAll(`.elective-slot[data-level="${level}"]`);
 
-                    if (currentHours + subjectHours <= 20) {
-                        SubjectClicked(subjectElement);
+                slots.forEach(slot => {
+                    if (!slot.classList.contains('taken') && !slot.classList.contains('selected')) {
+                        const isOffered = window.subjectOfferedMap[strCode];
+                        const newSubject = document.createElement('div');
+                        newSubject.className = `subject ${isOffered ? 'available' : 'unoffered'} selected`;
+                        newSubject.id = strCode;
+                        newSubject.innerHTML = `<span>${subjectNameMap[strCode]}</span>`;
+                        newSubject.onclick = () => SubjectClicked(newSubject);
+
+                        newSubject.dataset.originalSlotHTML = slot.outerHTML;
+                        newSubject.dataset.slotId = slot.id;
+                        newSubject.dataset.level = level;
+                        newSubject.dataset.currentLevel = currentLevel;
+                        newSubject.dataset.isOffered = isOffered;
+
+                        slot.parentNode.replaceChild(newSubject, slot);
+                        selectedSubjects.push(strCode);
+                        return;
+                    }
+                });
+            });
+
+            recommendedSubjects.forEach(code => {
+                const strCode = String(code);
+                if (![3, 4].includes(subjectTypeMap[strCode])) {
+                    const subjectElement = document.getElementById(strCode);
+                    if (subjectElement && !subjectElement.classList.contains('selected')) {
+                        const subjectHours = subjectCreditHoursMap[strCode] || 0;
+                        const currentHours = selectedSubjects.reduce((sum, c) =>
+                            sum + (subjectCreditHoursMap[c] || 0), 0);
+
+                        if (currentHours + subjectHours <= 20) {
+                            SubjectClicked(subjectElement);
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        updateHiddenField();
-        updateHours();
-        updateProgressBar();
+            updateHiddenField();
+            updateHours();
+            updateProgressBar();
 
-    } catch (err) {
-        displayAlert(`Recommendation error: ${err.message}`);
-        console.error("Recommendation error details:", err);
+        } catch (err) {
+            displayAlert(`Recommendation error: ${err.message}`);
+            console.error("Recommendation error details:", err);
+        }
     }
 });
 
 function replaceSlotWithSubject(slotElement, subjectCode) {
     const originalHTML = slotElement.outerHTML;
+    const isOffered = window.subjectOfferedMap[strCode];
     const newSubject = document.createElement('div');
-    newSubject.className = 'subject available selected';
+    newSubject.className = `subject ${isOffered ? 'available' : 'unoffered'} selected`;
     newSubject.id = subjectCode;
     newSubject.innerHTML = `<span>${subjectNameMap[subjectCode]}</span>`;
     newSubject.dataset.originalSlot = originalHTML;
@@ -754,13 +785,17 @@ function replaceSlotWithSubject(slotElement, subjectCode) {
 }
 
 function displayAlert(message) {
-    var lblOutput = document.getElementById(lblOutputClientId);
-    lblOutput.innerText = message;
-    lblOutput.style.color = 'red';
+    const lblOutput = document.getElementById(lblOutputClientId);
+    if (lblOutput) {
+        lblOutput.innerText = message;
+        lblOutput.style.color = 'red';
+    }
 }
 
 function displayAlert2(message) {
-    var lblOutput2 = document.getElementById(lblOutput2ClientId);
-    lblOutput2.innerText = message;
-    lblOutput2.style.color = 'red';
+    const lblOutput2 = document.getElementById(lblOutput2ClientId);
+    if (lblOutput2) {
+        lblOutput2.innerText = message;
+        lblOutput2.style.color = 'red';
+    }
 }
