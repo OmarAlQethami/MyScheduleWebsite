@@ -27,6 +27,8 @@ namespace MyScheduleWebsite
             int majorId = GetMajorId(userId);
             int studentId = GetStudentId(userId);
 
+            CheckExistingOrder(studentId);
+
             SqlConnection.ClearAllPools();
 
             ViewState["UniversityId"] = universityId;
@@ -106,7 +108,7 @@ namespace MyScheduleWebsite
             public string Location { get; set; }
         }
 
-        int curriculumId = 1;
+        int curriculumId = 2;
 
         private Guid GetUserId()
         {
@@ -179,6 +181,21 @@ namespace MyScheduleWebsite
             myPara.Add("@UserId", userId);
             DataTable dt = myCrud.getDTPassSqlDic(mySql, myPara);
             return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["studentId"]) : 0;
+        }
+        private void CheckExistingOrder(int studentId)
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT COUNT(*) FROM orders WHERE studentId = @studentId";
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    { "@studentId", studentId }
+                };
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
+            if (dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0)
+            {
+                Response.Redirect("~/OrderSuccessfulPage.aspx");
+            }
         }
 
         private List<string> GetTakenSubjectCodes(int studentId, int universityId, int majorId)
@@ -1003,9 +1020,13 @@ namespace MyScheduleWebsite
             var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
             var selectedSections = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(hdnSelectedSections.Value);
 
+            int universityId = (int)ViewState["UniversityId"];
+            int majorId = (int)ViewState["MajorId"];
+
             foreach (var subjectCode in selectedSubjects)
             {
-                if (!selectedSections.ContainsKey(subjectCode))
+                bool isOffered = IsSubjectOffered(subjectCode, universityId, majorId, curriculumId);
+                if (isOffered && !selectedSections.ContainsKey(subjectCode))
                 {
                     errors.Add($"{GetSubjectName(subjectCode)} ({subjectCode}) requires a section selection");
                 }
@@ -1127,7 +1148,6 @@ namespace MyScheduleWebsite
                 int studentId = GetStudentId(userId);
                 int universityId = (int)ViewState["UniversityId"];
                 int majorId = (int)ViewState["MajorId"];
-                int curriculumId = 1;
 
                 var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
                 decimal totalHours = 0;
@@ -1226,6 +1246,43 @@ namespace MyScheduleWebsite
                             { "@subjectId", subjectId },
                             { "@sectionId", sectionId }
                         });
+                }
+
+                string requestedSemester = curriculumId == 1 ? "Fall 2024" : "Spring 2025";
+                foreach (string subjectCode in selectedSubjects)
+                {
+                    bool isOffered = IsSubjectOffered(subjectCode, universityId, majorId, curriculumId);
+                    if (!isOffered)
+                    {
+                        CRUD subjectCrud = new CRUD();
+                        DataTable dtSubject = subjectCrud.getDTPassSqlDic(
+                            @"SELECT subjectId FROM subjects 
+                                WHERE subjectCode = @code 
+                                AND universityId = @univId 
+                                AND majorId = @majorId",
+                            new Dictionary<string, object>
+                            {
+                                { "@code", subjectCode },
+                                { "@univId", universityId },
+                                { "@majorId", majorId }
+                            });
+
+                        if (dtSubject.Rows.Count == 0)
+                            continue;
+
+                        int subjectId = Convert.ToInt32(dtSubject.Rows[0]["subjectId"]);
+
+                        CRUD waitlistCrud = new CRUD();
+                        waitlistCrud.InsertUpdateDelete(
+                            @"INSERT INTO waitlist (studentId, subjectId, requestedSemester, priority, requestDate, status)
+                                VALUES (@studentId, @subjectId, @requestedSemester, 1, GETDATE(), 'Pending')",
+                            new Dictionary<string, object>
+                            {
+                                { "@studentId", studentId },
+                                { "@subjectId", subjectId },
+                                { "@requestedSemester", requestedSemester }
+                            });
+                    }
                 }
 
                 return true;

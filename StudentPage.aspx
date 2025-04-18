@@ -11,9 +11,9 @@
                 <asp:Label ID="lblGraduation" class="label-center-labels" runat="server" Text="Graduation In: N/A"></asp:Label>
             </div>
             <div class="hours-taken-container">
-                <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
-                <asp:Label ID="lblElectiveUniversityHoursTaken" runat="server" Text="Elective University Hours Selected: N/A of N/A"></asp:Label>
-                <asp:Label ID="lblElectiveCollegeHoursTaken" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblHoursTaken" class="label-hours" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveUniversityHoursTaken" class="label-hours" runat="server" Text="Elective University Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveCollegeHoursTaken" class="label-hours" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
             </div>
         </div>
 

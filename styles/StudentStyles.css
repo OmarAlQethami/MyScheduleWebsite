@@ -13,6 +13,7 @@
 }
 
 .lbl-greeting {
+    font-size: 18px;
     display: flex;
     align-self: center;
     justify-self: center;
@@ -20,14 +21,22 @@
 }
 
 .label-center-labels {
+    font-size: 18px;
     margin: 5px;
+}
+
+.label-hours {
+    font-size: 16px;
+    display: flex;
+    align-self: flex-start;
+    justify-self: center;
 }
 
 .hours-taken-container {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    margin-left: auto;
+    margin-left: 350px
 }
 
 .subjects-container {
@@ -45,8 +54,12 @@
 }
 
 .labels {
-    font-size: 16px;
+    font-size: 18px;
     min-width: 65px;
+}
+
+span {
+    font-size: 13px;
 }
 
 .subject {
@@ -78,6 +91,7 @@
 .subject.taken {
     border-color: #AAAAAA;
     background-color: #A9D18E;
+    cursor: not-allowed;
 }
 
 .subject.available {
@@ -93,6 +107,7 @@
 .subject.unavailable {
     background-color: #BBBBBB;
     border-color: #888888;
+    cursor: not-allowed;
 }
 
 .subject.selected {
