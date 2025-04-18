@@ -1,12 +1,10 @@
 ﻿using System;
-
 using System.Data;
-
 using System.IO;
-
 using System.Web.UI;
-
 using System.Web.UI.WebControls;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 
 
@@ -203,11 +201,81 @@ namespace MyScheduleWebsite
         protected void btnExport_Click(object sender, EventArgs e)
 
         {
+            try
+            {
+                
+                Document pdfDoc = new Document(PageSize.A4.Rotate(), 10f, 10f, 10f, 0f);
+                MemoryStream memoryStream = new MemoryStream();
 
+               
+                PdfWriter
+                writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                writer.PdfVersion = PdfWriter.VERSION_1_7;
 
+ 
+                pdfDoc.Open();
+
+               
+                Font titleFont = FontFactory.GetFont("Arial", 18, Font.BOLD, new BaseColor(53, 149, 205));
+                Paragraph title = new Paragraph("Your Schedule Details", titleFont);
+                title.Alignment = Element.ALIGN_CENTER;
+                pdfDoc.Add(title);
+                pdfDoc.Add(Chunk.Newline);
+
+                
+                Font infoFont = FontFactory.GetFont("Arial", 12, Font.NORMAL);
+                pdfDoc.Add(new Paragraph($"Student Name: {lblStudentName.Text}", infoFont));
+                pdfDoc.Add(new Paragraph($"University ID: {lblUniID.Text}", infoFont));
+                pdfDoc.Add(new Paragraph($"Major: {lblMajor.Text}", infoFont));
+                pdfDoc.Add(new Paragraph($"Total Credits: {lblTotalCredits.Text}", infoFont));
+                pdfDoc.Add(Chunk.Newline);
+
+                
+                PdfPTable pdfTable = new PdfPTable(gvSchedule.Columns.Count);
+                pdfTable.WidthPercentage = 100;
+                pdfTable.SpacingBefore = 10f;
+                pdfTable.SpacingAfter = 10f;
+
+                Font headerFont = FontFactory.GetFont("Arial", 10, Font.BOLD, BaseColor.White);
+                foreach (DataControlField column in gvSchedule.Columns)
+                {
+                    PdfPCell headerCell = new PdfPCell(new Phrase(column.HeaderText, headerFont));
+                    headerCell.BackgroundColor = new BaseColor(53, 149, 205);
+                    headerCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    pdfTable.AddCell(headerCell);
+                }
+
+                Font cellFont = FontFactory.GetFont("Arial", 9);
+                foreach (GridViewRow row in gvSchedule.Rows)
+                {
+                    if (row.RowType == DataControlRowType.DataRow)
+                    {
+                        foreach (TableCell cell in row.Cells)
+                        {
+                            PdfPCell dataCell = new PdfPCell(new Phrase(cell.Text, cellFont));
+                            dataCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                            pdfTable.AddCell(dataCell);
+                        }
+                    }
+                }
+
+                pdfDoc.Add(pdfTable);
+                pdfDoc.Close();
+
+            
+                Response.Clear();
+                Response.ContentType = "application/pdf";
+                Response.AddHeader("content-disposition", "attachment;filename=StudentSchedule.pdf");
+                Response.BinaryWrite(memoryStream.ToArray());
+                Response.End();
+            }
+            catch (Exception ex)
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                    $"alert('Error exporting PDF: {ex.Message.Replace("'", "\\'")}');", true);
+            }
 
         }
-
 
 
         protected void btnCancel_Click(object sender, EventArgs e)
@@ -219,7 +287,7 @@ namespace MyScheduleWebsite
             {
 
                 ClientScript.RegisterStartupScript(this.GetType(), "alert",
-"alert('Schedule cancelled successfully!');", true);
+                   "alert('Schedule cancelled successfully!');", true);
 
 
 

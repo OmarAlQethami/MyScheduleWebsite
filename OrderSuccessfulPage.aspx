@@ -169,6 +169,8 @@
     }
 </style>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="schedule-container">
     <div class="schedule-card">
         <div class="header">
@@ -180,8 +182,7 @@
         <div class="student-info">
             <div class="info-row">
                 <div class="info-label">Student Name:</div>
-                <div class="info-value"><asp:Label ID="lblStudentName" runat="server" Text="Ahmed
-Al-Otaibi"></asp:Label></div>
+                <div class="info-value"><asp:Label ID="lblStudentName" runat="server" Text="Ahmed Al-Otaibi"></asp:Label></div>
             </div>
             <div class="info-row">
                 <div class="info-label">University ID:</div>
