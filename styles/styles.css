@@ -1,4 +1,4 @@
-﻿﻿@font-face {
+﻿@font-face {
     font-family: 'Lato';
     src: url('../fonts/lato-regular.woff') format('woff');
     font-weight: normal;
@@ -50,7 +50,11 @@ body {
     padding-right: 20px;
     padding-bottom: 20px;
     margin-bottom: 20px;
-    position: relative;
+    position: sticky;
+    background-color: #DDDDDD;
+    top: 50px;
+    z-index: 1000;
+    padding: 10px;
 }
 
 .buttons {

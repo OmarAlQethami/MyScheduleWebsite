@@ -5,15 +5,15 @@
 
     <div class="main-container">
         <div class="info">
-            <asp:Label ID="lblGreeting" runat="server" Text="Hello, N/A"></asp:Label>
+            <asp:Label ID="lblGreeting" CssClass="lbl-greeting" runat="server" Text="Hello, N/A"></asp:Label>
             <div class="label-center">
                 <asp:Label ID="lblCurrentLevel" class="label-center-labels" runat="server" Text="Current Level: N/A"></asp:Label>
                 <asp:Label ID="lblGraduation" class="label-center-labels" runat="server" Text="Graduation In: N/A"></asp:Label>
             </div>
             <div class="hours-taken-container">
-                <asp:Label ID="lblHoursTaken" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
-                <asp:Label ID="lblElectiveUniversityHoursTaken" runat="server" Text="Elective University Hours Selected: N/A of N/A"></asp:Label>
-                <asp:Label ID="lblElectiveCollegeHoursTaken" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblHoursTaken" class="label-hours" runat="server" Text="Compulsory Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveUniversityHoursTaken" class="label-hours" runat="server" Text="Elective University Hours Selected: N/A of N/A"></asp:Label>
+                <asp:Label ID="lblElectiveCollegeHoursTaken" class="label-hours" runat="server" Text="Elective College Hours Selected: N/A of N/A"></asp:Label>
             </div>
         </div>
 
@@ -113,18 +113,17 @@
                         </div>
                         <h3>Based on your academic progress, we recommend these subjects:</h3>
                         <br />
-                        <asp:Label CssClass="labels" runat="server">
-                            // TODO
-                        </asp:Label>
-                        <br /> <br />
-                        <h4>Feel free to edit the suggestion if you like.</h4>
+                        <h4>These subjects will be Auto-Selected, Feel free to edit the suggestion if you like.</h4>
+                        <br />
+                        <asp:Label ID="lblRecommendations" CssClass="labels" runat="server">N/A</asp:Label>
+                        
                     </div>
                 </div>
             </asp:View>
 
             <asp:View ID="viewSections" runat="server">
                 <!-- Sections Page -->
-                <div class="choose-labels">
+                <div class="choose-labels-sections">
                     <div class="choose-label-wrapper">
                         <asp:Label ID="lblChoose2" runat="server" CssClass="labels" Text="Choose your desired sections:"></asp:Label>
                     </div>
@@ -158,6 +157,8 @@
 
     <asp:HiddenField ID="hdnSelectedSubjects" runat="server" ClientIDMode="Static" />
     <asp:HiddenField ID="hdnSelectedSections" runat="server" ClientIDMode="Static"/>
+    <asp:HiddenField ID="hdnRecommendedSubjects" runat="server" ClientIDMode="Static" />
+    <asp:HiddenField ID="hdnCurrentLevel" runat="server" ClientIDMode="Static"/>
 
     <script>
         var lblOutputClientId = '<%= lblOutput.ClientID %>';
