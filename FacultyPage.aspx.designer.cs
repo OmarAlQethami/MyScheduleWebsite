@@ -24,6 +24,15 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.HiddenField hdnActiveTab;
 
         /// <summary>
+        /// hdnSelectedOrder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnSelectedOrder;
+
+        /// <summary>
         /// lblFacultyName control.
         /// </summary>
         /// <remarks>
@@ -166,5 +175,41 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvCurriculum;
+
+        /// <summary>
+        /// lblModalStudentName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModalStudentName;
+
+        /// <summary>
+        /// lblModalStudentLevel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModalStudentLevel;
+
+        /// <summary>
+        /// litModalError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litModalError;
+
+        /// <summary>
+        /// gvOrderDetails control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvOrderDetails;
     }
 }

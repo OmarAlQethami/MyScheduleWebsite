@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Web;
 using System.Web.Security;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace MyScheduleWebsite
@@ -14,7 +16,6 @@ namespace MyScheduleWebsite
         {
             if (!IsPostBack)
             {
-                hdnActiveTab.Value = "students";
                 GetFacultyUniversityAndMajor();
                 LoadDashboard();
                 BindStudents();
@@ -125,21 +126,21 @@ namespace MyScheduleWebsite
         {
             CRUD myCrud = new CRUD();
             string sql = @"SELECT 
-                        s.subjectCode,
-                        s.subjectEnglishName,
-                        COUNT(w.studentId) AS totalStudents,
-                        STRING_AGG(CONCAT(stu.studentEnglishFirstName, ' ', stu.studentEnglishLastName, 
-                                   ' (Priority: ', CASE WHEN w.priority = 1 THEN 'High' ELSE 'Normal' END, ')'), 
-                                   ', ') WITHIN GROUP (ORDER BY w.priority DESC, w.requestDate) AS topStudents,
-                        w.requestedSemester,
-                        w.status
-                   FROM waitlist w
-                   INNER JOIN subjects s ON w.subjectId = s.subjectId
-                   INNER JOIN students stu ON w.studentId = stu.studentId
-                   WHERE s.universityId = @UniversityId
-                     AND s.majorId = @MajorId
-                   GROUP BY s.subjectCode, s.subjectEnglishName, w.requestedSemester, w.status
-                   ORDER BY totalStudents DESC";
+                s.subjectCode,
+                s.subjectEnglishName,
+                COUNT(w.studentId) AS totalStudents,
+                STRING_AGG(CONCAT(stu.studentEnglishFirstName, ' ', stu.studentEnglishLastName, 
+                           ' - ', stu.studentUniId),  -- Changed here
+                           ', ') WITHIN GROUP (ORDER BY w.priority DESC, w.requestDate) AS topStudents,
+                w.requestedSemester,
+                w.status
+           FROM waitlist w
+           INNER JOIN subjects s ON w.subjectId = s.subjectId
+           INNER JOIN students stu ON w.studentId = stu.studentId
+           WHERE s.universityId = @UniversityId
+             AND s.majorId = @MajorId
+           GROUP BY s.subjectCode, s.subjectEnglishName, w.requestedSemester, w.status
+           ORDER BY totalStudents DESC";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
     {
@@ -159,6 +160,30 @@ namespace MyScheduleWebsite
                 gvWaitlists.HeaderRow.TableSection = TableRowSection.TableHeader;
             }
         }
+        protected void gvWaitlists_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                DataRowView rowView = (DataRowView)e.Row.DataItem;
+                string topStudents = rowView["topStudents"].ToString();
+
+                DropDownList ddlStudents = (DropDownList)e.Row.FindControl("ddlStudents");
+                if (ddlStudents != null)
+                {
+                    string[] students = topStudents.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var student in students)
+                    {
+                        ddlStudents.Items.Add(new ListItem(student));
+                    }
+
+                    if (ddlStudents.Items.Count == 0)
+                    {
+                        ddlStudents.Items.Add("No students in waitlist");
+                    }
+                }
+            }
+        }
 
         public string FormatStudentList(object studentList)
         {
@@ -172,11 +197,6 @@ namespace MyScheduleWebsite
         private void LoadDashboard()
         {
 
-        }
-        protected void btnView_Click(object sender, EventArgs e)
-        {
-            Button btn = (Button)sender;
-            string studentId = btn.CommandArgument;
         }
 
         protected void btnApprove_Click(object sender, EventArgs e)
@@ -257,6 +277,85 @@ namespace MyScheduleWebsite
             gvStudents.DataBind();
         }
 
+        [System.Web.Services.WebMethod(EnableSession = true)]
+        private DataTable GetOrderDetails(int orderId)
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT 
+        s.subjectCode AS SubjectCode,
+        sub.subjectEnglishName AS SubjectName,
+        s.sectionNumber AS SectionNumber,
+        sub.creditHours AS CreditHours,
+        STRING_AGG(CONVERT(nvarchar, sd.day), ', ') + ' | ' +
+        STRING_AGG(CONVERT(nvarchar, sd.startTime, 108), ', ') + ' | ' +
+        STRING_AGG(CONVERT(nvarchar, sd.endTime, 108), ', ') + ' | ' +
+        STRING_AGG(sd.location, ', ') AS Schedule,
+        s.instructorName AS Instructor
+    FROM orderDetails od
+    INNER JOIN sections s ON od.sectionId = s.sectionId
+    INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+    INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+    WHERE od.orderId = @OrderId
+    GROUP BY s.subjectCode, sub.subjectEnglishName, s.sectionNumber, 
+            sub.creditHours, s.instructorName";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object> {
+        { "@OrderId", orderId }
+    };
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters) as DataTable;
+            return dt ?? new DataTable();
+        }
+
+        public static string FormatScheduleDetails(string day, string startTime, string endTime, string location)
+        {
+            if (!int.TryParse(day, out int academicDay))
+            {
+                academicDay = 0;
+            }
+            academicDay -= 1;
+
+            if (!DateTime.TryParse(startTime, out DateTime start))
+            {
+                start = DateTime.MinValue;
+            }
+            if (!DateTime.TryParse(endTime, out DateTime end))
+            {
+                end = DateTime.MinValue;
+            }
+
+            string formattedStart = start.ToString("hh:mmtt");
+            string formattedEnd = end.ToString("hh:mmtt");
+
+            return $"{GetDayName(academicDay)} | {formattedStart}-{formattedEnd} | {location}";
+        }
+
+        private static string GetDayName(int academicDay)
+        {
+            if (academicDay >= 0 && academicDay <= 4)
+            {
+                return ((DayOfWeek)academicDay).ToString();
+            }
+            return "TBA";
+        }
+
+        protected void btnView_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            GridViewRow row = (GridViewRow)btn.NamingContainer;
+
+            string studentName = $"{DataBinder.Eval(row.DataItem, "studentEnglishFirstName")} {DataBinder.Eval(row.DataItem, "studentEnglishLastName")}";
+
+            lblModalStudentName.Text = studentName;
+
+            int orderId = Convert.ToInt32(btn.CommandArgument);
+            DataTable dtOrderDetails = GetOrderDetails(orderId);
+
+            gvOrderDetails.DataSource = dtOrderDetails;
+            gvOrderDetails.DataBind();
+
+            ClientScript.RegisterStartupScript(this.GetType(), "ShowModal", "showModal();", true);
+        }
         public string GetOrderStatus(object status)
         {
             if (status == DBNull.Value)
