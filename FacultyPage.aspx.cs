@@ -126,27 +126,27 @@ namespace MyScheduleWebsite
         {
             CRUD myCrud = new CRUD();
             string sql = @"SELECT 
+                s.subjectId,
                 s.subjectCode,
                 s.subjectEnglishName,
+                w.requestedSemester,
                 COUNT(w.studentId) AS totalStudents,
                 STRING_AGG(CONCAT(stu.studentEnglishFirstName, ' ', stu.studentEnglishLastName, 
-                           ' - ', stu.studentUniId),  -- Changed here
-                           ', ') WITHIN GROUP (ORDER BY w.priority DESC, w.requestDate) AS topStudents,
-                w.requestedSemester,
+                           ' (', stu.studentUniId, ')'), '|') WITHIN GROUP (ORDER BY w.priority DESC) AS studentList,
                 w.status
-           FROM waitlist w
-           INNER JOIN subjects s ON w.subjectId = s.subjectId
-           INNER JOIN students stu ON w.studentId = stu.studentId
-           WHERE s.universityId = @UniversityId
-             AND s.majorId = @MajorId
-           GROUP BY s.subjectCode, s.subjectEnglishName, w.requestedSemester, w.status
-           ORDER BY totalStudents DESC";
+            FROM waitlist w
+            INNER JOIN subjects s ON w.subjectId = s.subjectId
+            INNER JOIN students stu ON w.studentId = stu.studentId
+            WHERE s.universityId = @UniversityId
+              AND s.majorId = @MajorId
+            GROUP BY s.subjectId, s.subjectCode, s.subjectEnglishName, w.requestedSemester, w.status
+            ORDER BY totalStudents DESC";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-    {
-        { "@UniversityId", ViewState["UniversityId"] },
-        { "@MajorId", ViewState["MajorId"] }
-    };
+                {
+                    { "@UniversityId", ViewState["UniversityId"] },
+                    { "@MajorId", ViewState["MajorId"] }
+                };
 
             DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
             gvWaitlists.DataSource = dt;
@@ -165,12 +165,12 @@ namespace MyScheduleWebsite
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 DataRowView rowView = (DataRowView)e.Row.DataItem;
-                string topStudents = rowView["topStudents"].ToString();
+                string studentList = rowView["studentList"].ToString();
 
                 DropDownList ddlStudents = (DropDownList)e.Row.FindControl("ddlStudents");
                 if (ddlStudents != null)
                 {
-                    string[] students = topStudents.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] students = studentList.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (var student in students)
                     {
@@ -194,21 +194,53 @@ namespace MyScheduleWebsite
                    string.Join("", students.Select(s => $"<li>{s}</li>")) +
                    "</ul>";
         }
-        private void LoadDashboard()
-        {
-
-        }
-
         protected void btnApprove_Click(object sender, EventArgs e)
         {
-            Button btn = (Button)sender;
-            string requestId = btn.CommandArgument;
+            UpdateWaitlistStatus(sender, "Approved");
         }
+
         protected void btnDeny_Click(object sender, EventArgs e)
         {
-            Button btn = (Button)sender;
-            string requestId = btn.CommandArgument;
+            UpdateWaitlistStatus(sender, "Denied");
         }
+
+        private void UpdateWaitlistStatus(object sender, string newStatus)
+        {
+            Button btn = (Button)sender;
+            string[] args = btn.CommandArgument.ToString().Split('|');
+            int subjectId = Convert.ToInt32(args[0]);
+            string semester = args[1];
+
+            CRUD myCrud = new CRUD();
+            string sql = @"UPDATE w
+                  SET w.status = @Status,
+                      w.statusChangedBy = @ChangedBy,
+                      w.statusChangedDate = GETDATE()
+                  FROM waitlist w
+                  INNER JOIN subjects s ON w.subjectId = s.subjectId
+                  WHERE s.subjectId = @SubjectId
+                    AND w.requestedSemester = @Semester";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    { "@Status", newStatus },
+                    { "@ChangedBy", User.Identity.Name },
+                    { "@SubjectId", subjectId },
+                    { "@Semester", semester }
+                };
+
+            int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
+
+            if (rowsAffected > 0)
+            {
+                BindWaitlists();
+            }
+            else
+            {
+                
+            }
+        }
+
         protected void btnEdit_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
@@ -282,29 +314,53 @@ namespace MyScheduleWebsite
         {
             CRUD myCrud = new CRUD();
             string sql = @"SELECT 
-        s.subjectCode AS SubjectCode,
-        sub.subjectEnglishName AS SubjectName,
-        s.sectionNumber AS SectionNumber,
-        sub.creditHours AS CreditHours,
-        STRING_AGG(CONVERT(nvarchar, sd.day), ', ') + ' | ' +
-        STRING_AGG(CONVERT(nvarchar, sd.startTime, 108), ', ') + ' | ' +
-        STRING_AGG(CONVERT(nvarchar, sd.endTime, 108), ', ') + ' | ' +
-        STRING_AGG(sd.location, ', ') AS Schedule,
-        s.instructorName AS Instructor
-    FROM orderDetails od
-    INNER JOIN sections s ON od.sectionId = s.sectionId
-    INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
-    INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
-    WHERE od.orderId = @OrderId
-    GROUP BY s.subjectCode, sub.subjectEnglishName, s.sectionNumber, 
-            sub.creditHours, s.instructorName";
+                s.subjectCode AS SubjectCode,
+                sub.subjectEnglishName AS SubjectName,
+                s.sectionNumber AS SectionNumber,
+                sub.creditHours AS CreditHours,
+                STRING_AGG(CONVERT(nvarchar, sd.day), ', ') AS Days,
+                STRING_AGG(CONVERT(nvarchar, sd.startTime, 108), ', ') AS StartTimes,
+                STRING_AGG(CONVERT(nvarchar, sd.endTime, 108), ', ') AS EndTimes,
+                STRING_AGG(sd.location, ', ') AS Locations,
+                s.instuctorArabicName AS Instructor
+            FROM orderDetails od
+            INNER JOIN sections s ON od.sectionId = s.sectionId
+            INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+            INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+            WHERE od.orderId = @OrderId
+            GROUP BY s.subjectCode, sub.subjectEnglishName, s.sectionNumber, 
+                    sub.creditHours, s.instuctorArabicName";
 
             Dictionary<string, object> parameters = new Dictionary<string, object> {
-        { "@OrderId", orderId }
-    };
+                { "@OrderId", orderId }
+            };
 
-            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters) as DataTable;
-            return dt ?? new DataTable();
+            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters) as DataTable ?? new DataTable();
+
+            dt.Columns.Add("FormattedSchedule", typeof(string));
+
+            foreach (DataRow row in dt.Rows)
+            {
+                string[] days = row["Days"].ToString().Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] startTimes = row["StartTimes"].ToString().Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] endTimes = row["EndTimes"].ToString().Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] locations = row["Locations"].ToString().Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+
+                List<string> scheduleEntries = new List<string>();
+                for (int i = 0; i < days.Length; i++)
+                {
+                    scheduleEntries.Add(FormatScheduleDetails(
+                        days[i],
+                        startTimes.ElementAtOrDefault(i),
+                        endTimes.ElementAtOrDefault(i),
+                        locations.ElementAtOrDefault(i)
+                    ));
+                }
+
+                row["FormattedSchedule"] = string.Join("<br/>", scheduleEntries);
+            }
+
+            return dt;
         }
 
         public static string FormatScheduleDetails(string day, string startTime, string endTime, string location)
@@ -342,15 +398,36 @@ namespace MyScheduleWebsite
         protected void btnView_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            GridViewRow row = (GridViewRow)btn.NamingContainer;
-
-            string studentName = $"{DataBinder.Eval(row.DataItem, "studentEnglishFirstName")} {DataBinder.Eval(row.DataItem, "studentEnglishLastName")}";
-
-            lblModalStudentName.Text = studentName;
 
             int orderId = Convert.ToInt32(btn.CommandArgument);
-            DataTable dtOrderDetails = GetOrderDetails(orderId);
 
+            CRUD myCrud = new CRUD();
+            string studentSql = @"
+                SELECT s.studentEnglishFirstName, s.studentEnglishLastName, s.currentLevel 
+                FROM orders o
+                INNER JOIN students s ON o.studentId = s.studentId
+                WHERE o.orderId = @OrderId";
+
+            Dictionary<string, object> studentParams = new Dictionary<string, object>
+                {
+                    { "@OrderId", orderId }
+                };
+
+            DataTable studentDt = myCrud.getDTPassSqlDic(studentSql, studentParams);
+
+            if (studentDt.Rows.Count > 0)
+            {
+                DataRow student = studentDt.Rows[0];
+                lblModalStudentName.Text = $"Student Name: {student["studentEnglishFirstName"]} {student["studentEnglishLastName"]}";
+                lblModalStudentLevel.Text = $"Level: {student["currentLevel"]}";
+            }
+            else
+            {
+                lblModalStudentName.Text = "Student Not Found";
+                lblModalStudentLevel.Text = "N/A";
+            }
+
+            DataTable dtOrderDetails = GetOrderDetails(orderId);
             gvOrderDetails.DataSource = dtOrderDetails;
             gvOrderDetails.DataBind();
 
@@ -398,10 +475,68 @@ namespace MyScheduleWebsite
             int studentId = Convert.ToInt32(btn.CommandArgument);
         }
 
-        protected void btnExport_Click(object sender, EventArgs e)
+        private void LoadDashboard()
         {
-            Button btn = (Button)sender;
-            int orderId = Convert.ToInt32(btn.CommandArgument);
+            lblTotalStudents.Text = "Total Students: " + GetTotalStudentsCount().ToString("N0");
+
+            lblApprovedOrders.Text = "Approved Orders: " + GetApprovedOrdersCount().ToString("N0");
+
+            lblPendingActions.Text = "Pending Actions: " + GetPendingWaitlistActionsCount().ToString("N0");
+        }
+
+        private int GetTotalStudentsCount()
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT COUNT(*) 
+                 FROM students
+                 WHERE universityId = @UniversityId 
+                   AND majorId = @MajorId";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                { "@UniversityId", ViewState["UniversityId"] },
+                { "@MajorId", ViewState["MajorId"] }
+            };
+
+            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
+        }
+
+        private int GetApprovedOrdersCount()
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT COUNT(*) 
+                 FROM orders o
+                 INNER JOIN students s ON o.studentId = s.studentId
+                 WHERE s.universityId = @UniversityId 
+                   AND s.majorId = @MajorId
+                   AND o.status = 'Approved'";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+    {
+        { "@UniversityId", ViewState["UniversityId"] },
+        { "@MajorId", ViewState["MajorId"] }
+    };
+
+            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
+        }
+
+        private int GetPendingWaitlistActionsCount()
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT COUNT(DISTINCT CONCAT(w.subjectId, '|', w.requestedSemester))
+                 FROM waitlist w
+                 INNER JOIN subjects s ON w.subjectId = s.subjectId
+                 WHERE s.universityId = @UniversityId
+                   AND s.majorId = @MajorId
+                   AND w.status = 'Pending'";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+    {
+        { "@UniversityId", ViewState["UniversityId"] },
+        { "@MajorId", ViewState["MajorId"] }
+    };
+
+            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
         }
     }
 }

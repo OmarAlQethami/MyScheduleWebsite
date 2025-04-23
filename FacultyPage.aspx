@@ -92,13 +92,9 @@
                         <asp:TemplateField HeaderText="Actions" ItemStyle-Width="180px">
                             <ItemTemplate>
                                 <asp:Button ID="btnView" runat="server" CssClass="action-btn view" 
-                                    Text="View" CommandArgument='<%# Eval("OrderId") %>' 
+                                    Text="View" CommandArgument='<%# Eval("orderId") %>' 
                                     OnClick="btnView_Click"
-                                    Enabled='<%# Eval("OrderId") != DBNull.Value %>' />
-                                </button>
-                                <asp:Button ID="btnExport" runat="server" CssClass="action-btn export" 
-                                    Text="Export" CommandArgument='<%# Eval("OrderId") %>' 
-                                    OnClick="btnExport_Click" Visible='<%# Eval("OrderId") != DBNull.Value %>' />
+                                    Visible='<%# Eval("orderId") != DBNull.Value %>' />
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>
@@ -112,14 +108,16 @@
                     <Columns>
                         <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" />
                         <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" />
-                        <asp:BoundField DataField="totalStudents" HeaderText="Total Waitlisted" />
-                        <asp:TemplateField HeaderText="Interested Students">
+                        <asp:BoundField DataField="requestedSemester" HeaderText="Semester" />
+                        <asp:BoundField DataField="totalStudents" HeaderText="Waitlisted Students" />
+        
+                        <asp:TemplateField HeaderText="Students">
                             <ItemTemplate>
                                 <asp:DropDownList ID="ddlStudents" runat="server" CssClass="student-dropdown">
                                 </asp:DropDownList>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:BoundField DataField="requestedSemester" HeaderText="Semester" />
+        
                         <asp:TemplateField HeaderText="Status">
                             <ItemTemplate>
                                 <span class='status-badge <%# Eval("status").ToString().ToLower() %>'>
@@ -127,9 +125,25 @@
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
+        
+                        <asp:TemplateField HeaderText="Actions" ItemStyle-Width="180px">
+                            <ItemTemplate>
+                                <asp:Button ID="btnApprove" runat="server" Text="Approve" 
+                                    CssClass="action-btn approve" 
+                                    CommandArgument='<%# Eval("subjectId") + "|" + Eval("requestedSemester") %>' 
+                                    OnClick="btnApprove_Click" 
+                                    Visible='<%# Eval("status").ToString() == "Pending" %>' />
+                
+                                <asp:Button ID="btnDeny" runat="server" Text="Deny" 
+                                    CssClass="action-btn deny" 
+                                    CommandArgument='<%# Eval("subjectId") + "|" + Eval("requestedSemester") %>' 
+                                    OnClick="btnDeny_Click" 
+                                    Visible='<%# Eval("status").ToString() == "Pending" %>' />
+                            </ItemTemplate>
+                        </asp:TemplateField>
                     </Columns>
                 </asp:GridView>
-            </div>
+                </div>
 
             <div id="dashboard" class="tab-content">
                 <div class="chart-card">
@@ -182,37 +196,49 @@
             </div>
 
             <div class="modal-overlay" id="orderModal" onclick="hideModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="hideModal()">&times;</button>
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <button class="modal-close" onclick="hideModal()">&times;</button>
         
-        <div class="student-info-header">
-            <h3 style="margin: 0 0 10px 0;">Student Information</h3>
-            <div style="display: flex; gap: 15px;">
-                <div class="info-badge">
-                    <span class="info-label">Name:</span>
-                    <asp:Label ID="lblModalStudentName" runat="server" Text="N/A" />
-                </div>
-                <div class="info-badge">
-                    <span class="info-label">Level:</span>
-                    <asp:Label ID="lblModalStudentLevel" runat="server" Text="N/A" />
+                    <div class="student-info-header">
+                        <div style="display: flex; gap: 15px;">
+                            <div class="info-badge">
+                                <span class="info-label"></span>
+                                <asp:Label ID="lblModalStudentName" runat="server" cssclass="labels"
+                                    Text=""  />
+                            </div>
+        
+                            <div class="info-badge">
+                                <span class="info-label"></span>
+                                <asp:Label ID="lblModalStudentLevel" runat="server" cssclass="labels"
+                                    Text="" />
+                            </div>
+                        </div>
+                    </div>
+
+                <asp:Literal ID="litModalError" runat="server" Visible="false" />
+                    <asp:GridView ID="gvOrderDetails" runat="server" CssClass="students-table"
+                        AutoGenerateColumns="false">
+                        <Columns>
+                            <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" />
+                            <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
+                            <asp:BoundField DataField="SectionNumber" HeaderText="Section" />
+                            <asp:BoundField DataField="creditHours" HeaderText="Credits" />
+                            <asp:TemplateField HeaderText="Schedule">
+                                <ItemTemplate>
+                                    <%# Eval("FormattedSchedule") %>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:TemplateField HeaderText="Instructor" ItemStyle-HorizontalAlign="Center">
+                                <ItemTemplate>
+                                    <div class="instructor-cell">
+                                        <%# Eval("Instructor") %>
+                                    </div>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
                 </div>
             </div>
-        </div>
-
-        <asp:Literal ID="litModalError" runat="server" Visible="false" />
-        <asp:GridView ID="gvOrderDetails" runat="server" CssClass="students-table"
-            AutoGenerateColumns="false">
-                <Columns>
-                    <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" />
-                    <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
-                    <asp:BoundField DataField="SectionNumber" HeaderText="Section" />
-                    <asp:BoundField DataField="CreditHours" HeaderText="Credits" />
-                    <asp:BoundField DataField="Schedule" HeaderText="Schedule" />
-                    <asp:BoundField DataField="Instructor" HeaderText="Instructor" />
-                </Columns>
-            </asp:GridView>
-        </div>
-    </div>
         </div>
     </div>
 
@@ -330,7 +356,6 @@
             document.getElementById('orderModal').style.display = 'none';
         }
 
-        // Close modal when pressing ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') hideModal();
         });
