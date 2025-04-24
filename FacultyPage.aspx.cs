@@ -122,10 +122,29 @@ namespace MyScheduleWebsite
             return $"{GetDayName(academicDay)} | {formattedStart}-{formattedEnd} | {location}";
         }
 
-        private void BindWaitlists()
+        protected void gvWaitlists_Sorting(object sender, GridViewSortEventArgs e)
+        {
+            string sortDirection = ViewState["WaitlistSortDirection"]?.ToString() ?? "ASC";
+
+            if (ViewState["WaitlistSortExpression"]?.ToString() == e.SortExpression)
+            {
+                sortDirection = (sortDirection == "ASC") ? "DESC" : "ASC";
+            }
+            else
+            {
+                sortDirection = "ASC";
+            }
+
+            ViewState["WaitlistSortExpression"] = e.SortExpression;
+            ViewState["WaitlistSortDirection"] = sortDirection;
+
+            BindWaitlists(e.SortExpression, sortDirection);
+        }
+
+        private void BindWaitlists(string sortExpression = "subjectCode", string sortDirection = "ASC")
         {
             CRUD myCrud = new CRUD();
-            string sql = @"SELECT 
+            string sql = $@"SELECT 
                 s.subjectId,
                 s.subjectCode,
                 s.subjectEnglishName,
@@ -140,7 +159,7 @@ namespace MyScheduleWebsite
             WHERE s.universityId = @UniversityId
               AND s.majorId = @MajorId
             GROUP BY s.subjectId, s.subjectCode, s.subjectEnglishName, w.requestedSemester, w.status
-            ORDER BY totalStudents DESC";
+            ORDER BY {ValidateWaitlistSortColumn(sortExpression)} {sortDirection}";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
@@ -153,11 +172,37 @@ namespace MyScheduleWebsite
             gvWaitlists.DataBind();
         }
 
+        private string ValidateWaitlistSortColumn(string columnName)
+        {
+            var allowedColumns = new List<string>
+                {
+                    "subjectCode",
+                    "subjectEnglishName",
+                    "requestedSemester",
+                    "totalStudents",
+                    "status"
+                };
+
+            return allowedColumns.Contains(columnName) ? columnName : "subjectCode";
+        }
+
         protected void gvWaitlists_PreRender(object sender, EventArgs e)
         {
             if (gvWaitlists.Rows.Count > 0)
             {
                 gvWaitlists.HeaderRow.TableSection = TableRowSection.TableHeader;
+
+                string currentSort = ViewState["WaitlistSortExpression"]?.ToString();
+                string sortDirection = ViewState["WaitlistSortDirection"]?.ToString();
+
+                foreach (DataControlFieldHeaderCell header in gvWaitlists.HeaderRow.Cells
+                    .OfType<DataControlFieldHeaderCell>())
+                {
+                    if (header.ContainingField.SortExpression == currentSort)
+                    {
+                        header.CssClass += sortDirection == "ASC" ? " sort-asc" : " sort-desc";
+                    }
+                }
             }
         }
         protected void gvWaitlists_RowDataBound(object sender, GridViewRowEventArgs e)
@@ -284,18 +329,37 @@ namespace MyScheduleWebsite
             return Guid.Empty;
         }
 
-        protected void BindStudents()
+        protected void gvStudents_Sorting(object sender, GridViewSortEventArgs e)
+        {
+            string sortDirection = ViewState["SortDirection"]?.ToString() ?? "ASC";
+
+            if (ViewState["SortExpression"]?.ToString() == e.SortExpression)
+            {
+                sortDirection = (sortDirection == "ASC") ? "DESC" : "ASC";
+            }
+            else
+            {
+                sortDirection = "ASC";
+            }
+
+            ViewState["SortExpression"] = e.SortExpression;
+            ViewState["SortDirection"] = sortDirection;
+
+            BindStudents(e.SortExpression, sortDirection);
+        }
+
+        private void BindStudents(string sortExpression = "studentUniId", string sortDirection = "ASC")
         {
             CRUD myCrud = new CRUD();
-            string sql = @"SELECT s.studentId, s.studentUniId, s.currentLevel, 
-                            s.studentEnglishFirstName, s.studentEnglishLastName,
-                            o.orderId, o.orderDate, o.status
-                            FROM students s
-                            LEFT JOIN orders o ON s.studentId = o.studentId
-                            WHERE s.universityId = @UniversityId 
-                            AND s.majorId = @MajorId
-                            AND (s.studentEnglishFirstName + ' ' + s.studentEnglishLastName LIKE '%' + @Search + '%' 
-                            OR s.studentUniId LIKE '%' + @Search + '%')";
+            string sql = $@"SELECT 
+                s.studentId, s.studentUniId, s.currentLevel, 
+                s.studentEnglishFirstName, s.studentEnglishLastName,
+                o.orderId, o.orderDate, o.status
+                FROM students s
+                LEFT JOIN orders o ON s.studentId = o.studentId
+                WHERE s.universityId = @UniversityId 
+                  AND s.majorId = @MajorId
+                ORDER BY {ValidateSortColumn(sortExpression)} {sortDirection}";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
@@ -307,6 +371,20 @@ namespace MyScheduleWebsite
             DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
             gvStudents.DataSource = dt;
             gvStudents.DataBind();
+        }
+
+        private string ValidateSortColumn(string columnName)
+        {
+            var allowedColumns = new List<string>
+                {
+                    "studentUniId",
+                    "currentLevel",
+                    "studentEnglishFirstName",
+                    "status",
+                    "OrderDate"
+                };
+
+            return allowedColumns.Contains(columnName) ? columnName : "studentUniId";
         }
 
         [System.Web.Services.WebMethod(EnableSession = true)]
@@ -456,6 +534,18 @@ namespace MyScheduleWebsite
             if (gvStudents.Rows.Count > 0)
             {
                 gvStudents.HeaderRow.TableSection = TableRowSection.TableHeader;
+
+                string currentSort = ViewState["SortExpression"]?.ToString();
+                string sortDirection = ViewState["SortDirection"]?.ToString();
+
+                foreach (DataControlFieldHeaderCell header in gvStudents.HeaderRow.Cells
+                    .OfType<DataControlFieldHeaderCell>())
+                {
+                    if (header.ContainingField.SortExpression == currentSort)
+                    {
+                        header.CssClass += sortDirection == "ASC" ? " sort-asc" : " sort-desc";
+                    }
+                }
             }
         }
 
@@ -493,10 +583,10 @@ namespace MyScheduleWebsite
                    AND majorId = @MajorId";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-            {
-                { "@UniversityId", ViewState["UniversityId"] },
-                { "@MajorId", ViewState["MajorId"] }
-            };
+                {
+                    { "@UniversityId", ViewState["UniversityId"] },
+                    { "@MajorId", ViewState["MajorId"] }
+                };
 
             return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
         }
@@ -512,10 +602,10 @@ namespace MyScheduleWebsite
                    AND o.status = 'Approved'";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-    {
-        { "@UniversityId", ViewState["UniversityId"] },
-        { "@MajorId", ViewState["MajorId"] }
-    };
+                {
+                    { "@UniversityId", ViewState["UniversityId"] },
+                    { "@MajorId", ViewState["MajorId"] }
+                };
 
             return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
         }
@@ -531,10 +621,10 @@ namespace MyScheduleWebsite
                    AND w.status = 'Pending'";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-    {
-        { "@UniversityId", ViewState["UniversityId"] },
-        { "@MajorId", ViewState["MajorId"] }
-    };
+                {
+                    { "@UniversityId", ViewState["UniversityId"] },
+                    { "@MajorId", ViewState["MajorId"] }
+                };
 
             return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
         }

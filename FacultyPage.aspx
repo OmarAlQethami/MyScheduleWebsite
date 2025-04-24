@@ -69,32 +69,37 @@
                 <asp:GridView ID="gvStudents" runat="server" CssClass="students-table"
                     AutoGenerateColumns="false" 
                     OnPreRender="gvStudents_PreRender" 
-                    DataKeyNames="OrderId">
-                    <HeaderStyle CssClass="modal-grid-header" />
-                    <RowStyle CssClass="modal-grid-row" />
+                    DataKeyNames="OrderId"
+                    AllowSorting="true"
+                    OnSorting="gvStudents_Sorting">
                     <Columns>
-                        <asp:BoundField DataField="StudentUniId" HeaderText="Student ID" />
-                        <asp:BoundField DataField="CurrentLevel" HeaderText="Level" />
-                        <asp:TemplateField HeaderText="Student Name">
+                        <asp:BoundField DataField="studentUniId" HeaderText="Student ID" SortExpression="studentUniId" />
+                        <asp:BoundField DataField="currentLevel" HeaderText="Level" SortExpression="currentLevel" />
+        
+                        <asp:TemplateField HeaderText="Student Name" SortExpression="studentEnglishFirstName">
                             <ItemTemplate>
                                 <%# Eval("studentEnglishFirstName") + " " + Eval("studentEnglishLastName") %>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:TemplateField HeaderText="Order Status">
+        
+                        <asp:TemplateField HeaderText="Order Status" SortExpression="status">
                             <ItemTemplate>
                                 <span class='status-badge <%# GetStatusClass(Eval("status")) %>'>
                                     <%# GetOrderStatus(Eval("status")) %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
+        
                         <asp:BoundField DataField="OrderDate" HeaderText="Order Date" 
-                            DataFormatString="{0:dd MMM yyyy hh:mm tt}" HtmlEncode="false" />
-                        <asp:TemplateField HeaderText="Actions" ItemStyle-Width="180px">
+                            DataFormatString="{0:dd MMM yyyy hh:mm tt}" HtmlEncode="false" SortExpression="OrderDate" />
+        
+                        <asp:TemplateField HeaderText="Actions">
                             <ItemTemplate>
                                 <asp:Button ID="btnView" runat="server" CssClass="action-btn view" 
-                                    Text="View" CommandArgument='<%# Eval("orderId") %>' 
+                                    Text="View" CommandArgument='<%# Eval("OrderId") %>' 
                                     OnClick="btnView_Click"
-                                    Visible='<%# Eval("orderId") != DBNull.Value %>' />
+                                    ClientIDMode="AutoID"
+                                    Visible='<%# Eval("OrderId") != DBNull.Value %>' />
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>
@@ -103,39 +108,45 @@
 
             <div id="waitlists" class="tab-content">
                 <asp:GridView ID="gvWaitlists" runat="server" CssClass="waitlist-table" 
-                    AutoGenerateColumns="false" OnPreRender="gvWaitlists_PreRender"
-                    OnRowDataBound="gvWaitlists_RowDataBound">
+                    AutoGenerateColumns="false" 
+                    OnPreRender="gvWaitlists_PreRender"
+                    OnRowDataBound="gvWaitlists_RowDataBound"
+                    ClientIDMode="AutoID"
+                    AllowSorting="true"
+                    OnSorting="gvWaitlists_Sorting">
                     <Columns>
-                        <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" />
-                        <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" />
-                        <asp:BoundField DataField="requestedSemester" HeaderText="Semester" />
-                        <asp:BoundField DataField="totalStudents" HeaderText="Waitlisted Students" />
-        
+                        <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" SortExpression="subjectCode" />
+                        <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" SortExpression="subjectEnglishName" />
+                        <asp:BoundField DataField="requestedSemester" HeaderText="Semester" SortExpression="requestedSemester" />
+                        <asp:BoundField DataField="totalStudents" HeaderText="Waitlisted Students" SortExpression="totalStudents" />
+    
                         <asp:TemplateField HeaderText="Students">
                             <ItemTemplate>
-                                <asp:DropDownList ID="ddlStudents" runat="server" CssClass="student-dropdown">
+                                <asp:DropDownList ID="ddlStudents" runat="server" CssClass="student-dropdown" ClientIDMode="Predictable">
                                 </asp:DropDownList>
                             </ItemTemplate>
                         </asp:TemplateField>
-        
-                        <asp:TemplateField HeaderText="Status">
+    
+                        <asp:TemplateField HeaderText="Status" SortExpression="status">
                             <ItemTemplate>
                                 <span class='status-badge <%# Eval("status").ToString().ToLower() %>'>
                                     <%# Eval("status") %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
-        
+    
                         <asp:TemplateField HeaderText="Actions" ItemStyle-Width="180px">
                             <ItemTemplate>
                                 <asp:Button ID="btnApprove" runat="server" Text="Approve" 
                                     CssClass="action-btn approve" 
+                                    ClientIDMode="Predictable"
                                     CommandArgument='<%# Eval("subjectId") + "|" + Eval("requestedSemester") %>' 
                                     OnClick="btnApprove_Click" 
                                     Visible='<%# Eval("status").ToString() == "Pending" %>' />
-                
+        
                                 <asp:Button ID="btnDeny" runat="server" Text="Deny" 
                                     CssClass="action-btn deny" 
+                                    ClientIDMode="Predictable"
                                     CommandArgument='<%# Eval("subjectId") + "|" + Eval("requestedSemester") %>' 
                                     OnClick="btnDeny_Click" 
                                     Visible='<%# Eval("status").ToString() == "Pending" %>' />
@@ -143,7 +154,7 @@
                         </asp:TemplateField>
                     </Columns>
                 </asp:GridView>
-                </div>
+            </div>
 
             <div id="dashboard" class="tab-content">
                 <div class="chart-card">

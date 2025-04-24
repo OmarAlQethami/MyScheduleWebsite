@@ -165,7 +165,7 @@
 
 
 .students-table td:last-child {
-    text-align: left;
+    padding-left: 12px;
 }
 
 .status-badge {
@@ -536,3 +536,27 @@
     padding: 12px;
 }
 
+.students-table th {
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+    .students-table th:hover {
+        background: #e9ecef !important;
+    }
+
+.sort-indicator {
+    margin-left: 8px;
+    font-size: 0.8em;
+}
+
+.sort-asc::after {
+    content: "▲";
+    color: #3498db;
+}
+
+.sort-desc::after {
+    content: "▼";
+    color: #3498db;
+}
