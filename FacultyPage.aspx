@@ -1,11 +1,13 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" 
     AutoEventWireup="true" CodeBehind="FacultyPage.aspx.cs" 
-    Inherits="MyScheduleWebsite.FacultyPage" ClientIDMode="Static" %>
+    Inherits="MyScheduleWebsite.FacultyPage" ClientIDMode="Static" EnableEventValidation="false"%>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <link rel="stylesheet" href="/styles/FacultyStyles.css">
     <asp:HiddenField ID="hdnActiveTab" runat="server" Value="students" ClientIDMode="Static"/>
     <asp:HiddenField ID="hdnSelectedOrder" runat="server" />
+    <asp:HiddenField ID="hdnOrderStatusData" runat="server" />
+    <asp:HiddenField ID="hdnWaitlistStatusData" runat="server" />
 
     <div class="faculty-container">
         <div class="faculty-header">
@@ -98,7 +100,7 @@
                                 <asp:Button ID="btnView" runat="server" CssClass="action-btn view" 
                                     Text="View" CommandArgument='<%# Eval("OrderId") %>' 
                                     OnClick="btnView_Click"
-                                    ClientIDMode="AutoID"
+                                    ClientIDMode="Predictable" 
                                     Visible='<%# Eval("OrderId") != DBNull.Value %>' />
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -157,9 +159,76 @@
             </div>
 
             <div id="dashboard" class="tab-content">
-                <div class="chart-card">
-                    <h3>Order Status Distribution</h3>
-                    <canvas id="orderChart" width="100" height="100"></canvas>
+                <div class="dashboard-container">
+                    <div class="dashboard-stats-container">
+                        <div class="stats-section">
+                            <h3 class="section-header">Orders Statistics</h3>
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= OrderStatuses["Approved"] %></div>
+                                    <div class="stat-label">Approved</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= OrderStatuses["Pending"] %></div>
+                                    <div class="stat-label">Pending</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= OrderStatuses["Not Ordered"] %></div>
+                                    <div class="stat-label">Not Ordered</div>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <canvas id="orderChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="stats-section">
+                            <h3 class="section-header">Waitlists Statistics</h3>
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= WaitlistStatuses["Approved"] %></div>
+                                    <div class="stat-label">Approved</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= WaitlistStatuses["Pending"] %></div>
+                                    <div class="stat-label">Pending</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><%= WaitlistStatuses["Denied"] %></div>
+                                    <div class="stat-label">Denied</div>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <canvas id="waitlistChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="data-tables">
+                        <div class="table-card">
+                            <h4>Most Ordered Subjects</h4>
+                            <asp:GridView ID="gvPopularSubjects" runat="server" CssClass="dashboard-table"
+                                AutoGenerateColumns="false">
+                                <Columns>
+                                    <asp:BoundField DataField="SubjectCode" HeaderText="Code" />
+                                    <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
+                                    <asp:BoundField DataField="RequestCount" HeaderText="Orders" />
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                        <div class="table-card">
+                            <h4>Top Waitlisted Subjects</h4>
+                            <asp:GridView ID="gvTopWaitlists" runat="server" CssClass="dashboard-table" 
+                                AutoGenerateColumns="false">
+                                <Columns>
+                                    <asp:BoundField DataField="SubjectCode" HeaderText="Code" />
+                                    <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
+                                    <asp:BoundField DataField="WaitCount" HeaderText="Waitlists" />
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -258,44 +327,142 @@
     <script src="scripts/facultyPage.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            try {
-                const activeTabControl = document.getElementById('hdnActiveTab');
-                const activeTab = activeTabControl ? activeTabControl.value : 'students';
-                setActiveTab(activeTab);
+        let orderChart = null;
+        let waitlistChart = null;
+        let chartsInitialized = false;
+        let chartInitializationPending = false;
+        let resizeObserver = null;
+        let tabHandlerRegistered = false;
 
-                const ctx = document.getElementById('orderChart')?.getContext('2d');
-                if (ctx) {
-                    new Chart(ctx, {
-                        type: 'pie',
-                        data: {
-                            labels: ['Approved', 'Pending', 'Not Ordered'],
-                            datasets: [{
-                                data: [85, 5, 30],
-                                backgroundColor: ['#4CAF50', '#FFC107', '#E91E63']
-                            }]
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error('Initialization error:', e);
+        document.addEventListener("DOMContentLoaded", function () {
+            if (!tabHandlerRegistered) {
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    link.addEventListener('click', handleTabClick);
+                });
+                tabHandlerRegistered = true;
             }
+
+            const initialTab = document.getElementById('hdnActiveTab')?.value || 'students';
+            setActiveTab(initialTab);
         });
 
-        function setActiveTab(tabId) {
-            document.getElementById('<%= hdnActiveTab.ClientID%>').value = tabId;
-            document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+        function handleTabClick(e) {
+            const targetTab = this.dataset.target;
+
+            setActiveTab(targetTab);
+
+            if (targetTab === 'dashboard') {
+                setTimeout(() => {
+                    if (!chartsInitialized) {
+                        initializeCharts();
+                    }
+                }, 1);
+            }
         }
+
+        function setActiveTab(tabId) {
+
+            const tabControl = document.getElementById('<%= hdnActiveTab.ClientID%>');
+            if (tabControl) {
+                tabControl.value = tabId;
+            }
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.classList.toggle('active', link.dataset.target === tabId);
+            });
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabId);
+            });
+        }
+
+        function initializeCharts() {
+            if (chartInitializationPending || chartsInitialized) return;
+            chartInitializationPending = true;
+
+            const orderCanvas = document.getElementById('orderChart');
+            const waitlistCanvas = document.getElementById('waitlistChart');
+
+            try {
+                orderChart = new Chart(orderCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Approved', 'Pending', 'Not Ordered'],
+                        datasets: [{
+                            data: window.orderStatusData || [0, 0, 0],
+                            backgroundColor: ['#4CAF50', '#FFC107', '#E91E63'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 20 }
+                            }
+                        }
+                    }
+                });
+
+                waitlistChart = new Chart(waitlistCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Approved', 'Pending', 'Denied'],
+                        datasets: [{
+                            data: window.waitlistStatusData || [0, 0, 0],
+                            backgroundColor: ['#4CAF50', '#FFC107', '#E91E63'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 20 }
+                            }
+                        }
+                    }
+                });
+
+                if (!resizeObserver) {
+                    resizeObserver = new ResizeObserver(entries => {
+                        orderChart?.resize();
+                        waitlistChart?.resize();
+                    });
+                    resizeObserver.observe(orderCanvas.parentElement);
+                    resizeObserver.observe(waitlistCanvas.parentElement);
+                }
+
+                chartsInitialized = true;
+            } catch (error) {
+                console.error('Chart error:', error);
+            }
+
+            chartInitializationPending = false;
+        }
+
+        function showModal() {
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideModal();
+        });
 
         function toggleDetails(orderId) {
             const detailsDiv = document.getElementById(`details_${orderId}`);
             if (!detailsDiv) return;
-
             detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
-
             const btn = document.querySelector(`[data-orderid="${orderId}"]`);
             btn.classList.toggle('active');
         }
@@ -309,66 +476,54 @@
                 body: JSON.stringify({ orderId: orderId }),
                 credentials: 'same-origin'
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const errorContainer = document.getElementById('modalError');
+                    errorContainer.style.display = 'none';
+
+                    if (data.error) {
+                        errorContainer.textContent = data.error + (data.details ? ` (${data.details})` : '');
+                        errorContainer.style.display = 'block';
+                        return;
+                    }
+
+                    const details = data.d || [];
+                    const tbody = document.getElementById('modalTableBody');
+                    tbody.innerHTML = '';
+
+                    if (details.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6">No order details found</td></tr>';
+                        return;
+                    }
+
+                    details.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                                <td>${item.SubjectCode || ''}</td>
+                                <td>${item.SubjectName || ''}</td>
+                                <td>${item.SectionNumber || ''}</td>
+                                <td>${item.CreditHours || ''}</td>
+                                <td>${item.Schedule || ''}</td>
+                                <td>${item.Instructor || 'TBA'}</td>
+                            `;
+                        tbody.appendChild(row);
                     });
-                }
-                return response.json();
-            })
-            .then(data => {
-                const errorContainer = document.getElementById('modalError');
-                errorContainer.style.display = 'none';
-        
-                if (data.error) {
-                    errorContainer.textContent = data.error + (data.details ? ` (${data.details})` : '');
-                    errorContainer.style.display = 'block';
-                    return;
-                }   
-        
-                const details = data.d || [];
-                const tbody = document.getElementById('modalTableBody');
-                tbody.innerHTML = '';
 
-                if (details.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6">No order details found</td></tr>';
-                    return;
-                }
-
-                details.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.SubjectCode || ''}</td>
-                        <td>${item.SubjectName || ''}</td>
-                        <td>${item.SectionNumber || ''}</td>
-                        <td>${item.CreditHours || ''}</td>
-                        <td>${item.Schedule || ''}</td>
-                        <td>${item.Instructor || 'TBA'}</td>
-                    `;
-                    tbody.appendChild(row);
+                    document.getElementById('orderDetailsModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const tbody = document.getElementById('modalTableBody');
+                    tbody.innerHTML = '<tr><td colspan="6">Error loading details</td></tr>';
+                    document.getElementById('orderDetailsModal').style.display = 'block';
                 });
-
-                document.getElementById('orderDetailsModal').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const tbody = document.getElementById('modalTableBody');
-                tbody.innerHTML = '<tr><td colspan="6">Error loading details</td></tr>';
-                document.getElementById('orderDetailsModal').style.display = 'block';
-            });
         }
-
-        function showModal() {
-            document.getElementById('orderModal').style.display = 'flex';
-        }
-
-        function hideModal() {
-            document.getElementById('orderModal').style.display = 'none';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') hideModal();
-        });
     </script>
 </asp:Content>

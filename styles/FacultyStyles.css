@@ -112,7 +112,9 @@
 .students-table,
 .major-plan-table,
 .waitlist-table,
-.curriculum-table {
+.curriculum-table,
+.dashboard-table
+{
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -126,7 +128,9 @@
 .students-table th,
 .major-plan-table th,
 .waitlist-table th,
-.curriculum-table th {
+.curriculum-table th,
+.dashboard-table th
+{
     background-color: #f8f9fa;
     padding: 0.75rem 1rem;
     font-weight: 600;
@@ -136,30 +140,34 @@
     text-align: center;
 }
 
-    
+
 .students-table tbody td,
 .major-plan-table tbody td,
 .waitlist-table tbody td,
-.curriculum-table tbody td {
+.curriculum-table tbody td,
+.dashboard-table tbpdy td 
+{
     padding: 0.75rem 1rem;
     color: #495057;
     border-bottom: 1px solid #e9ecef;
     text-align: center;
 }
 
-    
+
 .students-table tbody tr:nth-child(even),
 .major-plan-table tbody tr:nth-child(even),
 .waitlist-table tbody tr:nth-child(even),
-.curriculum-table tbody tr:nth-child(even) {
+.curriculum-table tbody tr:nth-child(even),
+.dashboard-table tbody tr:nth-child(even) {
     background-color: #fcfcfc;
 }
 
-    
+
 .students-table tbody tr:hover,
 .major-plan-table tbody tr:hover,
 .waitlist-table tbody tr:hover,
-.curriculum-table tbody tr:hover {
+.curriculum-table tbody tr:hover,
+.dashboard-table tbody tr:hover {
     background-color: #f1f3f5;
 }
 
@@ -256,21 +264,6 @@
     align-items: center;
     font-size: 0.9em;
     transition: width 0.3s;
-}
-
-@media (max-width: 768px) {
-    .curriculum-columns {
-        grid-template-columns: 1fr;
-    }
-
-    .tab-nav {
-        flex-wrap: wrap;
-    }
-
-    .tab-link {
-        flex: 1 0 45%;
-        margin: 2px;
-    }
 }
 
 .filters {
@@ -414,13 +407,6 @@
 }
 
 
-.modal-content {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-
 .modal-grid tr:hover {
     background-color: #f5f5f5;
 }
@@ -440,12 +426,13 @@
 }
 
 .modal-content {
-    background: #EEEEEE;
+    background: #fff;
+    margin: 5% auto;
     padding: 20px;
-    border-radius: 10px;
-    position: relative;
-    max-width: 1000px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     width: 90%;
+    max-width: 1000px;
 }
 
 .student-info-header {
@@ -559,4 +546,261 @@
 .sort-desc::after {
     content: "▼";
     color: #3498db;
+}
+
+.dashboard-container {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #666;
+}
+
+#orderChart {
+    height: 200px;
+    --approved-color: #4CAF50;
+    --pending-color: #FFC107;
+    --not-ordered-color: #E91E63;
+}
+
+#waitlistChart {
+    height: 200px;
+    --pending-color: #FFC107;
+    --approved-color: #4CAF50;
+    --denied-color: #F44336;
+}
+
+.data-tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.table-card {
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.table-card h4 {
+    text-align: center;
+    margin-bottom: 15px
+}
+
+.dashboard-table {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.stats-grid {
+    flex: 1;
+    min-width: 300px;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stats-header {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.stat-card {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-left: 4px solid;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats-container {
+        flex-direction: column;
+    }
+}
+
+.stat-card.total-students {
+    border-bottom: 4px solid #2196F3;
+}
+
+.stat-card.ordered-students {
+    border-bottom: 4px solid #4CAF50;
+}
+
+.stat-card.pending-actions {
+    border-bottom: 4px solid #FFC107;
+}
+
+.dashboard-stats-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px
+}
+
+.stats-section {
+    flex: 1;
+    min-width: 400px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 30px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 1.5rem;
+    padding-bottom: 30px
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0 1.5rem;
+}
+
+.stat-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+    .stats-section {
+        min-width: 100%;
+        margin: 1rem 0;
+    }
+
+    .stats-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+}
+
+.stats-section:nth-child(1) {
+    border-color: #2196F3;
+}
+
+.stats-section:nth-child(2) {
+    border-color: #FF9800;
+}
+
+.stat-item:nth-child(1) .stat-value {
+    color: #4CAF50;
+}
+.stat-item:nth-child(1) .stat-label {
+    color: #2C5F2D;
+}
+
+.stat-item:nth-child(2) .stat-value {
+    color: #FFC107;
+}
+.stat-item:nth-child(2) .stat-label {
+    color: #87431D;
+}
+
+.stat-item:nth-child(3) .stat-value {
+    color: #E91E63;
+}
+.stat-item:nth-child(3) .stat-label {
+    color: #7B241C;
+}
+
+@media (max-width: 768px) {
+    .stats-section {
+        min-width: 100%;
+        margin: 1rem 0;
+    }
+
+    .stats-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+}
+
+.chart-card {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    min-height: 250px;
+}
+
+.chart-card canvas {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    display: block !important;
 }

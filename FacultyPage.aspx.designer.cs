@@ -33,6 +33,24 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.HiddenField hdnSelectedOrder;
 
         /// <summary>
+        /// hdnOrderStatusData control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnOrderStatusData;
+
+        /// <summary>
+        /// hdnWaitlistStatusData control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnWaitlistStatusData;
+
+        /// <summary>
         /// lblFacultyName control.
         /// </summary>
         /// <remarks>
@@ -157,6 +175,24 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvWaitlists;
+
+        /// <summary>
+        /// gvPopularSubjects control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvPopularSubjects;
+
+        /// <summary>
+        /// gvTopWaitlists control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvTopWaitlists;
 
         /// <summary>
         /// gvMajorPlan control.

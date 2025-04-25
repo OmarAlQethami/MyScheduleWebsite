@@ -17,12 +17,12 @@ namespace MyScheduleWebsite
             if (!IsPostBack)
             {
                 GetFacultyUniversityAndMajor();
-                LoadDashboard();
-                BindStudents();
                 BindMajorPlan();
                 BindCurriculum();
                 BindWaitlists();
             }
+            BindStudents();
+            LoadDashboard();
         }
 
         private int curriculumId = 1;
@@ -41,10 +41,10 @@ namespace MyScheduleWebsite
                    ORDER BY s.subjectLevel, s.subjectCode";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-    {
-        { "@UniversityId", ViewState["UniversityId"] },
-        { "@MajorId", ViewState["MajorId"] }
-    };
+                {
+                    { "@UniversityId", ViewState["UniversityId"] },
+                    { "@MajorId", ViewState["MajorId"] }
+                };
 
             DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
             gvMajorPlan.DataSource = dt;
@@ -565,15 +565,6 @@ namespace MyScheduleWebsite
             int studentId = Convert.ToInt32(btn.CommandArgument);
         }
 
-        private void LoadDashboard()
-        {
-            lblTotalStudents.Text = "Total Students: " + GetTotalStudentsCount().ToString("N0");
-
-            lblApprovedOrders.Text = "Approved Orders: " + GetApprovedOrdersCount().ToString("N0");
-
-            lblPendingActions.Text = "Pending Actions: " + GetPendingWaitlistActionsCount().ToString("N0");
-        }
-
         private int GetTotalStudentsCount()
         {
             CRUD myCrud = new CRUD();
@@ -591,42 +582,240 @@ namespace MyScheduleWebsite
             return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
         }
 
-        private int GetApprovedOrdersCount()
+        private Dictionary<string, object> GetUniversityParams()
         {
-            CRUD myCrud = new CRUD();
-            string sql = @"SELECT COUNT(*) 
-                 FROM orders o
-                 INNER JOIN students s ON o.studentId = s.studentId
-                 WHERE s.universityId = @UniversityId 
-                   AND s.majorId = @MajorId
-                   AND o.status = 'Approved'";
-
-            Dictionary<string, object> parameters = new Dictionary<string, object>
-                {
-                    { "@UniversityId", ViewState["UniversityId"] },
-                    { "@MajorId", ViewState["MajorId"] }
-                };
-
-            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
+            return new Dictionary<string, object>
+            {
+                { "@UniversityId", ViewState["UniversityId"] },
+                { "@MajorId", ViewState["MajorId"] }
+            };
         }
 
-        private int GetPendingWaitlistActionsCount()
+        public class DashboardData
+        {
+            public int TotalStudents { get; set; }
+            public int StudentsWithOrders { get; set; }
+            public int StudentsWithoutOrders { get; set; }
+            public Dictionary<string, int> OrderStatuses { get; set; } = new Dictionary<string, int>
+            {
+                ["Approved"] = 0,
+                ["Pending"] = 0,
+                ["Denied"] = 0,
+                ["Not Ordered"] = 0
+            };
+
+            public Dictionary<string, int> WaitlistStatuses { get; set; } = new Dictionary<string, int>
+            {
+                ["Approved"] = 0,
+                ["Pending"] = 0,
+                ["Denied"] = 0
+            };
+            public DataTable TopWaitlisted { get; set; }
+            public DataTable PopularSubjects { get; set; }
+        }
+
+        private DashboardData GetDashboardData()
+        {
+            var data = new DashboardData();
+
+            var orderStatuses = GetOrderStatusDistribution();
+            foreach (var kvp in orderStatuses)
+            {
+                data.OrderStatuses[kvp.Key] = kvp.Value;
+            }
+
+            var waitlistStatuses = GetWaitlistStatusDistribution();
+            foreach (var kvp in waitlistStatuses)
+            {
+                data.WaitlistStatuses[kvp.Key] = kvp.Value;
+            }
+
+            data.TotalStudents = GetTotalStudentsCount();
+            data.StudentsWithOrders = GetStudentsWithOrdersCount();
+            data.StudentsWithoutOrders = GetStudentsWithoutOrdersCount();
+            data.TopWaitlisted = GetTopWaitlistedSubjects();
+            data.PopularSubjects = GetPopularSubjects();
+
+            return data;
+        }
+
+        private Dictionary<string, int> GetOrderStatusDistribution()
+        {
+            var statuses = new Dictionary<string, int>
+            {
+                ["Approved"] = 0,
+                ["Pending"] = 0,
+                ["Denied"] = 0,
+                ["Not Ordered"] = 0
+            };
+
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT ISNULL(o.status, 'Not Ordered') AS Status, 
+                          COUNT(DISTINCT s.studentId) AS Count
+                   FROM students s
+                   LEFT JOIN orders o ON s.studentId = o.studentId
+                   WHERE s.universityId = @UniversityId 
+                     AND s.majorId = @MajorId
+                   GROUP BY o.status";
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, GetUniversityParams());
+
+            foreach (DataRow row in dt.Rows)
+            {
+                string status = row["Status"].ToString();
+                int count = Convert.ToInt32(row["Count"]);
+
+                if (statuses.ContainsKey(status))
+                {
+                    statuses[status] = count;
+                }
+            }
+
+            return statuses;
+        }
+
+        private DataTable GetTopWaitlistedSubjects()
+        {
+            string sql = @"SELECT TOP 5 s.subjectCode, s.subjectEnglishName AS SubjectName, 
+                          COUNT(*) AS WaitCount
+                   FROM waitlist w
+                   INNER JOIN subjects s ON w.subjectId = s.subjectId
+                   WHERE s.universityId = @UniversityId AND s.majorId = @MajorId
+                   GROUP BY s.subjectCode, s.subjectEnglishName
+                   ORDER BY WaitCount DESC";
+
+            return new CRUD().getDTPassSqlDic(sql, GetUniversityParams());
+        }
+
+        private int GetStudentsWithOrdersCount()
         {
             CRUD myCrud = new CRUD();
-            string sql = @"SELECT COUNT(DISTINCT CONCAT(w.subjectId, '|', w.requestedSemester))
-                 FROM waitlist w
-                 INNER JOIN subjects s ON w.subjectId = s.subjectId
-                 WHERE s.universityId = @UniversityId
-                   AND s.majorId = @MajorId
-                   AND w.status = 'Pending'";
+            string sql = @"SELECT COUNT(DISTINCT s.studentId)
+                   FROM students s
+                   INNER JOIN orders o ON s.studentId = o.studentId
+                   WHERE s.universityId = @UniversityId 
+                     AND s.majorId = @MajorId";
 
-            Dictionary<string, object> parameters = new Dictionary<string, object>
+            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, GetUniversityParams()).Rows[0][0]);
+        }
+
+        private int GetStudentsWithoutOrdersCount()
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT COUNT(*)
+                   FROM students
+                   WHERE universityId = @UniversityId 
+                     AND majorId = @MajorId
+                     AND studentId NOT IN (SELECT studentId FROM orders)";
+
+            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, GetUniversityParams()).Rows[0][0]);
+        }
+
+        private Dictionary<string, int> GetWaitlistStatusDistribution()
+        {
+            var statuses = new Dictionary<string, int>
+            {
+
+                ["Approved"] = 0,
+                ["Pending"] = 0,
+                ["Denied"] = 0
+            };
+
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT w.status, COUNT(*) AS Count
+                   FROM waitlist w
+                   INNER JOIN subjects s ON w.subjectId = s.subjectId
+                   WHERE s.universityId = @UniversityId 
+                     AND s.majorId = @MajorId
+                   GROUP BY w.status";
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, GetUniversityParams());
+
+            foreach (DataRow row in dt.Rows)
+            {
+                string status = row["status"].ToString();
+                int count = Convert.ToInt32(row["Count"]);
+
+                if (statuses.ContainsKey(status))
                 {
-                    { "@UniversityId", ViewState["UniversityId"] },
-                    { "@MajorId", ViewState["MajorId"] }
-                };
+                    statuses[status] = count;
+                }
+            }
 
-            return Convert.ToInt32(myCrud.getDTPassSqlDic(sql, parameters).Rows[0][0]);
+            return statuses;
+        }
+
+        private DataTable GetPopularSubjects()
+        {
+            string sql = @"SELECT TOP 5 sub.subjectCode, 
+                          sub.subjectEnglishName AS SubjectName,
+                          COUNT(*) AS RequestCount
+                   FROM orderDetails od
+                   INNER JOIN orders o ON od.orderId = o.orderId
+                   INNER JOIN sections sec ON od.sectionId = sec.sectionId
+                   INNER JOIN subjects sub ON sec.subjectCode = sub.subjectCode
+                   WHERE o.status = 'Approved'
+                     AND sub.universityId = @UniversityId
+                     AND sub.majorId = @MajorId
+                   GROUP BY sub.subjectCode, sub.subjectEnglishName
+                   ORDER BY RequestCount DESC";
+
+            return new CRUD().getDTPassSqlDic(sql, GetUniversityParams());
+        }
+
+        public Dictionary<string, int> OrderStatuses { get; set; }
+        public Dictionary<string, int> WaitlistStatuses { get; set; }
+
+        protected void LoadDashboard()
+        {
+            var dashboardData = GetDashboardData();
+            EnsureKeyExists(dashboardData.OrderStatuses, "Approved", "Pending", "Not Ordered");
+            EnsureKeyExists(dashboardData.WaitlistStatuses, "Pending", "Approved", "Denied");
+
+            string orderData = $"{dashboardData.OrderStatuses["Approved"]}, {dashboardData.OrderStatuses["Pending"]}, {dashboardData.OrderStatuses["Not Ordered"]}";
+            ClientScript.RegisterArrayDeclaration("orderStatusData", orderData);
+
+            string waitlistData = $"{dashboardData.WaitlistStatuses["Approved"]}, {dashboardData.WaitlistStatuses["Pending"]}, {dashboardData.WaitlistStatuses["Denied"]}";
+            ClientScript.RegisterArrayDeclaration("waitlistStatusData", waitlistData);
+
+            OrderStatuses = dashboardData.OrderStatuses ?? new Dictionary<string, int>();
+            WaitlistStatuses = dashboardData.WaitlistStatuses ?? new Dictionary<string, int>();
+
+
+            lblTotalStudents.Text = "Total Students: " + GetTotalStudentsCount().ToString("N0");
+            lblApprovedOrders.Text = $"Approved Orders: {dashboardData.OrderStatuses["Approved"]:N0}";
+            lblPendingActions.Text = $"Pending Actions: {dashboardData.WaitlistStatuses["Pending"]:N0}";
+
+            gvTopWaitlists.DataSource = dashboardData.TopWaitlisted;
+            gvTopWaitlists.DataBind();
+
+            gvPopularSubjects.DataSource = dashboardData.PopularSubjects;
+            gvPopularSubjects.DataBind();
+        }
+
+        private void EnsureKeyExists(Dictionary<string, int> dict, params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                if (!dict.ContainsKey(key))
+                {
+                    dict[key] = 0;
+                }
+            }
+        }
+
+        protected int GetOrderStatusValue(string key)
+        {
+            if (OrderStatuses != null && OrderStatuses.TryGetValue(key, out int value))
+                return value;
+            return 0;
+        }
+
+        protected int GetWaitlistStatusValue(string key)
+        {
+            if (WaitlistStatuses != null && WaitlistStatuses.TryGetValue(key, out int value))
+                return value;
+            return 0;
         }
     }
 }
