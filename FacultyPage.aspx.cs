@@ -257,51 +257,103 @@ namespace MyScheduleWebsite
             string semester = args[1];
 
             CRUD myCrud = new CRUD();
-            string sql = @"UPDATE w
-                  SET w.status = @Status,
-                      w.statusChangedBy = @ChangedBy,
-                      w.statusChangedDate = GETDATE()
-                  FROM waitlist w
-                  INNER JOIN subjects s ON w.subjectId = s.subjectId
-                  WHERE s.subjectId = @SubjectId
-                    AND w.requestedSemester = @Semester";
+            string facultyFullName = ViewState["FacultyName"]?.ToString() ?? "Faculty";
+
+            string updateSql = @"UPDATE w 
+                       SET w.status = @Status,
+                           w.statusChangedBy = @ChangedBy,
+                           w.statusChangedDate = GETDATE()
+                       FROM waitlist w
+                       INNER JOIN subjects s ON w.subjectId = s.subjectId
+                       WHERE s.subjectId = @SubjectId
+                         AND w.requestedSemester = @Semester";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
                     { "@Status", newStatus },
-                    { "@ChangedBy", User.Identity.Name },
+                    { "@ChangedBy", facultyFullName },
                     { "@SubjectId", subjectId },
                     { "@Semester", semester }
                 };
 
-            int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
+            int rowsUpdated = myCrud.InsertUpdateDelete(updateSql, parameters);
 
-            if (rowsAffected > 0)
+            if (rowsUpdated > 0)
             {
+                string subjectName = GetSubjectName(subjectId);
+
+                string studentSql = @"SELECT s.email, s.studentEnglishFirstName, s.studentEnglishLastName
+                            FROM waitlist w
+                            INNER JOIN students s ON w.studentId = s.studentId
+                            WHERE w.subjectId = @SubjectId
+                              AND w.requestedSemester = @Semester";
+
+                DataTable students = myCrud.getDTPassSqlDic(studentSql, parameters);
+
+                foreach (DataRow student in students.Rows)
+                {
+                    string email = student["email"].ToString();
+                    string fullName = $"{student["studentEnglishFirstName"]} {student["studentEnglishLastName"]}";
+
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        SendStatusEmail(email, fullName, subjectName, facultyFullName, newStatus);
+                    }
+                }
                 BindWaitlists();
-            }
-            else
-            {
-                
             }
         }
 
-        protected void btnEdit_Click(object sender, EventArgs e)
+        private string GetSubjectName(int subjectId)
         {
-            Button btn = (Button)sender;
-            string requestId = btn.CommandArgument;
+            CRUD myCrud = new CRUD();
+            DataTable dt = myCrud.getDTPassSqlDic(
+                "SELECT subjectEnglishName FROM subjects WHERE subjectId = @id",
+                new Dictionary<string, object> { { "@id", subjectId } }
+            );
+            return dt.Rows[0]["subjectEnglishName"].ToString();
+        }
+
+        private void SendStatusEmail(string studentEmail, string studentName, string subjectName, string facultyName, string status)
+        {
+            try
+            {
+                mailMgr email = new mailMgr
+                {
+                    myTo = studentEmail,
+                    mySubject = $"Update on your request for {subjectName}",
+                    myBody = $@"
+Dear {studentName},
+
+We're writing to inform you about the status of your request for {subjectName}.
+
+Your request has been {status} by {facultyName}.
+
+
+------------------
+This is an automated notification. Please do not reply directly to this email.",
+                    myIsBodyHtml = false
+                };
+
+                email.sendEmailViaGmail();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Email failed for {studentEmail}: {ex.Message}");
+            }
         }
         private void GetFacultyUniversityAndMajor()
         {
             Guid userId = GetUserId();
             CRUD myCrud = new CRUD();
 
-            string sql = @"SELECT f.facultyEnglishFirstName, f.universityId, f.majorId, 
+            string sql = @"SELECT f.facultyEnglishFirstName, f.facultyEnglishLastName, 
+                          f.universityId, f.majorId, 
                           m.majorEnglishName, u.universityEnglishName 
-                           FROM faculty f
-                           INNER JOIN majors m ON f.majorId = m.majorId
-                           INNER JOIN universities u ON f.universityId = u.universityId
-                           WHERE f.UserId = @UserId";
+                   FROM faculty f
+                   INNER JOIN majors m ON f.majorId = m.majorId
+                   INNER JOIN universities u ON f.universityId = u.universityId
+                   WHERE f.UserId = @UserId";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
@@ -311,12 +363,17 @@ namespace MyScheduleWebsite
             DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
             if (dt.Rows.Count > 0)
             {
+                string firstName = dt.Rows[0]["facultyEnglishFirstName"].ToString();
+                string lastName = dt.Rows[0]["facultyEnglishLastName"].ToString();
+                string fullName = $"{firstName} {lastName}".Trim();
+
                 lblFacultyName.Text = $"Hello, {dt.Rows[0]["facultyEnglishFirstName"]}";
                 lblMajor.Text = $"Major: {dt.Rows[0]["majorEnglishName"]}";
                 lblUniversity.Text = $"University: {dt.Rows[0]["universityEnglishName"]}";
 
                 ViewState["UniversityId"] = Convert.ToInt32(dt.Rows[0]["universityId"]);
                 ViewState["MajorId"] = Convert.ToInt32(dt.Rows[0]["majorId"]);
+                ViewState["FacultyName"] = fullName;
             }
         }
 
