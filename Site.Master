@@ -15,6 +15,7 @@
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link rel="stylesheet" href="~/Content/Site.css"> 
     <link rel="stylesheet" href="~/styles/styles.css">
+    <link rel="stylesheet" href="/styles/HelpCenterstyles.css">
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>
@@ -55,6 +56,7 @@
                         <li><a runat="server" href="~/">Home</a></li>
                         <li><a runat="server" href="~/About">About</a></li>
                         <li><a runat="server" href="~/Contact">Contact</a></li>
+                        <li><a runat="server" href="~/EditInfoPage.aspx">Edit Information</a></li> <!-- 🔹 New Button -->
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <% if (Session["Username"] != null) { %>
@@ -72,6 +74,69 @@
                     <asp:ContentPlaceHolder ID="MainContent" runat="server">
                     </asp:ContentPlaceHolder>
             </div>
+
+   <div class="help-center">
+    <div class="help-button" onclick="toggleHelpBox()">?</div>
+    <asp:UpdatePanel ID="updHelp" runat="server" UpdateMode="Conditional">
+        <ContentTemplate>
+            <div class="help-box" id="helpBox" runat="server">
+
+                <asp:Panel ID="pnlMessageButtons" runat="server" CssClass="message-options">
+                    <asp:LinkButton ID="btnMessageAdmin" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Admin">
+                        Message Admin
+                    </asp:LinkButton>
+
+                    <asp:LinkButton ID="btnMessageDeptHead" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="DeptHead">
+                        Message Department Head
+                    </asp:LinkButton>
+
+                    <asp:LinkButton ID="btnMessageFaculty" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Faculty">
+                        Message Faculty
+                    </asp:LinkButton>
+
+                    <asp:LinkButton ID="btnMessageStudent" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Student">
+                        Message Student
+                    </asp:LinkButton>
+                </asp:Panel>
+
+                <asp:Panel ID="pnlEmailForm" runat="server" Visible="false" CssClass="email-form">
+                    <asp:DropDownList ID="ddlRecipients" runat="server" Visible="false" 
+                        CssClass="input-style" />
+
+                    <asp:TextBox ID="txtEmailTitle" runat="server" placeholder="Email Title" 
+                        CssClass="input-style" autocomplete="off" />
+
+                    <asp:TextBox ID="txtEmailBody" runat="server" TextMode="MultiLine" Rows="4" 
+                        placeholder="Email Body" CssClass="input-style" autocomplete="off" />
+
+                    <asp:Button ID="btnSendEmail" runat="server" Text="Send" 
+                        CssClass="button-class" OnClick="btnSendEmail_Click" />
+                </asp:Panel>
+
+            </div>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+</div>
+
+
+<script>
+    function toggleHelpBox() {
+        const helpBox = document.getElementById('<%= helpBox.ClientID %>');
+        helpBox.style.display = helpBox.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    document.addEventListener('click', function (event) {
+        const helpCenter = document.querySelector('.help-center');
+        const helpBox = document.getElementById('<%= helpBox.ClientID %>');
+        if (!helpCenter.contains(event.target) && !event.target.classList.contains('message-option')) {
+            helpBox.style.display = 'none';
+        }
+    });
+</script>
 
             <hr />
             <footer>

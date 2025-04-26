@@ -121,9 +121,9 @@ function updateHours() {
     document.getElementById(lblHoursSelectedId).innerText =
         `Compulsory Hours Selected: ${selectedCompulsory} of ${totalCompulsoryHours}`;
     document.getElementById(lblElectiveCollegeHoursSelectedId).innerText =
-        `Elective College Hours Selected: ${selectedCollege} of ${totalElectiveCollegeHours}`;
+        `Elective College Hours Selected: ${selectedCollege} of ${12}`;
     document.getElementById(lblElectiveUniversityHoursSelectedId).innerText =
-        `Elective University Hours Selected: ${selectedUniversity} of ${totalElectiveUniversityHours}`;
+        `Elective University Hours Selected: ${selectedUniversity} of ${4}`;
 }
 
 function showElectivePopup(level, slotId) {
@@ -138,9 +138,14 @@ function showElectivePopup(level, slotId) {
     var popup = document.createElement("div");
     popup.className = "elective-popup";
 
+    if (level > currentStudentLevel) {
+        displayAlert("You cannot choose electives from level " + level + " yet.");
+        return;
+
+    }
     electiveOptionsList.forEach(function (option) {
         var optionDiv = document.createElement("div");
-        optionDiv.className = "elective-option";
+        optionDiv.className = "subject elective-option history";
         optionDiv.innerText = option.name;
         optionDiv.onclick = function (e) {
             e.stopPropagation();
@@ -150,14 +155,20 @@ function showElectivePopup(level, slotId) {
             var subjectElement = document.createElement("div");
             subjectElement.id = option.code;
             subjectElement.className = "subject history";
-            subjectElement.setAttribute("onclick", "SubjectClicked(this)");
+            subjectElement.setAttribute("onclick", "toggleElectiveSlot(this)"); // Use toggle function
             subjectElement.innerHTML = "<span>" + option.name + "</span>";
             subjectElement.setAttribute("data-slot-id", slotId);
             subjectElement.setAttribute("data-slot-level", level);
 
             slot.parentNode.replaceChild(subjectElement, slot);
 
-            SubjectClicked(subjectElement);
+            // Add to selectedSubjects if not already present
+            if (!selectedSubjects.includes(option.code)) {
+                selectedSubjects.push(option.code);
+                subjectElement.classList.add('history-selected');
+            }
+
+            updateHours();
 
             if (popup && popup.parentNode) {
                 popup.parentNode.removeChild(popup);
@@ -203,6 +214,30 @@ function restoreSelection(hiddenFieldId) {
             if (el) el.classList.add('history-selected');
         });
     }
+}
+
+function toggleElectiveSlot(element) {
+    var subjectCode = element.id;
+    var slotId = element.getAttribute('data-slot-id');
+    var level = element.getAttribute('data-slot-level');
+
+    // Remove from selectedSubjects
+    selectedSubjects = selectedSubjects.filter(item => item !== subjectCode);
+    element.classList.remove('history-selected');
+
+    // Create placeholder element
+    var placeholder = document.createElement('div');
+    placeholder.id = slotId;
+    placeholder.className = 'subject elective-slot';
+    placeholder.setAttribute('data-level', level);
+    placeholder.setAttribute('onclick', `showElectivePopup(${level}, '${slotId}')`);
+    var electiveNumber = slotId.split('_')[2];
+    placeholder.innerHTML = `<span>Elective (${electiveNumber})</span>`;
+
+    // Replace subject with placeholder
+    element.parentNode.replaceChild(placeholder, element);
+
+    updateHours();
 }
 
 function displayAlert(message) {

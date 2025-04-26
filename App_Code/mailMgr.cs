@@ -36,7 +36,7 @@ public class mailMgr : MailMessage
         myPortNumber = int.Parse(ConfigurationManager.AppSettings["PortNumber"]);
         myEnableSSL = bool.Parse(ConfigurationManager.AppSettings["EnableSSL"]);
         myUserName = ConfigurationManager.AppSettings["emailUserName"];
-        myPassword = ConfigurationManager.AppSettings["emailPassword"];
+        myPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
 
         mySubject = " Notify Admin of Site Activity via gmail smtp ";
         myIsBodyHtml = true;

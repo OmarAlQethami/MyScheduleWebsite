@@ -236,11 +236,26 @@ namespace MyScheduleWebsite
 
                 if (electiveSubjectsInLevel.Any())
                 {
+                    int currentLevel = getCurrentLevel(GetUserId());
                     string placeholderId = $"elective_placeholder_{electivePlaceholderCounter}";
-                    subjectsContainer.InnerHtml +=
-                        $"<div class='subject elective-slot' id='{placeholderId}' data-level='{group.Key}' onclick='showElectivePopup({group.Key}, \"{placeholderId}\")'>" +
-                            $"<span>Elective ({electivePlaceholderCounter})</span>" +
-                        $"</div>";
+                    if (group.Key + 1 <= currentLevel)
+                    {
+                        var firstElective = electiveSubjectsInLevel.First();
+                        subjectsContainer.InnerHtml +=
+                            $"<div class='subject history history-selected' id='{firstElective.Code}' " +
+                            $"data-slot-id='{placeholderId}' data-slot-level='{group.Key}' onclick='toggleElectiveSlot(this)'>" +
+                            $"<span>Elective ({electivePlaceholderCounter}) - {firstElective.EnglishName}</span></div>";
+
+                        data.AutoSelectedSubjects.Add(firstElective.Code);
+                    }
+                    else
+                    {
+                        // Render empty slot for higher levels
+                        subjectsContainer.InnerHtml +=
+                            $"<div class='subject elective-slot' id='{placeholderId}' data-level='{group.Key}' " +
+                            $"onclick='showElectivePopup({group.Key}, \"{placeholderId}\")'>" +
+                            $"<span>Elective ({electivePlaceholderCounter})</span></div>";
+                    }
                     foreach (var subject in electiveSubjectsInLevel)
                     {
                         string subjectCode = subject.Code;
