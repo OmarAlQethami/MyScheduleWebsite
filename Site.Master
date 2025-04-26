@@ -15,6 +15,7 @@
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link rel="stylesheet" href="~/Content/Site.css"> 
     <link rel="stylesheet" href="~/styles/styles.css">
+    <link rel="stylesheet" href="/styles/HelpCenterstyles.css">
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>
@@ -74,186 +75,68 @@
                     </asp:ContentPlaceHolder>
             </div>
 
-  
-  <style>
-    
-    .help-button {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      width: 70px;
-      height: 70px;
-      background-color: #007bff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 32px; 
-      font-weight: 100;  
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
+   <div class="help-center">
+    <div class="help-button" onclick="toggleHelpBox()">?</div>
+    <asp:UpdatePanel ID="updHelp" runat="server" UpdateMode="Conditional">
+        <ContentTemplate>
+            <div class="help-box" id="helpBox" runat="server">
 
-    }
+                <asp:Panel ID="pnlMessageButtons" runat="server" CssClass="message-options">
+                    <asp:LinkButton ID="btnMessageAdmin" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Admin">
+                        Message Admin
+                    </asp:LinkButton>
 
+                    <asp:LinkButton ID="btnMessageDeptHead" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="DeptHead">
+                        Message Department Head
+                    </asp:LinkButton>
 
-    .help-button:hover {
-      transform: rotate(15deg) scale(1.1);
-    }
+                    <asp:LinkButton ID="btnMessageFaculty" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Faculty">
+                        Message Faculty
+                    </asp:LinkButton>
 
-    .help-box {
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      width: 320px;
-      background-color: white;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      padding: 15px;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+                    <asp:LinkButton ID="btnMessageStudent" runat="server" CssClass="message-option" 
+                        Visible="false" OnClick="btnMessageRecipient_Click" CommandArgument="Student">
+                        Message Student
+                    </asp:LinkButton>
+                </asp:Panel>
 
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(20px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
+                <asp:Panel ID="pnlEmailForm" runat="server" Visible="false" CssClass="email-form">
+                    <asp:DropDownList ID="ddlRecipients" runat="server" Visible="false" 
+                        CssClass="input-style" />
 
-    .message-option {
-      background: linear-gradient(145deg, #e6e6e6, #ffffff);
-      padding: 15px;
-      border-radius: 25px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease-in-out;
-      font-weight: bold;
-      font-size: 15px;
-      margin: 10px 0;
-    }
+                    <asp:TextBox ID="txtEmailTitle" runat="server" placeholder="Email Title" 
+                        CssClass="input-style" autocomplete="off" />
 
-    .message-option:hover {
-      background: #d9f0ff;
-      transform: translateY(-7px);
-    }
+                    <asp:TextBox ID="txtEmailBody" runat="server" TextMode="MultiLine" Rows="4" 
+                        placeholder="Email Body" CssClass="input-style" autocomplete="off" />
 
-     .input-style { 
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      font-size: 14px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      margin: 5px 0;
-    }
+                    <asp:Button ID="btnSendEmail" runat="server" Text="Send" 
+                        CssClass="button-class" OnClick="btnSendEmail_Click" />
+                </asp:Panel>
 
-     .button-class {
-      background-color: #28a745;
-      color: white;
-      padding: 0; 
-      border: none;
-      border-radius: 30px; 
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 80px; 
-      height: 35px; 
-      margin: 0 auto; 
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
-
-    .email-display {
-      font-size: 14px;
-      font-weight: bold;
-      color: #555;
-      margin-bottom: 12px;
-      padding: 5px 0;
-    }
-  </style>
+            </div>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+</div>
 
 
-  <div class="help-button" onclick="toggleHelpBox()">?</div>
-
-  <div class="help-box" id="helpBox">
-  <div id="messageOptions"></div>
-  <div id="emailDisplay" class="email-display" style="display:none;"></div>
-  <input type="text" id="title" placeholder="Title" style="display:none;" />
-  <textarea id="body" rows="4" placeholder="Write your message here..." style="display:none;"></textarea>
-  <button style="display:none;" onclick="sendMessage()">Send</button>
- </div>
-
- <script>
-    const helpBox = document.getElementById('helpBox');
-    const messageOptions = document.getElementById('messageOptions');
-    const emailDisplay = document.getElementById('emailDisplay');
-    const titleField = document.getElementById('title');
-    const bodyField = document.getElementById('body');
-    const sendBtn = helpBox.querySelector('button');
-
-    let userRole = "student"; 
-
-    const recipients = {
-        admin: ["Message Faculty", "Message Student"],
-        faculty: ["Message Admin", "Message Student"],
-        student: ["Message Admin", "Message Faculty"],
-        guest: ["Message Admin"]
-    };
-
-    const emails = {
-        "Message Admin": "admin@example.com",
-        "Message Faculty": "faculty@example.com",
-        "Message Student": "student@example.com"
-    };
-
+<script>
     function toggleHelpBox() {
-        helpBox.style.display = helpBox.style.display === 'flex' ? 'none' : 'flex';
-        if (helpBox.style.display === 'flex') {
-            showOptions();
+        const helpBox = document.getElementById('<%= helpBox.ClientID %>');
+        helpBox.style.display = helpBox.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    document.addEventListener('click', function (event) {
+        const helpCenter = document.querySelector('.help-center');
+        const helpBox = document.getElementById('<%= helpBox.ClientID %>');
+        if (!helpCenter.contains(event.target) && !event.target.classList.contains('message-option')) {
+            helpBox.style.display = 'none';
         }
-    }
-
-    function showOptions() {
-        messageOptions.innerHTML = '';
-        emailDisplay.style.display = 'none';
-        titleField.style.display = 'none';
-        bodyField.style.display = 'none';
-        sendBtn.style.display = 'none';
-
-        recipients[userRole].forEach(option => {
-            const div = document.createElement('div');
-            div.className = 'message-option';
-            div.innerText = option;
-            div.onclick = () => selectRecipient(option);
-            messageOptions.appendChild(div);
-        });
-    }
-
-    function selectRecipient(option) {
-        messageOptions.innerHTML = '';
-        emailDisplay.innerText = `To: ${emails[option]}`;
-        emailDisplay.style.display = 'block';
-        titleField.style.display = 'block';
-        bodyField.style.display = 'block';
-        sendBtn.style.display = 'block';
-    }
-
-    function sendMessage() {
-        alert("Your message has been sent externally.");
-        toggleHelpBox();
-        titleField.value = "";
-        bodyField.value = "";
-    }
-  </script>
-
+    });
+</script>
 
             <hr />
             <footer>
