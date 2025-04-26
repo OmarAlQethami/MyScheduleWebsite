@@ -1085,21 +1085,23 @@ namespace MyScheduleWebsite
 
             CRUD crud = new CRUD();
             DataTable dt = crud.getDTPassSqlDic(
-                @"SELECT s.*, sub.subjectEnglishName, sd.day, sd.startTime, sd.endTime 
-                FROM sections s
-                INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
-                INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
-                WHERE s.subjectCode = @code 
-                AND s.sectionNumber = @num
-                AND sub.universityId = @universityId 
-                AND sub.majorId = @majorId",
-                new Dictionary<string, object> {
-                    { "@code", subjectCode },
-                    { "@num", sectionNumber },
-                    { "@universityId", universityId },
-                    { "@majorId", majorId }
-                    }
-            );
+                        @"SELECT s.sectionId, s.instuctorArabicName, 
+                         sub.subjectEnglishName, s.capacity, 
+                         s.registeredStudents, sd.day, 
+                         sd.startTime, sd.endTime, sd.location
+                          FROM sections s
+                          INNER JOIN subjects sub ON s.subjectCode = sub.subjectCode
+                          INNER JOIN sectionDetails sd ON s.sectionId = sd.sectionId
+                          WHERE s.subjectCode = @code 
+                          AND s.sectionNumber = @num
+                          AND sub.universityId = @universityId 
+                          AND sub.majorId = @majorId",
+                        new Dictionary<string, object> {
+                            { "@code", subjectCode },
+                            { "@num", sectionNumber },
+                            { "@universityId", universityId },
+                            { "@majorId", majorId }
+                        });
 
             if (dt.Rows.Count == 0) return null;
 
@@ -1110,11 +1112,13 @@ namespace MyScheduleWebsite
                 SubjectEnglishName = dt.Rows[0]["subjectEnglishName"].ToString(),
                 Capacity = Convert.ToInt32(dt.Rows[0]["capacity"]),
                 RegisteredStudents = Convert.ToInt32(dt.Rows[0]["registeredStudents"]),
+                InstructorArabicName = dt.Rows[0]["instuctorArabicName"]?.ToString() ?? "TBA",
                 Details = dt.AsEnumerable().Select(row => new SectionDetail
                 {
                     Day = Convert.ToInt32(row["day"]),
                     StartTime = (TimeSpan)row["startTime"],
-                    EndTime = (TimeSpan)row["endTime"]
+                    EndTime = (TimeSpan)row["endTime"],
+                    Location = row["location"]?.ToString()?.Trim() ?? "TBA"
                 }).ToList()
             };
         }
@@ -1150,6 +1154,7 @@ namespace MyScheduleWebsite
                 int majorId = (int)ViewState["MajorId"];
 
                 var selectedSubjects = Session["SelectedSubjects"] as List<string> ?? new List<string>();
+                List<string> waitlistSubjects = new List<string>();
                 decimal totalHours = 0;
 
                 foreach (string subjectCode in selectedSubjects)
@@ -1284,6 +1289,30 @@ namespace MyScheduleWebsite
                             });
                     }
                 }
+                var studentDetails = GetStudentDetails(studentId);
+                if (string.IsNullOrEmpty(studentDetails.Email))
+                {
+                    throw new Exception("Student email not found");
+                }
+
+                if (selectedSections.Count > 0)
+                {
+                    SendOrderConfirmationEmail(studentDetails.Email, studentDetails.Name, selectedSections);
+                }
+
+                foreach (string subjectCode in selectedSubjects)
+                {
+                    bool isOffered = IsSubjectOffered(subjectCode, universityId, majorId, curriculumId);
+                    if (!isOffered)
+                    {
+                        waitlistSubjects.Add(subjectCode);
+                    }
+                }
+
+                foreach (var subjectCode in waitlistSubjects)
+                {
+                    SendWaitlistEmail(studentDetails.Email, studentDetails.Name, subjectCode);
+                }
 
                 return true;
             }
@@ -1293,6 +1322,132 @@ namespace MyScheduleWebsite
                 lblOutput2.ForeColor = Color.Red;
                 return false;
             }
+        }
+
+        private (string Email, string Name) GetStudentDetails(int studentId)
+        {
+            CRUD crud = new CRUD();
+            string sql = @"SELECT email, studentEnglishFirstName, studentEnglishLastName 
+                   FROM students 
+                   WHERE studentId = @studentId";
+            DataTable dt = crud.getDTPassSqlDic(sql, new Dictionary<string, object> { { "@studentId", studentId } });
+            if (dt.Rows.Count > 0)
+            {
+                string email = dt.Rows[0]["email"].ToString();
+                string firstName = dt.Rows[0]["studentEnglishFirstName"].ToString();
+                string lastName = dt.Rows[0]["studentEnglishLastName"].ToString();
+                return (email, $"{firstName} {lastName}");
+            }
+            return (null, null);
+        }
+
+        private void SendOrderConfirmationEmail(string studentEmail, string studentName, Dictionary<string, string> selectedSections)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(studentEmail))
+                {
+                    throw new ArgumentException("Student email cannot be null");
+                }
+
+                List<string> tableRows = new List<string>();
+                foreach (var kvp in selectedSections)
+                {
+                    string subjectCode = kvp.Key;
+                    string sectionNumber = kvp.Value;
+
+                    Section section = GetSectionDetails(subjectCode, sectionNumber);
+                    if (section != null)
+                    {
+                        string schedule = FormatSchedule(section.Details);
+                        string instructor = section.InstructorArabicName?.Trim() ?? "TBA";
+
+                        tableRows.Add($"{section.SubjectEnglishName} | Section {sectionNumber} | {schedule} | {instructor}");
+                    }
+                }
+
+                string body = $@"
+Dear {studentName},
+
+Thank you for confirming your order. Below are the details of your registered subjects:
+
+{string.Join("\r\n\r\n", tableRows)}
+
+
+------------------
+This is an automated notification. Please do not reply directly to this email.";
+
+                mailMgr email = new mailMgr
+                {
+                    myTo = studentEmail,
+                    mySubject = "Order Confirmation",
+                    myBody = body,
+                    myIsBodyHtml = false
+                };
+
+                email.sendEmailViaGmail();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Confirmation email failed: {ex.Message}");
+            }
+        }
+
+        private string FormatSchedule(List<SectionDetail> details)
+        {
+            if (details == null || details.Count == 0) return "Schedule not available";
+
+            return string.Join("\n", details.Select(d =>
+            {
+                int adjustedDay = d.Day - 1;
+                DateTime start = DateTime.Today.Add(d.StartTime);
+                DateTime end = DateTime.Today.Add(d.EndTime);
+
+                return $"{GetDayName(adjustedDay)} | " +
+                       $"{start.ToString("hh:mm tt")}-{end.ToString("hh:mm tt")} | " +
+                       $"{d.Location}";
+            }));
+        }
+
+        private string GetDayName(int day)
+        {
+            if (day >= 0 && day <= 6)
+            {
+                return ((DayOfWeek)day).ToString();
+            }
+            return "TBA";
+        }
+
+        private void SendWaitlistEmail(string studentEmail, string studentName, string subjectCode)
+        {
+            try
+            {
+                string subjectName = GetSubjectName(subjectCode);
+                string body = $@"
+Dear {studentName},
+
+As {subjectName} is currently unoffered this semester, your request has been placed on the waitlist for this subject.
+Your current status is Pending.
+
+
+------------------
+This is an automated notification. Please do not reply directly to this email.";
+
+                mailMgr email = new mailMgr
+                {
+                    myTo = studentEmail,
+                    mySubject = $"Waitlist Notification for {subjectName}",
+                    myBody = body,
+                    myIsBodyHtml = false
+                };
+                email.sendEmailViaGmail();
+            }
+            catch (Exception ex)
+            {
+                lblOutput2.Text = $"Waitlist email failed: {ex.Message}";
+                lblOutput2.ForeColor = Color.Red;
+            }
+
         }
     }
 }
