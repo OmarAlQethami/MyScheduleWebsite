@@ -1,16 +1,202 @@
-﻿.admin-container {
-    display: flex;
-    min-height: 100vh;
+﻿/* General Styles */
+.admin-container {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 900px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
 }
 
 .sidebar-menu {
-    width: 350px;
-    background: #333;
+    width: 300px;
+    background: #222;
     color: white;
     padding: 20px;
     height: 100vh;
     position: fixed;
-    right: 0 !important;
+    right: 0;
     top: 0;
     overflow-y: auto;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    table th, table td {
+        padding: 12px 15px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #f9f9f9;
+        font-weight: bold;
+        color: #333;
+    }
+
+    table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+/* Button Styles */
+button, .asp-Button {
+    padding: 10px 25px;
+    font-size: 15px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+    button:hover, .asp-Button:hover {
+        background-color: #0056b3;
+    }
+
+/* Alignment */
+.top-align {
+    vertical-align: top;
+}
+
+/* Form Styles */
+.form-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.input-group {
+    font-size: 1.45rem;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.floating-label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: #999;
+    pointer-events: none;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-input,
+.asp-input {
+    all: unset;
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    color: #999;
+    background-color: white;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.6rem;
+}
+
+    .asp-input:focus {
+        border: 1px solid #000000;
+        outline: none;
+        color: #000000;
+    }
+
+        .asp-input:focus + .floating-label,
+        .asp-input:not(:placeholder-shown) + .floating-label {
+            transform: translateY(-120%) scale(0.7);
+            background-color: #fff;
+            padding-inline: 0.3rem;
+            color: #000000;
+        }
+
+.button {
+    padding: 10px 25px;
+    font-size: 15px;
+    cursor: pointer;
+    background-color: #2E5981;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+    .button:hover {
+        background-color: #0056b3;
+    }
+
+.floating-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+    .floating-select::-ms-expand {
+        display: none;
+    }
+
+.asp-input.filled + .floating-label {
+    transform: translateY(-120%) scale(0.7);
+    background-color: #fff;
+    padding-inline: 0.3rem;
+    color: #007bff;
+}
+
+/* Tab Styles */
+.tab-container {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.tab-header {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: #a19f9f;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 5px;
+    border-radius: 5px 5px 0 0;
+    transition: all 0.3s;
+}
+
+    .tab-button:hover {
+        background: #ddd;
+    }
+
+    .tab-button.active {
+        background: #4CAF50;
+        color: white;
+    }
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-top: none;
+    background: #fff;
+}
+
+    .tab-content.active {
+        display: block;
+    }
