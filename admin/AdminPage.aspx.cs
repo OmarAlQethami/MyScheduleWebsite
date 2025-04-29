@@ -639,7 +639,7 @@ namespace MyScheduleWebsite.admin
                     lblSignUpOutput.Text = "Error creating account: " + ex.Message;
                     lblSignUpOutput.ForeColor = System.Drawing.Color.Red;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lblSignUpOutput.Text = "An error occurred. Please try again.";
                     lblSignUpOutput.ForeColor = System.Drawing.Color.Red;

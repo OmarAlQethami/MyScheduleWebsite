@@ -25,6 +25,10 @@ namespace MyScheduleWebsite.Account
                 {
                     Response.Redirect("~/FacultyPage.aspx");
                 }
+                else if (Roles.IsUserInRole(Session["Username"].ToString(), "departmentHead"))
+                {
+                    Response.Redirect("~/DepartmentHeadPage.aspx");
+                }
                 else if (Roles.IsUserInRole(Session["Username"].ToString(), "admin"))
                 {
                     Response.Redirect("~/admin/AdminPage.aspx");
@@ -44,6 +48,7 @@ namespace MyScheduleWebsite.Account
                 string strRoleName = "admin";
                 string strRoleFaculty = "faculty";
                 string strRoleStudent = "student";
+                string strRoleDepartmentHead = "departmentHead";
                 string strEmail = "Admin@MySchedule.com";
                 strAppName = Membership.ApplicationName.ToString();
                 CRUD myCrud = new CRUD();
@@ -59,6 +64,8 @@ namespace MyScheduleWebsite.Account
                         Roles.CreateRole(strRoleFaculty);
                     if (!Roles.RoleExists(strRoleStudent))
                         Roles.CreateRole(strRoleStudent);
+                    if (!Roles.RoleExists(strRoleDepartmentHead)) 
+                        Roles.CreateRole(strRoleDepartmentHead);
                     if (!Membership.ValidateUser(strAdminUserName, strAdminPassword))
                     {
                         Membership.CreateUser(strAdminUserName, strAdminPassword, strEmail);
@@ -70,6 +77,8 @@ namespace MyScheduleWebsite.Account
                 {
                     if (!Roles.RoleExists(strRoleName))
                         Roles.CreateRole(strRoleName);
+                    if (!Roles.RoleExists(strRoleDepartmentHead)) 
+                        Roles.CreateRole(strRoleDepartmentHead);
                     if (!Membership.ValidateUser(strAdminUserName, strAdminPassword))
                     {
                         Membership.DeleteUser(strAdminUserName);
@@ -102,6 +111,10 @@ namespace MyScheduleWebsite.Account
                 else if (Roles.IsUserInRole(txtUserName.Text, "faculty"))
                 {
                     Response.Redirect("~/FacultyPage.aspx");
+                }
+                else if (Roles.IsUserInRole(txtUserName.Text, "departmentHead"))
+                {
+                    Response.Redirect("~/DepartmentHeadPage.aspx");
                 }
                 else if (Roles.IsUserInRole(txtUserName.Text, "admin"))
                 {
