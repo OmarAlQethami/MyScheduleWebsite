@@ -16,7 +16,7 @@
             </div>
     
             <div class="stats-bar">
-                <asp:Label ID="lblTotalStudents" runat="server" CssClass="stat-badge total-students">Total Students: N/A</asp:Label>
+                <asp:Label ID="lblTotalStudents" runat="server" CssClass="stat-badge total-students"> Total Students: N/A</asp:Label>
                 <asp:Label ID="lblApprovedOrders" runat="server" CssClass="stat-badge approved-orders">Approved Orders: N/A</asp:Label>
                 <asp:Label ID="lblPendingActions" runat="server" CssClass="stat-badge pending-actions">Pending Actions: N/A</asp:Label>
             </div>
@@ -29,6 +29,13 @@
                     OnClientClick="setActiveTab('students'); return false;" 
                     data-target="students">
                     Students
+                </asp:LinkButton>
+
+                <asp:LinkButton ID="btnFaculties" runat="server" 
+                CssClass="tab-link" 
+                OnClientClick="setActiveTab('facultiesTab'); return false;" 
+                data-target="facultiesTab">
+                    Faculty
                 </asp:LinkButton>
 
                 <asp:LinkButton ID="btnWaitlists" runat="server" 
@@ -58,6 +65,13 @@
                     data-target="curriculum">
                     Curriculum
                 </asp:LinkButton>
+
+                <asp:LinkButton ID="btnAddSubjectTab" runat="server" 
+                     CssClass="tab-link" 
+                     OnClientClick="setActiveTab('addSubjectTab'); return false;" 
+                     data-target="addSubjectTab">
+                      Add Major plan
+                 </asp:LinkButton>
             </div>
 
             <div id="students" class="tab-content active">
@@ -104,6 +118,26 @@
                         </asp:TemplateField>
                     </Columns>
                 </asp:GridView>
+            </div>
+
+           <div id="facultyInfoTab" class="tab-content">
+                 <asp:GridView ID="gvFacultyInfo" runat="server" 
+                    CssClass="faculty-info-table table table-striped"
+                    AutoGenerateColumns="false" 
+                    OnPreRender="gvFacultyInfo_PreRender"
+                    EmptyDataText="No records found">
+            <Columns>
+                <asp:TemplateField HeaderText="Full Name">
+                    <ItemTemplate>
+                           <%# $"{Eval("facultyEnglishFirstName")} {Eval("facultyEnglishLastName")}".Trim() %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+            
+                 <asp:BoundField DataField="email" HeaderText="Email" />
+                 <asp:BoundField DataField="universityEnglishName" HeaderText="University" />
+                 <asp:BoundField DataField="majorEnglishName" HeaderText="Major" />
+            </Columns>
+                 </asp:GridView>
             </div>
 
             <div id="waitlists" class="tab-content">
@@ -231,26 +265,75 @@
             </div>
 
             <div id="majorPlan" class="tab-content">
-                <asp:GridView ID="gvMajorPlan" runat="server" CssClass="major-plan-table" 
-                    AutoGenerateColumns="false" OnPreRender="gvMajorPlan_PreRender">
-                    <Columns>
-                        <asp:BoundField DataField="subjectLevel" HeaderText="Level" />
-                        <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" />
-                        <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" />
-                        <asp:BoundField DataField="creditHours" HeaderText="Credit Hours" />
-                        <asp:TemplateField HeaderText="Subject Type">
-                            <ItemTemplate>
-                                <%# Eval("subjectTypeEnglishName") %>
-                            </ItemTemplate>
-                        </asp:TemplateField>
-                        <asp:TemplateField HeaderText="Prerequisites">
-                            <ItemTemplate>
-                                <%# string.IsNullOrEmpty(Eval("prerequisites").ToString()) ? "" : Eval("prerequisites") %>
-                            </ItemTemplate>
-                        </asp:TemplateField>
-                    </Columns>
-                </asp:GridView>
-            </div>
+                 <div class="mb-3">
+    </div>
+    <asp:GridView ID="gvMajorPlan" runat="server" CssClass="major-plan-table" 
+        AutoGenerateColumns="false" 
+        OnRowDeleting="gvMajorPlan_RowDeleting"
+    OnRowEditing="gvMajorPlan_RowEditing"
+    OnRowUpdating="gvMajorPlan_RowUpdating"
+    OnRowCancelingEdit="gvMajorPlan_RowCancelingEdit"
+    OnRowDataBound="gvMajorPlan_RowDataBound"
+    DataKeyNames="subjectCode"> 
+        <Columns>
+            <asp:BoundField DataField="subjectLevel" HeaderText="Level" ReadOnly="true" />
+            <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" ReadOnly="true" />
+            
+            <asp:TemplateField HeaderText="Subject Name">
+                <ItemTemplate>
+                    <%# Eval("subjectEnglishName") %>
+                </ItemTemplate>
+                <EditItemTemplate>
+                    <asp:TextBox ID="txtSubjectEnglishName" runat="server" Text='<%# Bind("subjectEnglishName") %>' CssClass="form-control" />
+                </EditItemTemplate>
+            </asp:TemplateField>
+            
+            <asp:TemplateField HeaderText="Credit Hours">
+                <ItemTemplate>
+                    <%# Eval("creditHours") %>
+                </ItemTemplate>
+                <EditItemTemplate>
+                    <asp:TextBox ID="txtCreditHours" runat="server" Text='<%# Bind("creditHours") %>' CssClass="form-control" />
+                </EditItemTemplate>
+            </asp:TemplateField>
+            
+            <asp:TemplateField HeaderText="Subject Type">
+    <ItemTemplate>
+        <%# Eval("subjectTypeEnglishName") %>
+    </ItemTemplate>
+    <EditItemTemplate>
+        <asp:DropDownList ID="ddlSubjectType" runat="server" 
+                          CssClass="form-control"
+                          DataTextField="subjectTypeEnglishName"
+                          DataValueField="subjectTypeId">
+        </asp:DropDownList>
+    </EditItemTemplate>
+</asp:TemplateField>
+
+            <asp:TemplateField HeaderText="Prerequisites">
+                <ItemTemplate>
+                    <%# Eval("prerequisites") %>
+                </ItemTemplate>
+                <EditItemTemplate>
+                    <asp:TextBox ID="txtPrerequisites" runat="server" 
+                        Text='<%# Bind("prerequisites") %>' 
+                        CssClass="form-control" />
+                </EditItemTemplate>
+            </asp:TemplateField>
+
+            <asp:TemplateField HeaderText="Actions">
+                <ItemTemplate>
+                    <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit" CssClass="btn btn-primary btn-edit" />
+                    <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn btn-danger btn-delete" />
+                </ItemTemplate>
+                <EditItemTemplate>
+                    <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn btn-success btn-update" />
+                    <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn btn-secondary btn-cancel" />
+                </EditItemTemplate>
+            </asp:TemplateField>
+        </Columns>
+    </asp:GridView>
+</div>
 
             <div id="curriculum" class="tab-content">
                 <asp:GridView ID="gvCurriculum" runat="server" CssClass="curriculum-table" 
@@ -272,6 +355,103 @@
                     </Columns>
                 </asp:GridView>
             </div>
+
+            <div id="addSubjectTab" class="tab-content">
+    <div class="container mt-4">
+        <h4 class="mb-4">Add New Subjects</h4>
+        
+      
+        <div class="add-subject-form">
+            
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Subject Code:</label>
+                <div class="col-sm-9">
+                    <asp:TextBox ID="txtSubjectCode" runat="server" CssClass="form-control" ></asp:TextBox>
+                </div>
+            </div>
+            
+            
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Subject Level:</label>
+                <div class="col-sm-9">
+                    <asp:DropDownList ID="ddlSubjectLevel" runat="server" CssClass="form-control">
+                        <asp:ListItem Text="1" Value="1" />
+                        <asp:ListItem Text="2" Value="2" />
+                        <asp:ListItem Text="3" Value="3" />
+                        <asp:ListItem Text="4" Value="4" />
+                        <asp:ListItem Text="5" Value="5" />
+                        <asp:ListItem Text="6" Value="6" />
+                        <asp:ListItem Text="7" Value="7" />
+                        <asp:ListItem Text="8" Value="8" />
+                        <asp:ListItem Text="9" Value="9" />
+                        <asp:ListItem Text="10" Value="10" />
+                    </asp:DropDownList>
+                </div>
+            </div>
+            
+            
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Subject English Name:</label>
+                <div class="col-sm-9">
+                    <asp:TextBox ID="txtSubjectEnglishName" runat="server" CssClass="form-control" ></asp:TextBox>
+                </div>
+            </div>
+            
+            
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Subject Arabic Name:</label>
+                <div class="col-sm-9">
+                    <asp:TextBox ID="txtSubjectArabicName" runat="server" CssClass="form-control"></asp:TextBox>
+                </div>
+            </div>
+            
+           
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Credit Hours:</label>
+                <div class="col-sm-9">
+                    <asp:TextBox ID="txtCreditHours" runat="server" 
+                        CssClass="form-control" TextMode="Number" min="1" max="10" ></asp:TextBox>
+                </div>
+            </div>
+            
+           
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">ٍSubject Type:</label>
+                <div class="col-sm-9">
+                    <asp:DropDownList ID="ddlSubjectType" runat="server" CssClass="form-control">
+                        <asp:ListItem Text="Select The Subject Type " Value="" Selected="True" Disabled="True" />
+                        <asp:ListItem Text="Compulsory College" Value="1" />
+                        <asp:ListItem Text="Compulsory University" Value="2" />
+                        <asp:ListItem Text="Elective College" Value="1" />
+                        <asp:ListItem Text="Elective University" Value="2" />
+                        
+                    </asp:DropDownList>
+                </div>
+            </div>
+            
+            
+            <div class="form-group row">
+    <label class="col-sm-3 col-form-label">Prerequisites:</label>
+    <div class="col-sm-9">
+        <asp:TextBox ID="txtPrerequisites" runat="server" 
+            CssClass="form-control" 
+            placeholder="Enter The Material Codes Separated By Commas , "
+            ToolTip=""></asp:TextBox>
+    </div>
+</div>
+            
+           
+            <div class="form-group row">
+                <div class="col-sm-9 offset-sm-3">
+                    <asp:Button ID="btnSubmit" runat="server" 
+                        Text="حفظ المادة" 
+                        CssClass="btn btn-primary"
+                        OnClick="btnSubmit_Click" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <div class="modal-overlay" id="orderModal" onclick="hideModal()">
                 <div class="modal-content" onclick="event.stopPropagation()">
@@ -359,19 +539,29 @@
         }
 
         function setActiveTab(tabId) {
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
 
-            const tabControl = document.getElementById('<%= hdnActiveTab.ClientID%>');
-            if (tabControl) {
-                tabControl.value = tabId;
+            
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.style.display = 'block';
+                activeTab.classList.add('active');
             }
 
+            
             document.querySelectorAll('.tab-link').forEach(link => {
                 link.classList.toggle('active', link.dataset.target === tabId);
             });
 
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.toggle('active', content.id === tabId);
-            });
+            
+            const tabControl = document.getElementById('<%= hdnActiveTab.ClientID %>');
+            if (tabControl) {
+                tabControl.value = tabId;
+            }
         }
 
         function initializeCharts() {

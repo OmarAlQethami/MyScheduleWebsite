@@ -804,3 +804,53 @@
         max-height: none !important;
         display: block !important;
     }
+/* أزرار التعديل والحذف */
+.btn-edit {
+    background-color: #2196F3; /* أزرق */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background-color: #F44336; /* أحمر */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-update {
+    background-color: #4CAF50; /* أخضر */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background-color: #FF9800; /* برتقالي */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#btnAddSubject {
+    margin-bottom: 15px;
+    padding: 8px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    #btnAddSubject:hover {
+        background-color: #218838;
+    }

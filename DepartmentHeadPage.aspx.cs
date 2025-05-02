@@ -14,9 +14,11 @@ namespace MyScheduleWebsite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            GetFacultyUniversityAndMajor();
+            BindFacultyInfo();
             if (!IsPostBack)
             {
-                GetFacultyUniversityAndMajor();
+
                 BindMajorPlan();
                 BindCurriculum();
                 BindWaitlists();
@@ -26,29 +28,138 @@ namespace MyScheduleWebsite
         }
 
         private int curriculumId = 1;
-
         private void BindMajorPlan()
         {
             if (ViewState["UniversityId"] == null || ViewState["MajorId"] == null) return;
 
             CRUD myCrud = new CRUD();
             string sql = @"SELECT s.subjectLevel, s.subjectCode, s.subjectEnglishName, 
-                          s.creditHours, st.subjectTypeEnglishName, s.prerequisites
-                   FROM subjects s
-                   INNER JOIN subjectType st ON s.subjectTypeId = st.subjectTypeId
-                   WHERE s.universityId = @UniversityId 
-                     AND s.majorId = @MajorId
-                   ORDER BY s.subjectLevel, s.subjectCode";
+                 s.creditHours, st.subjectTypeEnglishName, s.prerequisites,
+                 s.subjectTypeId 
+           FROM subjects s
+           INNER JOIN subjectType st ON s.subjectTypeId = st.subjectTypeId
+           WHERE s.universityId = @UniversityId 
+             AND s.majorId = @MajorId
+           ORDER BY s.subjectLevel, s.subjectCode";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
-                {
-                    { "@UniversityId", ViewState["UniversityId"] },
-                    { "@MajorId", ViewState["MajorId"] }
-                };
+    {
+        { "@UniversityId", ViewState["UniversityId"] },
+        { "@MajorId", ViewState["MajorId"] }
+    };
 
             DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
             gvMajorPlan.DataSource = dt;
             gvMajorPlan.DataBind();
+        }
+
+        protected void gvMajorPlan_RowEditing(object sender, GridViewEditEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("RowEditing event fired");
+            gvMajorPlan.EditIndex = e.NewEditIndex;
+            BindMajorPlan();
+        }
+
+        protected void gvMajorPlan_RowUpdating(object sender, GridViewUpdateEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Update started");
+
+            GridViewRow row = gvMajorPlan.Rows[e.RowIndex];
+
+            
+            string subjectCode = gvMajorPlan.DataKeys[e.RowIndex].Value.ToString();
+            System.Diagnostics.Debug.WriteLine($"Updating record with code: {subjectCode}");
+
+            
+            TextBox txtName = (TextBox)row.FindControl("txtSubjectEnglishName");
+            TextBox txtHours = (TextBox)row.FindControl("txtCreditHours");
+            TextBox txtPre = (TextBox)row.FindControl("txtPrerequisites");
+            DropDownList ddlType = (DropDownList)row.FindControl("ddlSubjectType");
+
+            
+            if (txtName == null || txtHours == null || ddlType == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Controls not found!");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                    "alert('Error: Cannot find form controls');", true);
+                return;
+            }
+
+            string selectedTypeId = ddlType.SelectedValue;
+            System.Diagnostics.Debug.WriteLine($"Selected Subject Type ID: {selectedTypeId}");
+            try
+            {
+                CRUD myCrud = new CRUD();
+                string sql = @"UPDATE subjects SET 
+                      subjectEnglishName = @name,
+                      creditHours = @hours,
+                      prerequisites = @pre,
+                      subjectTypeId = (SELECT subjectTypeId FROM subjectType WHERE subjectTypeEnglishName = @type)
+                      WHERE subjectCode = @code
+                      AND universityId = @univId
+                      AND majorId = @majorId";
+
+                var parameters = new Dictionary<string, object>
+        {
+            { "@name", txtName.Text },
+            { "@hours", txtHours.Text },
+            { "@pre", txtPre?.Text ?? "" },
+            { "@type", ddlType.SelectedValue },
+            { "@code", subjectCode },
+            { "@univId", ViewState["UniversityId"] },
+            { "@majorId", ViewState["MajorId"] }
+        };
+
+                int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
+                System.Diagnostics.Debug.WriteLine($"Rows affected: {rowsAffected}");
+
+                if (rowsAffected > 0)
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "alert('Updated Successfully');", true);
+                }
+                else
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "alert('Record Not Updated, Check Data');", true);
+                }
+
+                gvMajorPlan.EditIndex = -1;
+                BindMajorPlan();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error: {ex.ToString()}");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                    $"alert('Error: {ex.Message.Replace("'", "\\'")}');", true);
+            }
+        }
+
+        protected void gvMajorPlan_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        {
+            gvMajorPlan.EditIndex = -1;
+            BindMajorPlan();
+        }
+
+        protected void gvMajorPlan_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            string subjectCode = gvMajorPlan.DataKeys[e.RowIndex].Value.ToString();
+
+            CRUD myCrud = new CRUD();
+            string sql = @"DELETE FROM subjects 
+                  WHERE subjectCode = @subjectCode
+                  AND universityId = @UniversityId
+                  AND majorId = @MajorId";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+    {
+        { "@subjectCode", subjectCode },
+        { "@UniversityId", ViewState["UniversityId"] },
+        { "@MajorId", ViewState["MajorId"] }
+    };
+
+            myCrud.InsertUpdateDelete(sql, parameters);
+            BindMajorPlan();
         }
 
         protected void gvMajorPlan_PreRender(object sender, EventArgs e)
@@ -58,6 +169,185 @@ namespace MyScheduleWebsite
                 gvMajorPlan.HeaderRow.TableSection = TableRowSection.TableHeader;
             }
         }
+
+        protected string GetSafeSubjectType(object subjectType)
+        {
+            if (subjectType == null) return "Core"; 
+
+            string type = subjectType.ToString().Trim();
+
+            
+            if (type.Equals("Core", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Elective", StringComparison.OrdinalIgnoreCase))
+            {
+                return type;
+            }
+
+            return "Core"; 
+        }
+
+        protected void gvMajorPlan_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                if ((e.Row.RowState & DataControlRowState.Edit) > 0)
+                {
+                    DropDownList ddlType = (DropDownList)e.Row.FindControl("ddlSubjectType");
+                    if (ddlType != null)
+                    {
+                       
+                        string sql = "SELECT subjectTypeId, subjectTypeEnglishName FROM subjectType";
+                        DataTable dt = new CRUD().getDT(sql);
+
+                        ddlType.DataSource = dt;
+                        ddlType.DataBind();
+
+                        
+                        DataRowView drv = (DataRowView)e.Row.DataItem;
+                        string currentTypeId = drv["subjectTypeId"].ToString();
+                        ddlType.SelectedValue = currentTypeId;
+                    }
+                }
+            }
+        }
+
+
+        protected void btnAddSubject_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                
+                Response.Redirect("AddSubject.aspx?univId=" + ViewState["UniversityId"] + "&majorId=" + ViewState["MajorId"]);
+
+                
+            }
+            catch (Exception ex)
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                    $"alert('Error: {ex.Message.Replace("'", "\\'")}');", true);
+            }
+        }
+
+        protected void btnSubmit_Click(object sender, EventArgs e)
+        {
+            try
+            {
+               
+                string subjectCode = txtSubjectCode.Text.Trim();
+                string subjectLevel = ddlSubjectLevel.SelectedValue;
+                string englishName = txtSubjectEnglishName.Text.Trim();
+                string arabicName = txtSubjectArabicName.Text.Trim();
+                string creditHours = txtCreditHours.Text.Trim();
+                string subjectTypeId = ddlSubjectType.SelectedValue;
+                string prerequisites = txtPrerequisites.Text.Trim();
+
+                
+                if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(englishName) ||
+                    string.IsNullOrEmpty(creditHours) || string.IsNullOrEmpty(subjectTypeId))
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert",
+                        "alert('Please enter all required fields )');", true);
+                    return;
+                }
+
+                
+                if (!int.TryParse(creditHours, out int hours) || hours < 1 || hours > 10)
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert",
+                        "alert('Credit hours must be a number between 1 and 10.');", true);
+                    return;
+                }
+
+                
+                CRUD myCrud = new CRUD();
+                string sql = @"INSERT INTO subjects 
+                      (subjectCode, subjectLevel, subjectEnglishName, subjectArabicName, 
+                       creditHours, subjectTypeId, prerequisites, universityId, majorId)
+                      VALUES 
+                      (@code, @level, @engName, @arName, 
+                       @hours, @typeId, @prerequisites, @univId, @majorId)";
+
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+        {
+            { "@code", subjectCode },
+            { "@level", subjectLevel },
+            { "@engName", englishName },
+            { "@arName", arabicName },
+            { "@hours", creditHours },
+            { "@typeId", subjectTypeId },
+            { "@prerequisites", string.IsNullOrEmpty(prerequisites) ? DBNull.Value : (object)prerequisites },
+            { "@univId", ViewState["UniversityId"] ?? DBNull.Value },
+            { "@majorId", ViewState["MajorId"] ?? DBNull.Value }
+        };
+
+                int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
+
+                
+                if (rowsAffected > 0)
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "success",
+                        "alert('The subject has been saved successfully'); window.location.href = 'BindMajorPlan.aspx';", true);
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "error",
+                        "alert('Data not saved, please try again');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                System.Diagnostics.Debug.WriteLine($"Error saving subject: {ex}");
+
+                
+                string errorMsg = ex.Message.Contains("UNIQUE KEY constraint")
+                    ? "The subject code is already registered, please use another code"
+                    : "An error occurred while trying to save data.";
+
+                ScriptManager.RegisterStartupScript(this, GetType(), "error",
+                    $"alert('{errorMsg}');", true);
+            }
+        }
+
+
+
+        private void BindFacultyInfo()
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"SELECT 
+                    f.facultyEnglishFirstName,
+                    f.facultyEnglishLastName,
+                    f.email,
+                    u.universityEnglishName,
+                    m.majorEnglishName
+                   FROM faculty f
+                   INNER JOIN universities u ON f.universityId = u.universityId
+                   INNER JOIN majors m ON f.majorId = m.majorId";
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, parameters);
+            gvFacultyInfo.DataSource = dt;
+            gvFacultyInfo.DataBind();
+        }
+
+        protected string GetFullName(object firstName, object lastName)
+        {
+            string first = firstName?.ToString() ?? "";
+            string last = lastName?.ToString() ?? "";
+            return $"{first} {last}".Trim();
+        }
+
+        protected void gvFacultyInfo_PreRender(object sender, EventArgs e)
+        {
+            GridView gridView = (GridView)sender;
+            if (gridView.Rows.Count > 0)
+            {
+                gridView.HeaderRow.TableSection = TableRowSection.TableHeader;
+            }
+        }
+
+
 
         private void BindCurriculum()
         {

@@ -37,18 +37,17 @@ namespace MyScheduleWebsite.Account
             createAdminAndUserByDefault();
         }
 
-         private void createAdminAndUserByDefault()
+        private void createAdminAndUserByDefault()
         {
             try
             {
                 string strExistingAdmin = "";
                 string strAppName = "/MyScheduleWebsite";
-                string strAdminUserName = "Admin";  
-                string strAdminPassword = "zxcvbnm999"; 
+                string strAdminUserName = "Admin";
+                string strAdminPassword = "zxcvbnm999";
                 string strRoleName = "admin";
                 string strRoleFaculty = "faculty";
                 string strRoleStudent = "student";
-                string strRoleDepartmentHead = "departmentHead";
                 string strEmail = "Admin@MySchedule.com";
                 strAppName = Membership.ApplicationName.ToString();
                 CRUD myCrud = new CRUD();
@@ -64,8 +63,6 @@ namespace MyScheduleWebsite.Account
                         Roles.CreateRole(strRoleFaculty);
                     if (!Roles.RoleExists(strRoleStudent))
                         Roles.CreateRole(strRoleStudent);
-                    if (!Roles.RoleExists(strRoleDepartmentHead)) 
-                        Roles.CreateRole(strRoleDepartmentHead);
                     if (!Membership.ValidateUser(strAdminUserName, strAdminPassword))
                     {
                         Membership.CreateUser(strAdminUserName, strAdminPassword, strEmail);
@@ -77,8 +74,6 @@ namespace MyScheduleWebsite.Account
                 {
                     if (!Roles.RoleExists(strRoleName))
                         Roles.CreateRole(strRoleName);
-                    if (!Roles.RoleExists(strRoleDepartmentHead)) 
-                        Roles.CreateRole(strRoleDepartmentHead);
                     if (!Membership.ValidateUser(strAdminUserName, strAdminPassword))
                     {
                         Membership.DeleteUser(strAdminUserName);
@@ -91,7 +86,7 @@ namespace MyScheduleWebsite.Account
             catch (Exception ex)
             {
                 lblOutput.Text = ex.Message.ToString();
-                
+
             }
         }
 
