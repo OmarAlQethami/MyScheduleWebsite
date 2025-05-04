@@ -159,15 +159,6 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.LinkButton btnCurriculum;
 
         /// <summary>
-        /// btnAddSubjectTab control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnAddSubjectTab;
-
-        /// <summary>
         /// txtSearch control.
         /// </summary>
         /// <remarks>
@@ -222,6 +213,15 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.GridView gvTopWaitlists;
 
         /// <summary>
+        /// btnOpenSubjectPopup control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnOpenSubjectPopup;
+
+        /// <summary>
         /// gvMajorPlan control.
         /// </summary>
         /// <remarks>
@@ -231,6 +231,15 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.GridView gvMajorPlan;
 
         /// <summary>
+        /// btnAddSection control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAddSection;
+
+        /// <summary>
         /// gvCurriculum control.
         /// </summary>
         /// <remarks>
@@ -238,6 +247,87 @@ namespace MyScheduleWebsite
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvCurriculum;
+
+        /// <summary>
+        /// txtPopupSubjectCode control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupSubjectCode;
+
+        /// <summary>
+        /// txtPopupregisteredStudents control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupregisteredStudents;
+
+        /// <summary>
+        /// txtPopupCapacity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupCapacity;
+
+        /// <summary>
+        /// txtPopupDay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupDay;
+
+        /// <summary>
+        /// txtPopupStartTime control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupStartTime;
+
+        /// <summary>
+        /// txtPopupEndTime control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupEndTime;
+
+        /// <summary>
+        /// txtPopupLocation control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupLocation;
+
+        /// <summary>
+        /// txtPopupInstructor control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPopupInstructor;
+
+        /// <summary>
+        /// btnSaveSection control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveSection;
 
         /// <summary>
         /// txtSubjectCode control.

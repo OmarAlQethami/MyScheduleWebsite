@@ -33,8 +33,8 @@
 
                 <asp:LinkButton ID="btnFaculties" runat="server" 
                 CssClass="tab-link" 
-                OnClientClick="setActiveTab('facultiesTab'); return false;" 
-                data-target="facultiesTab">
+                OnClientClick="setActiveTab('facultyInfoTab'); return false;" 
+                data-target="facultyInfoTab">
                     Faculty
                 </asp:LinkButton>
 
@@ -65,13 +65,6 @@
                     data-target="curriculum">
                     Curriculum
                 </asp:LinkButton>
-
-                <asp:LinkButton ID="btnAddSubjectTab" runat="server" 
-                     CssClass="tab-link" 
-                     OnClientClick="setActiveTab('addSubjectTab'); return false;" 
-                     data-target="addSubjectTab">
-                      Add Major plan
-                 </asp:LinkButton>
             </div>
 
             <div id="students" class="tab-content active">
@@ -122,7 +115,7 @@
 
            <div id="facultyInfoTab" class="tab-content">
                  <asp:GridView ID="gvFacultyInfo" runat="server" 
-                    CssClass="faculty-info-table table table-striped"
+                    CssClass="students-table"
                     AutoGenerateColumns="false" 
                     OnPreRender="gvFacultyInfo_PreRender"
                     EmptyDataText="No records found">
@@ -265,8 +258,12 @@
             </div>
 
             <div id="majorPlan" class="tab-content">
-                 <div class="mb-3">
-    </div>
+                <div class="mb-3">
+    <asp:Button ID="btnOpenSubjectPopup" runat="server" Text="Add Subject"
+        CssClass="btn btn-primary mb-3"
+        OnClientClick="openSubjectPopup(); return false;" />
+</div>
+
     <asp:GridView ID="gvMajorPlan" runat="server" CssClass="major-plan-table" 
         AutoGenerateColumns="false" 
         OnRowDeleting="gvMajorPlan_RowDeleting"
@@ -276,8 +273,27 @@
     OnRowDataBound="gvMajorPlan_RowDataBound"
     DataKeyNames="subjectCode"> 
         <Columns>
-            <asp:BoundField DataField="subjectLevel" HeaderText="Level" ReadOnly="true" />
-            <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" ReadOnly="true" />
+            <asp:TemplateField HeaderText="Level">
+    <ItemTemplate>
+        <%# Eval("subjectLevel") %>
+    </ItemTemplate>
+    <EditItemTemplate>
+        <asp:TextBox ID="txtSubjectLevel" runat="server" 
+            Text='<%# Bind("subjectLevel") %>' 
+            CssClass="form-control" />
+    </EditItemTemplate>
+</asp:TemplateField>
+
+<asp:TemplateField HeaderText="Subject Code">
+    <ItemTemplate>
+        <%# Eval("subjectCode") %>
+    </ItemTemplate>
+    <EditItemTemplate>
+        <asp:TextBox ID="txtSubjectCode" runat="server" 
+            Text='<%# Bind("subjectCode") %>' 
+            CssClass="form-control" />
+    </EditItemTemplate>
+</asp:TemplateField>
             
             <asp:TemplateField HeaderText="Subject Name">
                 <ItemTemplate>
@@ -336,122 +352,122 @@
 </div>
 
             <div id="curriculum" class="tab-content">
+               <div class="mb-3">
+                <asp:Button ID="btnAddSection" runat="server" Text="Add New Section" CssClass="btn btn-primary" OnClientClick="openPopup(); return false;" />
+              </div>
                 <asp:GridView ID="gvCurriculum" runat="server" CssClass="curriculum-table" 
-                    AutoGenerateColumns="false" OnPreRender="gvCurriculum_PreRender">
-                    <Columns>
-                        <asp:BoundField DataField="sectionNumber" HeaderText="Section #" />
-                        <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" />
-                        <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" />
-                        <asp:BoundField DataField="creditHours" HeaderText="Credits" />
-                        <asp:BoundField DataField="capacity" HeaderText="Capacity" />
-                        <asp:BoundField DataField="registeredStudents" HeaderText="Registered" />
-                        <asp:TemplateField HeaderText="Schedule">
-                            <ItemTemplate>
-                                <%# FormatScheduleDetails(Eval("day"), Eval("startTime"), Eval("endTime"), Eval("location")) %>
-                            </ItemTemplate>
-                        </asp:TemplateField>
-                        <asp:BoundField DataField="instuctorArabicName" HeaderText="Instructor" 
-                            NullDisplayText="TBA" />
-                    </Columns>
-                </asp:GridView>
+    AutoGenerateColumns="false" OnPreRender="gvCurriculum_PreRender"
+    OnRowEditing="gvCurriculum_RowEditing"
+    OnRowUpdating="gvCurriculum_RowUpdating"
+    OnRowCancelingEdit="gvCurriculum_RowCancelingEdit"
+    OnRowDeleting="gvCurriculum_RowDeleting"
+    DataKeyNames="sectionNumber">
+    <Columns>
+        <asp:BoundField DataField="sectionNumber" HeaderText="Section #" ReadOnly="true" />
+        <asp:BoundField DataField="subjectCode" HeaderText="Subject Code" />
+        <asp:BoundField DataField="subjectEnglishName" HeaderText="Subject Name" />
+        <asp:BoundField DataField="creditHours" HeaderText="Credits" />
+        <asp:BoundField DataField="capacity" HeaderText="Capacity" />
+        <asp:BoundField DataField="registeredStudents" HeaderText="Registered" ReadOnly="true" />
+        
+        <asp:TemplateField HeaderText="Schedule">
+            <ItemTemplate>
+                <%# FormatScheduleDetails(Eval("day"), Eval("startTime"), Eval("endTime"), Eval("location")) %>
+            </ItemTemplate>
+            <EditItemTemplate>
+                Day: <asp:TextBox ID="txtDay" runat="server" Text='<%# Bind("day") %>' Width="50" />
+                <br />
+                From: <asp:TextBox ID="txtStartTime" runat="server" Text='<%# Bind("startTime") %>' Width="50" />
+                To: <asp:TextBox ID="txtEndTime" runat="server" Text='<%# Bind("endTime") %>' Width="50" />
+                <br />
+                Location: <asp:TextBox ID="txtLocation" runat="server" Text='<%# Bind("location") %>' Width="70" />
+            </EditItemTemplate>
+        </asp:TemplateField>
+
+        <asp:BoundField DataField="instuctorArabicName" HeaderText="Instructor" NullDisplayText="TBA" />
+
+        <asp:TemplateField HeaderText="Actions">
+            <ItemTemplate>
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit" CssClass="btn btn-primary btn-edit" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn btn-danger btn-delete"  />
+            </ItemTemplate>
+            <EditItemTemplate>
+                <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn btn-success btn-update" />
+                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn btn-secondary btn-cancel"/>
+            </EditItemTemplate>
+        </asp:TemplateField>
+    </Columns>
+</asp:GridView>
+
             </div>
 
-            <div id="addSubjectTab" class="tab-content">
-    <div class="container mt-4">
-        <h4 class="mb-4">Add New Subjects</h4>
-        
-      
-        <div class="add-subject-form">
-            
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">Subject Code:</label>
-                <div class="col-sm-9">
-                    <asp:TextBox ID="txtSubjectCode" runat="server" CssClass="form-control" ></asp:TextBox>
-                </div>
-            </div>
-            
-            
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">Subject Level:</label>
-                <div class="col-sm-9">
-                    <asp:DropDownList ID="ddlSubjectLevel" runat="server" CssClass="form-control">
-                        <asp:ListItem Text="1" Value="1" />
-                        <asp:ListItem Text="2" Value="2" />
-                        <asp:ListItem Text="3" Value="3" />
-                        <asp:ListItem Text="4" Value="4" />
-                        <asp:ListItem Text="5" Value="5" />
-                        <asp:ListItem Text="6" Value="6" />
-                        <asp:ListItem Text="7" Value="7" />
-                        <asp:ListItem Text="8" Value="8" />
-                        <asp:ListItem Text="9" Value="9" />
-                        <asp:ListItem Text="10" Value="10" />
-                    </asp:DropDownList>
-                </div>
-            </div>
-            
-            
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">Subject English Name:</label>
-                <div class="col-sm-9">
-                    <asp:TextBox ID="txtSubjectEnglishName" runat="server" CssClass="form-control" ></asp:TextBox>
-                </div>
-            </div>
-            
-            
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">Subject Arabic Name:</label>
-                <div class="col-sm-9">
-                    <asp:TextBox ID="txtSubjectArabicName" runat="server" CssClass="form-control"></asp:TextBox>
-                </div>
-            </div>
-            
-           
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">Credit Hours:</label>
-                <div class="col-sm-9">
-                    <asp:TextBox ID="txtCreditHours" runat="server" 
-                        CssClass="form-control" TextMode="Number" min="1" max="10" ></asp:TextBox>
-                </div>
-            </div>
-            
-           
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">ٍSubject Type:</label>
-                <div class="col-sm-9">
-                    <asp:DropDownList ID="ddlSubjectType" runat="server" CssClass="form-control">
-                        <asp:ListItem Text="Select The Subject Type " Value="" Selected="True" Disabled="True" />
-                        <asp:ListItem Text="Compulsory College" Value="1" />
-                        <asp:ListItem Text="Compulsory University" Value="2" />
-                        <asp:ListItem Text="Elective College" Value="1" />
-                        <asp:ListItem Text="Elective University" Value="2" />
-                        
-                    </asp:DropDownList>
-                </div>
-            </div>
-            
-            
-            <div class="form-group row">
-    <label class="col-sm-3 col-form-label">Prerequisites:</label>
-    <div class="col-sm-9">
-        <asp:TextBox ID="txtPrerequisites" runat="server" 
-            CssClass="form-control" 
-            placeholder="Enter The Material Codes Separated By Commas , "
-            ToolTip=""></asp:TextBox>
-    </div>
+            <div id="sectionPopup" style="display:none; position:fixed; top:20%; left:30%; width:40%; background:#fff; padding:20px; box-shadow:0 0 10px gray; z-index:1000;">
+    <h3>Add New Section</h3>
+    <asp:TextBox ID="txtPopupSubjectCode" runat="server" placeholder="Subject Code" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupregisteredStudents" runat="server" placeholder="Number Of Students Registered" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupCapacity" runat="server" placeholder="Capacity" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupDay" runat="server" placeholder="Day" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupStartTime" runat="server" placeholder="Start Time" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupEndTime" runat="server" placeholder="End Time" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupLocation" runat="server" placeholder="Location" CssClass="form-control" /><br />
+    <asp:TextBox ID="txtPopupInstructor" runat="server" placeholder="Instructor Arabic Name" CssClass="form-control" /><br />
+
+    <asp:Button ID="btnSaveSection" runat="server" Text="Save Section" OnClick="btnSaveSection_Click" CssClass="btn btn-success" />
+    <input type="button" value="Cancel" class="btn btn-secondary" onclick="closePopup()" />
 </div>
-            
+
+
            
-            <div class="form-group row">
-                <div class="col-sm-9 offset-sm-3">
-                    <asp:Button ID="btnSubmit" runat="server" 
-                        Text="حفظ المادة" 
-                        CssClass="btn btn-primary"
-                        OnClick="btnSubmit_Click" />
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="addSubjectModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+    background-color:white; border:1px solid #ccc; padding:20px; z-index:1000; width:600px; max-width:95%; box-shadow:0 0 10px rgba(0,0,0,0.3);">
+    
+    <h3>Add Subject</h3>
+    <hr />
+
+    <label>Subject Code:</label><br />
+    <asp:TextBox ID="txtSubjectCode" runat="server" CssClass="form-control" /><br /><br />
+
+    <label>Subject Level:</label><br />
+    <asp:DropDownList ID="ddlSubjectLevel" runat="server" CssClass="form-control">
+        <asp:ListItem Text="1" Value="1" />
+        <asp:ListItem Text="2" Value="2" />
+        <asp:ListItem Text="3" Value="3" />
+        <asp:ListItem Text="4" Value="4" />
+        <asp:ListItem Text="5" Value="5" />
+        <asp:ListItem Text="6" Value="6" />
+        <asp:ListItem Text="7" Value="7" />
+        <asp:ListItem Text="8" Value="8" />
+        <asp:ListItem Text="9" Value="9" />
+        <asp:ListItem Text="10" Value="10" />
+    </asp:DropDownList><br /><br />
+
+    <label>English Name:</label><br />
+    <asp:TextBox ID="txtSubjectEnglishName" runat="server" CssClass="form-control" /><br /><br />
+
+    <label>Arabic Name:</label><br />
+    <asp:TextBox ID="txtSubjectArabicName" runat="server" CssClass="form-control" /><br /><br />
+
+    <label>Credit Hours:</label><br />
+    <asp:TextBox ID="txtCreditHours" runat="server" CssClass="form-control" TextMode="Number" /><br /><br />
+
+    <label>Subject Type:</label><br />
+    <asp:DropDownList ID="ddlSubjectType" runat="server" CssClass="form-control">
+        <asp:ListItem Text="Select Type" Value="" Selected="True" Disabled="True" />
+        <asp:ListItem Text="Compulsory College" Value="1" />
+        <asp:ListItem Text="Compulsory University" Value="2" />
+        <asp:ListItem Text="Elective College" Value="3" />
+        <asp:ListItem Text="Elective University" Value="4" />
+    </asp:DropDownList><br /><br />
+
+    <label>Prerequisites:</label><br />
+    <asp:TextBox ID="txtPrerequisites" runat="server" CssClass="form-control" Placeholder="Example: 101,102" /><br /><br />
+
+    <asp:Button ID="btnSubmit" runat="server" Text="Save Subject" CssClass="btn btn-primary" OnClick="btnSubmit_Click" />
+    <input type="button" value="Cancel" class="btn btn-secondary" onclick="closeSubjectPopup()" />
+
 </div>
+
+
 
             <div class="modal-overlay" id="orderModal" onclick="hideModal()">
                 <div class="modal-content" onclick="event.stopPropagation()">
@@ -500,9 +516,36 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="scripts/facultyPage.js"></script>
+
+   
+    <script type="text/javascript">
+    function openPopup() {
+        document.getElementById('sectionPopup').style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('sectionPopup').style.display = 'none';
+        }
+    </script>
+
+      <script type="text/javascript">
+          function openSubjectPopup() {
+              document.getElementById('addSubjectModal').style.display = 'block';
+          }
+
+          function closeSubjectPopup() {
+              document.getElementById('addSubjectModal').style.display = 'none';
+          }
+      </script>
+
+
+
+
 
     <script>
         let orderChart = null;
@@ -539,29 +582,19 @@
         }
 
         function setActiveTab(tabId) {
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.style.display = 'none';
-                content.classList.remove('active');
-            });
 
-            
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                activeTab.style.display = 'block';
-                activeTab.classList.add('active');
+            const tabControl = document.getElementById('<%= hdnActiveTab.ClientID%>');
+            if (tabControl) {
+                tabControl.value = tabId;
             }
 
-            
             document.querySelectorAll('.tab-link').forEach(link => {
                 link.classList.toggle('active', link.dataset.target === tabId);
             });
 
-            
-            const tabControl = document.getElementById('<%= hdnActiveTab.ClientID %>');
-            if (tabControl) {
-                tabControl.value = tabId;
-            }
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabId);
+            });
         }
 
         function initializeCharts() {

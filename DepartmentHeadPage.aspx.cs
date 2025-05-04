@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
@@ -14,11 +15,11 @@ namespace MyScheduleWebsite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            GetFacultyUniversityAndMajor();
-            BindFacultyInfo();
+            
             if (!IsPostBack)
             {
-
+                GetFacultyUniversityAndMajor();
+                BindFacultyInfo();
                 BindMajorPlan();
                 BindCurriculum();
                 BindWaitlists();
@@ -70,20 +71,15 @@ namespace MyScheduleWebsite
             string subjectCode = gvMajorPlan.DataKeys[e.RowIndex].Value.ToString();
             System.Diagnostics.Debug.WriteLine($"Updating record with code: {subjectCode}");
 
-            
+            TextBox txtCode = (TextBox)row.FindControl("txtSubjectCode");
+            TextBox txtLevel = (TextBox)row.FindControl("txtSubjectLevel");
             TextBox txtName = (TextBox)row.FindControl("txtSubjectEnglishName");
             TextBox txtHours = (TextBox)row.FindControl("txtCreditHours");
             TextBox txtPre = (TextBox)row.FindControl("txtPrerequisites");
             DropDownList ddlType = (DropDownList)row.FindControl("ddlSubjectType");
 
             
-            if (txtName == null || txtHours == null || ddlType == null)
-            {
-                System.Diagnostics.Debug.WriteLine("Controls not found!");
-                ClientScript.RegisterStartupScript(this.GetType(), "alert",
-                    "alert('Error: Cannot find form controls');", true);
-                return;
-            }
+            
 
             string selectedTypeId = ddlType.SelectedValue;
             System.Diagnostics.Debug.WriteLine($"Selected Subject Type ID: {selectedTypeId}");
@@ -92,6 +88,8 @@ namespace MyScheduleWebsite
                 CRUD myCrud = new CRUD();
                 string sql = @"UPDATE subjects SET 
                       subjectEnglishName = @name,
+                      subjectCode = @newCode,
+                      subjectLevel = @level,
                       creditHours = @hours,
                       prerequisites = @pre,
                       subjectTypeId = (SELECT subjectTypeId FROM subjectType WHERE subjectTypeEnglishName = @type)
@@ -102,6 +100,8 @@ namespace MyScheduleWebsite
                 var parameters = new Dictionary<string, object>
         {
             { "@name", txtName.Text },
+            { "@newCode", txtCode.Text.Trim() },
+            { "@level", txtLevel.Text.Trim() },
             { "@hours", txtHours.Text },
             { "@pre", txtPre?.Text ?? "" },
             { "@type", ddlType.SelectedValue },
@@ -232,7 +232,7 @@ namespace MyScheduleWebsite
         {
             try
             {
-               
+
                 string subjectCode = txtSubjectCode.Text.Trim();
                 string subjectLevel = ddlSubjectLevel.SelectedValue;
                 string englishName = txtSubjectEnglishName.Text.Trim();
@@ -241,16 +241,16 @@ namespace MyScheduleWebsite
                 string subjectTypeId = ddlSubjectType.SelectedValue;
                 string prerequisites = txtPrerequisites.Text.Trim();
 
-                
+
                 if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(englishName) ||
                     string.IsNullOrEmpty(creditHours) || string.IsNullOrEmpty(subjectTypeId))
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "alert",
-                        "alert('Please enter all required fields )');", true);
+                       "alert('Please fill in all required fields.');", true);
                     return;
                 }
 
-                
+
                 if (!int.TryParse(creditHours, out int hours) || hours < 1 || hours > 10)
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "alert",
@@ -258,7 +258,7 @@ namespace MyScheduleWebsite
                     return;
                 }
 
-                
+
                 CRUD myCrud = new CRUD();
                 string sql = @"INSERT INTO subjects 
                       (subjectCode, subjectLevel, subjectEnglishName, subjectArabicName, 
@@ -282,7 +282,7 @@ namespace MyScheduleWebsite
 
                 int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
 
-                
+
                 if (rowsAffected > 0)
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "success",
@@ -296,10 +296,10 @@ namespace MyScheduleWebsite
             }
             catch (Exception ex)
             {
-                
+
                 System.Diagnostics.Debug.WriteLine($"Error saving subject: {ex}");
 
-                
+
                 string errorMsg = ex.Message.Contains("UNIQUE KEY constraint")
                     ? "The subject code is already registered, please use another code"
                     : "An error occurred while trying to save data.";
@@ -307,8 +307,220 @@ namespace MyScheduleWebsite
                 ScriptManager.RegisterStartupScript(this, GetType(), "error",
                     $"alert('{errorMsg}');", true);
             }
+            BindMajorPlan();
         }
 
+        protected void gvCurriculum_RowEditing(object sender, GridViewEditEventArgs e)
+        {
+            gvCurriculum.EditIndex = e.NewEditIndex;
+            BindCurriculum(); 
+        }
+
+        protected void gvCurriculum_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        {
+            gvCurriculum.EditIndex = -1;
+            BindCurriculum();
+        }
+
+        protected void gvCurriculum_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            
+            int sectionNumber = Convert.ToInt32(gvCurriculum.DataKeys[e.RowIndex].Value);
+
+            CRUD myCrud = new CRUD();
+
+           
+            string sql = @"DELETE FROM Sections 
+                   WHERE sectionNumber = @sectionNumber 
+                   AND universityId = @UniversityId 
+                   AND majorId = @MajorId";
+
+            
+            var parameters = new Dictionary<string, object>
+    {
+        { "@sectionNumber", sectionNumber },
+        { "@UniversityId", ViewState["UniversityId"] },
+        { "@MajorId", ViewState["MajorId"] }
+    };
+
+           
+            myCrud.InsertUpdateDelete(sql, parameters);
+
+            BindCurriculum();
+        }
+
+        protected void gvCurriculum_RowUpdating(object sender, GridViewUpdateEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Update started");
+
+            GridViewRow row = gvCurriculum.Rows[e.RowIndex];
+
+            int sectionNumber = Convert.ToInt32(gvCurriculum.DataKeys[e.RowIndex].Value);
+
+
+            string subjectCode = ((TextBox)row.Cells[1].Controls[0]).Text;
+            string subjectName = ((TextBox)row.Cells[2].Controls[0]).Text;
+            int creditHours = int.Parse(((TextBox)row.Cells[3].Controls[0]).Text);
+            int capacity = int.Parse(((TextBox)row.Cells[4].Controls[0]).Text);
+
+            string day = ((TextBox)row.FindControl("txtDay")).Text;
+            string startTime = ((TextBox)row.FindControl("txtStartTime")).Text;
+            string endTime = ((TextBox)row.FindControl("txtEndTime")).Text;
+            string location = ((TextBox)row.FindControl("txtLocation")).Text;
+            string instructor = ((TextBox)row.Cells[7].Controls[0]).Text;
+
+            CRUD myCrud = new CRUD();
+            string sql = @"UPDATE Sections SET 
+                    subjectCode = @subjectCode,
+                    subjectEnglishName = @subjectName,
+                    creditHours = @creditHours,
+                    capacity = @capacity,
+                    day = @day, 
+                    startTime = @startTime, 
+                    endTime = @endTime, 
+                    location = @location,
+                    instuctorArabicName = @instructor
+                    WHERE sectionNumber = @sectionNumber";
+
+            var parameters = new Dictionary<string, object>
+    {
+        { "@subjectCode", subjectCode },
+        { "@subjectName", subjectName },
+        { "@creditHours", creditHours },
+        { "@capacity", capacity },
+        { "@day", day },
+        { "@startTime", startTime },
+        { "@endTime", endTime },
+        { "@location", location },
+        { "@instructor", instructor },
+        { "@sectionNumber", sectionNumber }
+    };
+
+            try
+            {
+                int rowsAffected = myCrud.InsertUpdateDelete(sql, parameters);
+
+                if (rowsAffected > 0)
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "alert('Updated Successfully');", true);
+                }
+                else
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "alert('No changes made, check data');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error: {ex.ToString()}");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                    $"alert('Error: {ex.Message.Replace("'", "\\'")}');", true);
+            }
+
+            gvCurriculum.EditIndex = -1;
+            BindCurriculum();
+        }
+
+        protected void btnSaveSection_Click(object sender, EventArgs e)
+        {
+            string subjectCode = txtPopupSubjectCode.Text.Trim();
+            string registeredStudents = txtPopupregisteredStudents.Text.Trim();
+            int capacity = int.Parse(txtPopupCapacity.Text.Trim());
+            int day = ConvertDayToNumber(txtPopupDay.Text.Trim());
+            string startTime = txtPopupStartTime.Text.Trim();
+            string endTime = txtPopupEndTime.Text.Trim();
+            string location = txtPopupLocation.Text.Trim();
+            string instructor = txtPopupInstructor.Text.Trim();
+
+            
+            string sectionSql = @"
+    INSERT INTO Sections (subjectCode, capacity, registeredStudents, instructorArabicName)
+    OUTPUT INSERTED.sectionId
+    VALUES (@subjectCode, @capacity, @registeredStudents, @instructor)";
+
+        
+            string sectionDetailsSql = @"
+    INSERT INTO SectionDetails (sectionId, day, startTime, endTime, location)
+    VALUES (@sectionId, @day, @startTime, @endTime, @location)";
+
+            CRUD myCrud = new CRUD();
+
+            var sectionParams = new Dictionary<string, object>
+    {
+        { "@subjectCode", subjectCode },
+        { "@capacity", capacity },
+        { "@registeredStudents", registeredStudents },
+        { "@instructor", instructor }
+    };
+
+            try
+            {
+                
+                int sectionId = myCrud.InsertAndReturnId(sectionSql, sectionParams);
+
+                if (sectionId > 0)
+                {
+                 
+                    var sectionDetailsParams = new Dictionary<string, object>
+            {
+                { "@sectionId", sectionId },
+                { "@day", day },
+                { "@startTime", startTime },
+                { "@endTime", endTime },
+                { "@location", location }
+            };
+
+                   
+                    int result = myCrud.InsertUpdateDelete(sectionDetailsSql, sectionDetailsParams);
+
+                    if (result > 0)
+                    {
+                        ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Section Added Successfully');", true);
+                    }
+                    else
+                    {
+                        ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Failed to add section details');", true);
+                    }
+                }
+                else
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Failed to add section');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Error: " + ex.Message + "');", true);
+            }
+
+            BindCurriculum();
+        }
+
+
+
+        private int ConvertDayToNumber(string day)
+        {
+            switch (day.Trim())
+            {
+               
+                case "sunday":
+                    return 1;
+                
+                case "monday":
+                    return 2;
+               
+                case "tuesday":
+                    return 3;
+               
+                case "wednesday":
+                    return 4;
+                
+                case "thursday":
+                    return 5;
+                default:
+                    return 0; 
+            }
+        }
 
 
         private void BindFacultyInfo()
