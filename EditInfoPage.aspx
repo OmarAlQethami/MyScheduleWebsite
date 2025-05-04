@@ -90,6 +90,16 @@
         <label for="txtDepartmentHeadEmail">Email:</label>
         <asp:TextBox ID="txtDepartmentHeadEmail" runat="server" CssClass="form-control" />
 
+        <h4>Change Password</h4>
+        <label for="txtCurrentPasswordDepartmentHead">Current Password:</label>
+        <asp:TextBox ID="txtCurrentPasswordDepartmentHead" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtNewPasswordDepartmentHead">New Password:</label>
+        <asp:TextBox ID="txtNewPasswordDepartmentHead" runat="server" CssClass="form-control" TextMode="Password" />
+
+        <label for="txtConfirmPasswordDepartmentHead">Confirm New Password:</label>
+        <asp:TextBox ID="txtConfirmPasswordDepartmentHead" runat="server" CssClass="form-control" TextMode="Password" />
+
         <asp:Button ID="btnSaveDepartmentHead" runat="server" Text="Save Department Head Info"
             CssClass="btn btn-primary" OnClick="btnSaveDepartmentHead_Click" />
     </asp:Panel>

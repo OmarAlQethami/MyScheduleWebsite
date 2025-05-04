@@ -249,6 +249,33 @@ namespace MyScheduleWebsite
         protected global::System.Web.UI.WebControls.TextBox txtDepartmentHeadEmail;
 
         /// <summary>
+        /// txtCurrentPasswordDepartmentHead control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtCurrentPasswordDepartmentHead;
+
+        /// <summary>
+        /// txtNewPasswordDepartmentHead control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNewPasswordDepartmentHead;
+
+        /// <summary>
+        /// txtConfirmPasswordDepartmentHead control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmPasswordDepartmentHead;
+
+        /// <summary>
         /// btnSaveDepartmentHead control.
         /// </summary>
         /// <remarks>

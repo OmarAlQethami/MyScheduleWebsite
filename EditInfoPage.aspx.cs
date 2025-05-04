@@ -24,7 +24,6 @@ namespace MyScheduleWebsite
             }
         }
 
-
         private void ShowPanelByRole()
         {
             if (Roles.IsUserInRole(User.Identity.Name, "admin"))
@@ -136,12 +135,9 @@ namespace MyScheduleWebsite
                 if (dr != null && dr.Read())
                 {
                     int maxLevel = dr.IsDBNull(0) ? 0 : dr.GetInt32(0);
-                    if (maxLevel > 0)
+                    for (int i = 1; i <= maxLevel; i++)
                     {
-                        for (int i = 1; i <= maxLevel; i++)
-                        {
-                            ddlCurrentLevel.Items.Add(new ListItem(i.ToString(), i.ToString()));
-                        }
+                        ddlCurrentLevel.Items.Add(new ListItem(i.ToString(), i.ToString()));
                     }
                 }
             }
@@ -215,7 +211,6 @@ namespace MyScheduleWebsite
         protected void btnGoToProgress_Click(object sender, EventArgs e)
         {
             Response.Redirect("StudentProgressPage.aspx");
-
         }
 
         private void LoadAdminInfo()
@@ -310,6 +305,12 @@ namespace MyScheduleWebsite
                 };
 
                 int result = myCrud.InsertUpdateDelete(mySql, myPara);
+
+                if (!string.IsNullOrEmpty(txtNewPasswordDepartmentHead.Text))
+                {
+                    ChangePassword(txtCurrentPasswordDepartmentHead.Text, txtNewPasswordDepartmentHead.Text, txtConfirmPasswordDepartmentHead.Text);
+                }
+
                 lblOutput.Text = result >= 1 ? "Department head email updated successfully." : "No changes were made.";
                 lblOutput.CssClass = result >= 1 ? "text-success" : "text-warning";
             }
@@ -404,11 +405,7 @@ namespace MyScheduleWebsite
         private Guid GetUserId()
         {
             var user = Membership.GetUser();
-            if (user == null || user.ProviderUserKey == null)
-            {
-                return Guid.Empty;
-            }
-            return (Guid)user.ProviderUserKey;
+            return user?.ProviderUserKey is Guid guid ? guid : Guid.Empty;
         }
     }
 }
