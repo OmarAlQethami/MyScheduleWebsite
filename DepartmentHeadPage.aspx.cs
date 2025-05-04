@@ -286,8 +286,12 @@ namespace MyScheduleWebsite
                 if (rowsAffected > 0)
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "success",
-                        "alert('The subject has been saved successfully'); window.location.href = 'BindMajorPlan.aspx';", true);
+                        "alert('The subject has been saved successfully');", true);
+
+                    BindMajorPlan();
+                    return;
                 }
+
                 else
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "error",
