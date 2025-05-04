@@ -204,7 +204,6 @@ namespace MyScheduleWebsite
                 string title = txtEmailTitle.Text.Trim();
                 string body = txtEmailBody.Text.Trim();
 
-                // Get current user's info
                 MembershipUser currentUser = Membership.GetUser();
                 if (currentUser == null)
                 {
@@ -216,24 +215,26 @@ namespace MyScheduleWebsite
                 Guid userId = (Guid)currentUser.ProviderUserKey;
                 string fullName = GetUserFullName(userId);
 
-                // Format email body
-                string formattedBody = $"Message sent by {fullName} ({userEmail})<br/><br/>{body}";
+                string formattedBody = $@"
+Message sent from {fullName} ({userEmail})
 
-                // Send email using mailMgr
+------------------
+{body}
+";
+
                 mailMgr emailSender = new mailMgr
                 {
                     myTo = recipientEmail,
                     mySubject = title,
-                    myBody = formattedBody
+                    myBody = formattedBody,
+                    myIsBodyHtml = false
                 };
 
                 string result = emailSender.sendEmailViaGmail();
 
-                // Show success message
                 ScriptManager.RegisterStartupScript(this, GetType(), "EmailSuccess",
                     $"alert('Email sent successfully to {recipientEmail}');", true);
 
-                // Reset form
                 txtEmailTitle.Text = "";
                 txtEmailBody.Text = "";
                 pnlEmailForm.Visible = false;
@@ -245,7 +246,6 @@ namespace MyScheduleWebsite
                     $"alert('Error sending email: {ex.Message}');", true);
             }
         }
-
         private string GetUserFullName(Guid userId)
         {
             CRUD myCrud = new CRUD();
