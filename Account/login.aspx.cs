@@ -25,6 +25,10 @@ namespace MyScheduleWebsite.Account
                 {
                     Response.Redirect("~/FacultyPage.aspx");
                 }
+                else if (Roles.IsUserInRole(Session["Username"].ToString(), "departmentHead"))
+                {
+                    Response.Redirect("~/DepartmentHeadPage.aspx");
+                }
                 else if (Roles.IsUserInRole(Session["Username"].ToString(), "admin"))
                 {
                     Response.Redirect("~/admin/AdminPage.aspx");
@@ -33,14 +37,14 @@ namespace MyScheduleWebsite.Account
             createAdminAndUserByDefault();
         }
 
-         private void createAdminAndUserByDefault()
+        private void createAdminAndUserByDefault()
         {
             try
             {
                 string strExistingAdmin = "";
                 string strAppName = "/MyScheduleWebsite";
-                string strAdminUserName = "Admin";  
-                string strAdminPassword = "zxcvbnm999"; 
+                string strAdminUserName = "Admin";
+                string strAdminPassword = "zxcvbnm999";
                 string strRoleName = "admin";
                 string strRoleFaculty = "faculty";
                 string strRoleStudent = "student";
@@ -82,7 +86,7 @@ namespace MyScheduleWebsite.Account
             catch (Exception ex)
             {
                 lblOutput.Text = ex.Message.ToString();
-                
+
             }
         }
 
@@ -102,6 +106,10 @@ namespace MyScheduleWebsite.Account
                 else if (Roles.IsUserInRole(txtUserName.Text, "faculty"))
                 {
                     Response.Redirect("~/FacultyPage.aspx");
+                }
+                else if (Roles.IsUserInRole(txtUserName.Text, "departmentHead"))
+                {
+                    Response.Redirect("~/DepartmentHeadPage.aspx");
                 }
                 else if (Roles.IsUserInRole(txtUserName.Text, "admin"))
                 {

@@ -492,7 +492,20 @@ namespace MyScheduleWebsite.App_Code
                 myGv.DataBind();
             }
         }
-        
+
+        public int InsertAndReturnId(string sql, Dictionary<string, object> parameters)
+        {
+            using (SqlCommand cmd = new SqlCommand(sql))
+            {
+                foreach (var param in parameters)
+                {
+                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                }
+                object result = cmd.ExecuteScalar();
+                return Convert.ToInt32(result);
+            }
+        }
+
 
         public static void clearAllPools()
         {
