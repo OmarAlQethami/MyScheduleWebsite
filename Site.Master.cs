@@ -198,7 +198,72 @@ namespace MyScheduleWebsite
 
         protected void btnSendEmail_Click(object sender, EventArgs e)
         {
+            try
+            {
+                string recipientEmail = ddlRecipients.SelectedValue;
+                string title = txtEmailTitle.Text.Trim();
+                string body = txtEmailBody.Text.Trim();
 
+                // Get current user's info
+                MembershipUser currentUser = Membership.GetUser();
+                if (currentUser == null)
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('You must be logged in to send messages.');", true);
+                    return;
+                }
+
+                string userEmail = currentUser.Email;
+                Guid userId = (Guid)currentUser.ProviderUserKey;
+                string fullName = GetUserFullName(userId);
+
+                // Format email body
+                string formattedBody = $"Message sent by {fullName} ({userEmail})<br/><br/>{body}";
+
+                // Send email using mailMgr
+                mailMgr emailSender = new mailMgr
+                {
+                    myTo = recipientEmail,
+                    mySubject = title,
+                    myBody = formattedBody
+                };
+
+                string result = emailSender.sendEmailViaGmail();
+
+                // Show success message
+                ScriptManager.RegisterStartupScript(this, GetType(), "EmailSuccess",
+                    $"alert('Email sent successfully to {recipientEmail}');", true);
+
+                // Reset form
+                txtEmailTitle.Text = "";
+                txtEmailBody.Text = "";
+                pnlEmailForm.Visible = false;
+                updHelp.Update();
+            }
+            catch (Exception ex)
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "EmailError",
+                    $"alert('Error sending email: {ex.Message}');", true);
+            }
+        }
+
+        private string GetUserFullName(Guid userId)
+        {
+            CRUD myCrud = new CRUD();
+            string sql = @"
+        SELECT COALESCE(
+            s.studentEnglishFirstName + ' ' + s.studentEnglishLastName,
+            f.facultyEnglishFirstName + ' ' + f.facultyEnglishLastName,
+            dh.departmentHeadEnglishFirstName + ' ' + dh.departmentHeadEnglishLastName,
+            'User'
+        ) AS FullName
+        FROM aspnet_Users u
+        LEFT JOIN students s ON u.UserId = s.UserId
+        LEFT JOIN faculty f ON u.UserId = f.UserId
+        LEFT JOIN departmentHead dh ON u.UserId = dh.UserId
+        WHERE u.UserId = @userId";
+
+            DataTable dt = myCrud.getDTPassSqlDic(sql, new Dictionary<string, object> { { "@userId", userId } });
+            return dt.Rows.Count > 0 ? dt.Rows[0]["FullName"].ToString() : "User";
         }
 
         protected void Logout_Click(object sender, EventArgs e)

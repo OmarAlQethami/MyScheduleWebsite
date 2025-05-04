@@ -36,6 +36,7 @@
     display: none;
     flex-direction: column;
     gap: 14px;
+    z-index: 99999;
     animation: fadeIn 0.25s ease-in-out;
 }
 
