@@ -5,8 +5,15 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Rubik';
+    src: url('../fonts/rubik-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
-    font-family: 'Lato', sans-serif !important;
+    font-family: 'Lato', 'Rubik', sans-serif !important;
 }
 
 .top-container {
@@ -43,7 +50,11 @@ body {
     padding-right: 20px;
     padding-bottom: 20px;
     margin-bottom: 20px;
-    position: relative;
+    position: sticky;
+    background-color: #DDDDDD;
+    top: 50px;
+    z-index: 1000;
+    padding: 10px;
 }
 
 .buttons {

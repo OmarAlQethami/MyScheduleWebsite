@@ -134,10 +134,12 @@
     <Content Include="Account\Web.config" />
     <Content Include="env.config" />
     <Content Include="fonts\lato-regular.woff" />
+    <Content Include="fonts\rubik-regular.woff" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="OrderSuccessfulPage.aspx" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\facultyPage.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
     <Content Include="Scripts\jquery-3.4.1.slim.js" />
@@ -179,6 +181,7 @@
     <Content Include="styles\StudentStyles.css" />
     <Content Include="styles\styles.css" />
     <Content Include="styles\WelcomeStyles.css" />
+    <Content Include="temp\tempPage.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -291,6 +294,14 @@
     </Compile>
     <Compile Include="StudentProgressPage.aspx.designer.cs">
       <DependentUpon>StudentProgressPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="temp\ExcelToSQL.cs" />
+    <Compile Include="temp\tempPage.aspx.cs">
+      <DependentUpon>tempPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="temp\tempPage.aspx.designer.cs">
+      <DependentUpon>tempPage.aspx</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
