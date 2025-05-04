@@ -42,15 +42,6 @@ namespace MyScheduleWebsite.admin
         protected global::System.Web.UI.WebControls.Label lblMajorsOutput;
 
         /// <summary>
-        /// btnUserRoleAssign control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnUserRoleAssign;
-
-        /// <summary>
         /// cBLRoles control.
         /// </summary>
         /// <remarks>
@@ -76,6 +67,15 @@ namespace MyScheduleWebsite.admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnUnlinkUserRoles;
+
+        /// <summary>
+        /// btnUserRoleAssign control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnUserRoleAssign;
 
         /// <summary>
         /// btnDeleteRoles control.
@@ -123,15 +123,6 @@ namespace MyScheduleWebsite.admin
         protected global::System.Web.UI.WebControls.TextBox txtRole;
 
         /// <summary>
-        /// btnLinkUserRole control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLinkUserRole;
-
-        /// <summary>
         /// txtPassword control.
         /// </summary>
         /// <remarks>
@@ -141,15 +132,6 @@ namespace MyScheduleWebsite.admin
         protected global::System.Web.UI.WebControls.TextBox txtPassword;
 
         /// <summary>
-        /// btnUnLinkUserToRole control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnUnLinkUserToRole;
-
-        /// <summary>
         /// txtEmail control.
         /// </summary>
         /// <remarks>
@@ -157,15 +139,6 @@ namespace MyScheduleWebsite.admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtEmail;
-
-        /// <summary>
-        /// btnShowAllUser control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnShowAllUser;
 
         /// <summary>
         /// btnCreateUser0 control.
@@ -186,15 +159,6 @@ namespace MyScheduleWebsite.admin
         protected global::System.Web.UI.WebControls.Button btnCreateRole0;
 
         /// <summary>
-        /// btnShowAllRoles control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnShowAllRoles;
-
-        /// <summary>
         /// btnDeleteUser0 control.
         /// </summary>
         /// <remarks>
@@ -211,15 +175,6 @@ namespace MyScheduleWebsite.admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnDeleteRole1;
-
-        /// <summary>
-        /// btnUpdateUser control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnUpdateUser;
 
         /// <summary>
         /// txtFName control.

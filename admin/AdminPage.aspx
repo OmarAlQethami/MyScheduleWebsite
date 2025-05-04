@@ -29,8 +29,7 @@
                         <th>Roles</th>
                         <th>Users</th>
                         <th>
-                            <asp:Button ID="btnUserRoleAssign" runat="server" 
-                            Text="Link User Role" OnClick="btnUserRoleAssign_Click" />
+                            
                         </th>
                     </tr>
                     <tr>
@@ -42,6 +41,8 @@
                         </td>
                          <td class="top-align">
                             <asp:Button ID="btnUnlinkUserRoles" runat="server" OnClick="btnUnlinkUserRoles_Click" Text="Unlink User Role" />
+                              <asp:Button ID="btnUserRoleAssign" runat="server" Text="Link User Role" OnClick="btnUserRoleAssign_Click" />
+                     
                         </td>
                     </tr>
                     <tr>
@@ -74,10 +75,7 @@
                     <td align="center" class="style4" style="width: 61px">
                         <asp:TextBox ID="txtRole" runat="server" autocomplete="off"></asp:TextBox>
                     </td>
-                    <td style="width: 177px">
-                        <asp:Button ID="btnLinkUserRole" runat="server" OnClick="btnLinkUserRole_Click" Text="Link User Role"
-                            Width="124px" style="margin-left: 0px" TabIndex="6" />
-                    </td>
+                    
                 </tr>
                 <tr>
                     <td>Password</td>
@@ -86,10 +84,7 @@
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="width: 177px">
-                        <asp:Button ID="btnUnLinkUserToRole" runat="server" OnClick="btnUnLinkUserToRole_Click"
-                            Text="UnlinkUsertoRole" Width="124px" />
-                    </td>
+                    
                 </tr>
                 <tr>
                     <td class="style3" style="width: 68px">Email</td>
@@ -98,10 +93,7 @@
                     </td>
                     <td align="center" class="style4" style="width: 42px">&nbsp;</td>
                     <td align="center">&nbsp;</td>
-                    <td>
-                        <asp:Button ID="btnShowAllUser" runat="server" OnClick="btnShowAllUser_Click" Text="Show All Users"
-                            Width="124px" />
-                    </td>
+                    
                 </tr>
                 <tr>
                     <td class="style3" style="width: 68px">&nbsp;</td>
@@ -114,10 +106,7 @@
                         <asp:Button ID="btnCreateRole0" runat="server" OnClick="btnCreateRole_Click" 
                             Text="Create Role" Width="98px" TabIndex="5" />
                     </td>
-                    <td>
-                        <asp:Button ID="btnShowAllRoles" runat="server" OnClick="btnShowAllRoles_Click" 
-                            Text="Show All Roles" Width="124px"/>
-                    </td>
+                    
                 </tr>
                 <tr>
                     <td class="style3">&nbsp;</td>
@@ -128,9 +117,7 @@
                     <td align="center">
                         <asp:Button ID="btnDeleteRole1" runat="server" OnClick="btnDeleteRole_Click" Text="Delete Role" />
                     </td>
-                    <td style="width: 177px">
-                        <asp:Button ID="btnUpdateUser" runat="server" OnClick="btnUpdateUser_Click" Text="Update User" Width="125px" />
-                    </td>
+                   
                 </tr>
             </table>
         </div>
