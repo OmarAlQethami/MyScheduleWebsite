@@ -30,7 +30,6 @@
             <asp:ListItem Text="Choose your current level" Value="" Selected="True"></asp:ListItem>
         </asp:DropDownList>
 
-        
         <label for="txtCurrentPasswordStudent">Current Password:</label>
         <asp:TextBox ID="txtCurrentPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
 
@@ -41,6 +40,7 @@
         <asp:TextBox ID="txtConfirmPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
 
         <asp:Button ID="btnSaveStudent" runat="server" Text="Save Student Info" CssClass="btn btn-primary" OnClick="btnSaveStudent_Click" />
+        <asp:Button ID="btnGoToProgress" runat="server" Text="Back to Edit Student Progress" CssClass="btn btn-primary" OnClick="btnGoToProgress_Click" Style="margin-left: 10px;" />
     </asp:Panel>
 
     <!-- ADMIN PANEL -->
@@ -83,10 +83,16 @@
         <asp:Button ID="btnSaveFaculty" runat="server" Text="Save Faculty Info" CssClass="btn btn-primary" OnClick="btnSaveFaculty_Click" />
     </asp:Panel>
 
-    <!-- BACK BUTTON -->
-    <div style="margin-top: 20px;">
-        <asp:Button ID="btnBack" runat="server" Text="Back to Home" CssClass="btn btn-secondary" OnClick="btnBack_Click" />
-    </div>
+    <!-- DEPARTMENT HEAD PANEL -->
+    <asp:Panel ID="pnlDepartmentHead" runat="server" Visible="false">
+        <h3>Department Head Information</h3>
+
+        <label for="txtDepartmentHeadEmail">Email:</label>
+        <asp:TextBox ID="txtDepartmentHeadEmail" runat="server" CssClass="form-control" />
+
+        <asp:Button ID="btnSaveDepartmentHead" runat="server" Text="Save Department Head Info"
+            CssClass="btn btn-primary" OnClick="btnSaveDepartmentHead_Click" />
+    </asp:Panel>
 
     <!-- OUTPUT MESSAGE -->
     <asp:Label ID="lblOutput" runat="server" CssClass="text-success" Style="margin-top: 20px; display:block;" />
