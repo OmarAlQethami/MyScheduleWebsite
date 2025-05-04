@@ -5,27 +5,14 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ffffff;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
-
     .schedule-container {
-        width: 80%;
-        max-width: 800px;
+        width: 100%;
         margin: 20px auto;
     }
 
     .schedule-card {
-        background-color: #ffffff;
+        background-color: #FFFFFF;
         padding: 20px;
-        border: 1px solid #ffffff;
         border-radius: 8px;
     }
 
@@ -180,40 +167,81 @@
         <div class="student-info">
             <div class="info-row">
                 <div class="info-label">Student Name:</div>
-                <div class="info-value"><asp:Label ID="lblStudentName" runat="server" Text="Ahmed
-Al-Otaibi"></asp:Label></div>
+                <div class="info-value"><asp:Label ID="lblStudentName" runat="server" Text=""></asp:Label></div>
             </div>
             <div class="info-row">
                 <div class="info-label">University ID:</div>
-                <div class="info-value"><asp:Label ID="lblUniID" runat="server" Text="123456789"></asp:Label></div>
+                <div class="info-value"><asp:Label ID="lblUniID" runat="server" Text=""></asp:Label></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Major:</div>
-                <div class="info-value"><asp:Label ID="lblMajor" runat="server" Text="Computer Science"></asp:Label></div>
+                <div class="info-value"><asp:Label ID="lblMajor" runat="server" Text=""></asp:Label></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Total Credits:</div>
-                <div class="info-value"><asp:Label ID="lblTotalCredits" runat="server" Text="15"></asp:Label></div>
+                <div class="info-value"><asp:Label ID="lblTotalCredits" runat="server" Text=""></asp:Label></div>
             </div>
         </div>
         
         <asp:GridView ID="gvSchedule" runat="server" AutoGenerateColumns="False" CssClass="schedule-table"
             OnRowDataBound="gvSchedule_RowDataBound" AllowSorting="True" OnSorting="gvSchedule_Sorting">
             <Columns>
-                <asp:BoundField DataField="CourseCode" HeaderText="Course Code" SortExpression="CourseCode" />
-                <asp:BoundField DataField="CourseName" HeaderText="Course Name" SortExpression="CourseName" />
-                <asp:BoundField DataField="SectionNumber" HeaderText="Section No." SortExpression="SectionNumber" />
+                <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" SortExpression="SubjectCode" />
+                <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" SortExpression="SubjectName" />
                 <asp:BoundField DataField="Credits" HeaderText="Credits" SortExpression="Credits" />
-                <asp:BoundField DataField="Schedule" HeaderText="Schedule" SortExpression="Schedule" />
+                <asp:BoundField DataField="SectionNumber" HeaderText="Section No." SortExpression="SectionNumber" />
+                <asp:TemplateField HeaderText="Day" SortExpression="Day">
+                    <ItemTemplate>
+                        <asp:Label ID="lblDay" runat="server" Text='<%# Eval("Day") %>'></asp:Label>
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="Start Time" SortExpression="StartTime">
+                    <ItemTemplate>
+                        <asp:Label ID="lblStartTime" runat="server" Text='<%# Eval("StartTime") %>'></asp:Label>
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="End Time" SortExpression="EndTime">
+                    <ItemTemplate>
+                        <asp:Label ID="lblEndTime" runat="server" Text='<%# Eval("EndTime") %>'></asp:Label>
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="Location" HeaderText="Location" SortExpression="Location" />
                 <asp:BoundField DataField="Instructor" HeaderText="Instructor" SortExpression="Instructor" />
             </Columns>
         </asp:GridView>
         
+        <asp:Panel ID="pnlWishlist" runat="server" Visible="false">
+            <div class="success-message" style="margin-top: 40px;">
+                Wishlisted Subjects
+            </div>
+            <asp:GridView ID="gvWishlist" runat="server" AutoGenerateColumns="False" CssClass="schedule-table">
+                <Columns>
+                    <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" />
+                    <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
+                    <asp:BoundField DataField="RequestDate" HeaderText="Request Date" 
+                                  DataFormatString="{0:dd MMM yyyy}" />
+                    <asp:BoundField DataField="Status" HeaderText="Status" />
+                    <asp:TemplateField HeaderText="Status Changed By">
+                        <ItemTemplate>
+                            <asp:Label runat="server" Text='<%# string.IsNullOrEmpty(Eval("StatusChangedBy").ToString()) ? "-" : Eval("StatusChangedBy") %>' />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Status Changed Date">
+                        <ItemTemplate>
+                            <asp:Label runat="server" 
+                                 Text='<%# Eval("StatusChangedDate") is DBNull ? "-" : Convert.ToDateTime(Eval("StatusChangedDate")).ToString("dd MMM yyyy") %>' />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+        </asp:Panel>
+
         <div class="action-buttons">
-            <asp:Button ID="btnExport" runat="server" Text="Export to PDF" 
-                CssClass="btn" OnClick="btnExport_Click" />
+           <%-- <asp:Button ID="btnExport" runat="server" Text="Export to PDF" 
+                CssClass="btn" OnClick="btnExport_Click" />--%>
             <asp:Button ID="btnCancel" runat="server" Text="Cancel Schedule" 
-                CssClass="btn btn-cancel" OnClick="btnCancel_Click" />
+                CssClass="btn btn-cancel" OnClick="btnCancel_Click"
+                OnClientClick="return confirm('Are you sure you want to cancel your order and delete all ordered subjects?');"/>
         </div>
     </div>
 </div>
