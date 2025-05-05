@@ -38,9 +38,9 @@
 
         <label for="txtConfirmPasswordStudent">Confirm New Password:</label>
         <asp:TextBox ID="txtConfirmPasswordStudent" runat="server" CssClass="form-control" TextMode="Password" />
-
-        <asp:Button ID="btnSaveStudent" runat="server" Text="Save Student Info" CssClass="btn btn-primary" OnClick="btnSaveStudent_Click" />
-        <asp:Button ID="btnGoToProgress" runat="server" Text="Back to Edit Student Progress" CssClass="btn btn-primary" OnClick="btnGoToProgress_Click" Style="margin-left: 10px;" />
+        <br />
+        <asp:Button ID="btnSaveStudent" runat="server" Text="Save Student Info" CssClass="btn-custom-style yes" OnClick="btnSaveStudent_Click" />
+        <asp:Button ID="btnGoToProgress" runat="server" Text="Edit Student Progress" CssClass="btn-custom-style" OnClick="btnGoToProgress_Click" Style="margin-left: 10px;" />
     </asp:Panel>
 
     <!-- ADMIN PANEL -->
@@ -59,8 +59,8 @@
 
         <label for="txtConfirmPassword">Confirm New Password:</label>
         <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" TextMode="Password" />
-
-        <asp:Button ID="btnSaveAdmin" runat="server" Text="Save Admin Info" CssClass="btn btn-primary" OnClick="btnSaveAdmin_Click" />
+        <br />
+        <asp:Button ID="btnSaveAdmin" runat="server" Text="Save Admin Info" CssClass="btn-custom-style yes" OnClick="btnSaveAdmin_Click" />
     </asp:Panel>
 
     <!-- FACULTY PANEL -->
@@ -79,8 +79,8 @@
 
         <label for="txtConfirmPasswordFaculty">Confirm New Password:</label>
         <asp:TextBox ID="txtConfirmPasswordFaculty" runat="server" CssClass="form-control" TextMode="Password" />
-
-        <asp:Button ID="btnSaveFaculty" runat="server" Text="Save Faculty Info" CssClass="btn btn-primary" OnClick="btnSaveFaculty_Click" />
+        <br />
+        <asp:Button ID="btnSaveFaculty" runat="server" Text="Save Faculty Info" CssClass="btn-custom-style yes" OnClick="btnSaveFaculty_Click" />
     </asp:Panel>
 
     <!-- DEPARTMENT HEAD PANEL -->
@@ -99,9 +99,9 @@
 
         <label for="txtConfirmPasswordDepartmentHead">Confirm New Password:</label>
         <asp:TextBox ID="txtConfirmPasswordDepartmentHead" runat="server" CssClass="form-control" TextMode="Password" />
-
+        <br />
         <asp:Button ID="btnSaveDepartmentHead" runat="server" Text="Save Department Head Info"
-            CssClass="btn btn-primary" OnClick="btnSaveDepartmentHead_Click" />
+            CssClass="btn-custom-style yes" OnClick="btnSaveDepartmentHead_Click" />
     </asp:Panel>
 
     <!-- OUTPUT MESSAGE -->

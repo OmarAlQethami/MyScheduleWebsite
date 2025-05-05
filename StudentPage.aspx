@@ -150,8 +150,8 @@
         </asp:MultiView>
 
         <div class="buttons">
-            <asp:Button ID="btnBack" runat="server" Text="Back" OnClick="btnBack_Click" CssClass="custom-button"/>
-            <asp:Button ID="btnNext" runat="server" Text="Next" OnClick="btnNext_Click" CssClass="custom-button"/>
+            <asp:Button ID="btnBack" runat="server" Text="Back" OnClick="btnBack_Click" CssClass="custom-button no"/>
+            <asp:Button ID="btnNext" runat="server" Text="Next" OnClick="btnNext_Click" CssClass="custom-button yes"/>
         </div>
     </div>
 

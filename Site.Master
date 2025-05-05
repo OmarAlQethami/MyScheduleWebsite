@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="~/Content/Site.css"> 
     <link rel="stylesheet" href="~/styles/styles.css">
     <link rel="stylesheet" href="/styles/HelpCenterstyles.css">
-    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="~/images/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>
 <body>
@@ -41,33 +41,39 @@
             </Scripts>
         </asp:ScriptManager>
 
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" runat="server" href="~/">My Schedule</a>
-                </div>
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li><a runat="server" href="~/">Home</a></li>
-                        <li><a runat="server" href="~/About">About</a></li>
-                        <li><a runat="server" href="~/Contact">Contact</a></li>
-                        <li><a runat="server" href="~/EditInfoPage.aspx">Edit Information</a></li> <!-- 🔹 New Button -->
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <% if (Session["Username"] != null) { %>
-                           <li>
-                                <asp:Button ID="btnLogout" runat="server" Text="Log out" CssClass="btn btn-link navbar-btn" OnClick="Logout_Click" />
-                           </li>
-                        <% } %>
-                    </ul>
-                </div>
-            </div>
+       <div class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" runat="server" href="~/">
+                <img src="/images/logo.png" alt="My Schedule" class="navbar-logo" />
+                <span class="navbar-brand-text">My Schedule</span>
+            </a>
         </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a runat="server" href="~/">Home</a></li>
+                <li><a runat="server" href="~/About">About</a></li>
+                <li><a runat="server" href="~/Contact">Contact</a></li>
+                <li><a runat="server" href="~/EditInfoPage.aspx">Edit Info</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <% if (Session["Username"] != null) { %>
+                    <li>
+                        <asp:Button ID="btnLogout" runat="server" Text="Log Out" 
+                                   CssClass="navbar-btn-logout btn-custom-style no" 
+                                   OnClick="Logout_Click" />
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</div>
+
 
         <div class="container body-content">
             <div class="jumbotron">
@@ -114,7 +120,7 @@
                         placeholder="Email Body" CssClass="input-style" autocomplete="off" />
 
                     <asp:Button ID="btnSendEmail" runat="server" Text="Send" 
-                        CssClass="button-class" OnClick="btnSendEmail_Click" />
+                        CssClass="btn-custom-style yes" OnClick="btnSendEmail_Click" />
                 </asp:Panel>
 
             </div>

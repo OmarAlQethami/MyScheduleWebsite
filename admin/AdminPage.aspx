@@ -29,7 +29,7 @@
                         <th>Roles</th>
                         <th>Users</th>
                         <th>
-                            <asp:Button ID="btnUserRoleAssign" runat="server" 
+                            <asp:Button ID="btnUserRoleAssign" runat="server" CssClass="btn-custom-style"
                             Text="Link User Role" OnClick="btnUserRoleAssign_Click" />
                         </th>
                     </tr>
@@ -41,19 +41,19 @@
                             <asp:CheckBoxList ID="cBLUsers" runat="server"></asp:CheckBoxList>
                         </td>
                          <td class="top-align">
-                            <asp:Button ID="btnUnlinkUserRoles" runat="server" OnClick="btnUnlinkUserRoles_Click" Text="Unlink User Role" />
+                            <asp:Button ID="btnUnlinkUserRoles" runat="server" OnClick="btnUnlinkUserRoles_Click" Text="Unlink User Role" CssClass="btn-custom-style" />
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                         <td>
-                             <asp:Button ID="btnDeleteRoles" runat="server" OnClick="btnDeleteRoles_Click" Text="Delete Roles" />
+                             <asp:Button ID="btnDeleteRoles" runat="server" OnClick="btnDeleteRoles_Click" Text="Delete Roles" CssClass="btn-custom-style no"/>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                         <td>
-                            <asp:Button ID="btnDeleteUsers" runat="server" OnClick="btnDeleteUsers_Click" Text="Delete Users" />
+                            <asp:Button ID="btnDeleteUsers" runat="server" OnClick="btnDeleteUsers_Click" Text="Delete Users" CssClass="btn-custom-style no"/>
                         </td>
                     </tr>
                  </table>
@@ -75,7 +75,7 @@
                         <asp:TextBox ID="txtRole" runat="server" autocomplete="off"></asp:TextBox>
                     </td>
                     <td style="width: 177px">
-                        <asp:Button ID="btnLinkUserRole" runat="server" OnClick="btnLinkUserRole_Click" Text="Link User Role"
+                        <asp:Button ID="btnLinkUserRole" runat="server" OnClick="btnLinkUserRole_Click" Text="Link User Role" CssClass="btn-custom-style"
                             Width="124px" style="margin-left: 0px" TabIndex="6" />
                     </td>
                 </tr>
@@ -87,8 +87,8 @@
                     <td></td>
                     <td></td>
                     <td style="width: 177px">
-                        <asp:Button ID="btnUnLinkUserToRole" runat="server" OnClick="btnUnLinkUserToRole_Click"
-                            Text="UnlinkUsertoRole" Width="124px" />
+                        <asp:Button ID="btnUnLinkUserToRole" runat="server" OnClick="btnUnLinkUserToRole_Click" CssClass="btn-custom-style no"
+                            Text="UnlinkUserRole" Width="124px" />
                     </td>
                 </tr>
                 <tr>
@@ -99,37 +99,37 @@
                     <td align="center" class="style4" style="width: 42px">&nbsp;</td>
                     <td align="center">&nbsp;</td>
                     <td>
-                        <asp:Button ID="btnShowAllUser" runat="server" OnClick="btnShowAllUser_Click" Text="Show All Users"
+                        <asp:Button ID="btnShowAllUser" runat="server" OnClick="btnShowAllUser_Click" Text="Show All Users" CssClass="btn-custom-style"
                             Width="124px" />
                     </td>
                 </tr>
                 <tr>
                     <td class="style3" style="width: 68px">&nbsp;</td>
                     <td align="center" class="style4">
-                        <asp:Button ID="btnCreateUser0" runat="server" OnClick="btnCreateUser_Click" Style="margin-left: 0px"
+                        <asp:Button ID="btnCreateUser0" runat="server" OnClick="btnCreateUser_Click" Style="margin-left: 0px" CssClass="btn-custom-style yes"
                             Text="Create User" TabIndex="3" />
                     </td>
                     <td align="center" class="style4" style="width: 42px">&nbsp;</td>
                     <td align="center">
-                        <asp:Button ID="btnCreateRole0" runat="server" OnClick="btnCreateRole_Click" 
+                        <asp:Button ID="btnCreateRole0" runat="server" OnClick="btnCreateRole_Click" CssClass="btn-custom-style yes"
                             Text="Create Role" Width="98px" TabIndex="5" />
                     </td>
                     <td>
-                        <asp:Button ID="btnShowAllRoles" runat="server" OnClick="btnShowAllRoles_Click" 
+                        <asp:Button ID="btnShowAllRoles" runat="server" OnClick="btnShowAllRoles_Click" CssClass="btn-custom-style"
                             Text="Show All Roles" Width="124px"/>
                     </td>
                 </tr>
                 <tr>
                     <td class="style3">&nbsp;</td>
                     <td align="center" class="style4">
-                        <asp:Button ID="btnDeleteUser0" runat="server" OnClick="btnDeleteUser_Click" Text="Delete User" Width="105px" />
+                        <asp:Button ID="btnDeleteUser0" runat="server" OnClick="btnDeleteUser_Click" Text="Delete User" Width="105px" CssClass="btn-custom-style no"/>
                     </td>
                     <td align="center" class="style4" style="width: 42px"></td>
                     <td align="center">
-                        <asp:Button ID="btnDeleteRole1" runat="server" OnClick="btnDeleteRole_Click" Text="Delete Role" />
+                        <asp:Button ID="btnDeleteRole1" runat="server" OnClick="btnDeleteRole_Click" Text="Delete Role" CssClass="btn-custom-style no" />
                     </td>
                     <td style="width: 177px">
-                        <asp:Button ID="btnUpdateUser" runat="server" OnClick="btnUpdateUser_Click" Text="Update User" Width="125px" />
+                        <asp:Button ID="btnUpdateUser" runat="server" OnClick="btnUpdateUser_Click" Text="Update User" Width="125px" CssClass="btn-custom-style" />
                     </td>
                 </tr>
             </table>
@@ -140,32 +140,32 @@
             <h3>Sign Up a new Faculty Member:</h3>
             <div class="form-container">
                 <div class="input-group">
-                    <asp:TextBox ID="txtFName" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtFName" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtFName">English First Name</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtLName" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtLName" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtLName">English Last Name</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtArFName" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtArFName" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtArFName">Arabic First Name</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtArLName" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtArLName" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtArLName">Arabic Last Name</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtEmail1" runat="server" CssClass="asp-input" placeholder=" " TextMode="Email"></asp:TextBox>
+                    <asp:TextBox ID="txtEmail1" runat="server" CssClass="asp-input" placeholder=" " TextMode="Email" autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtEmail1">Email</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtUsername1" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtUsername1" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtUsername1">Username</label>
                 </div>
 
@@ -196,7 +196,7 @@
                 </div>
                 <br /><br />
 
-                <asp:Button ID="btnSignUp" runat="server" CssClass="button" Text="Sign Up" 
+                <asp:Button ID="btnSignUp" runat="server" CssClass="btn-custom-style yes" Text="Sign Up" 
                     OnClick="btnSignUp_Click" OnClientClick="return confirm('Are all your information correct?');" />
             </div>
         </div>
@@ -265,7 +265,7 @@
                     </asp:DropDownList>
                 </div>
 
-                <asp:Button ID="btnSignUp1" runat="server" CssClass="button" Text="Sign Up" 
+                <asp:Button ID="btnSignUp1" runat="server" CssClass="btn-custom-style yes" Text="Sign Up" 
                     onclick="btnSignUp1_Click" 
                     OnClientClick="return confirm('Are all your information correct?')"/>
             </div>
@@ -286,12 +286,12 @@
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtMajors" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtMajors" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtMajors">Enter Majors</label>
                 </div>
 
                 <div class="input-group">
-                    <asp:TextBox ID="txtArMajors" runat="server" CssClass="asp-input" placeholder=" "></asp:TextBox>
+                    <asp:TextBox ID="txtArMajors" runat="server" CssClass="asp-input" placeholder=" " autocomplete="off"></asp:TextBox>
                     <label class="floating-label" for="txtArMajors">Enter Arabic Majors</label>
                 </div>
 
@@ -300,7 +300,7 @@
                     <label class="floating-label" for="txtTotal">Total Credit Hours</label>
                 </div>
 
-                <asp:Button ID="btnAddMajors" runat="server" CssClass="button" Text="Register" 
+                <asp:Button ID="btnAddMajors" runat="server" CssClass="btn-custom-style yes" Text="Register" 
                     onclick="btnAddMajors_Click" 
                     OnClientClick="return confirm('Are all your information correct?')"/>
             </div>

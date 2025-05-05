@@ -108,7 +108,7 @@ namespace MyScheduleWebsite
             public string Location { get; set; }
         }
 
-        int curriculumId = 2;
+        int curriculumId = 1;
 
         private Guid GetUserId()
         {
