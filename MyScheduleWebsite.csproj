@@ -144,6 +144,7 @@
     <Content Include="DepartmentHeadPage.aspx" />
     <Content Include="EditInfoPage.aspx" />
     <Content Include="FacultyPage.aspx" />
+    <Content Include="FAQ.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -282,6 +283,13 @@
     </Compile>
     <Compile Include="FacultyPage.aspx.designer.cs">
       <DependentUpon>FacultyPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FAQ.aspx.cs">
+      <DependentUpon>FAQ.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FAQ.aspx.designer.cs">
+      <DependentUpon>FAQ.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
