@@ -204,16 +204,17 @@ namespace MyScheduleWebsite
                 string title = txtEmailTitle.Text.Trim();
                 string body = txtEmailBody.Text.Trim();
 
-                MembershipUser currentUser = Membership.GetUser();
-                if (currentUser == null)
-                {
-                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('You must be logged in to send messages.');", true);
-                    return;
-                }
+                string userEmail = "";
+                string fullName = "Anonymous";
+                Guid userId = Guid.Empty;
 
-                string userEmail = currentUser.Email;
-                Guid userId = (Guid)currentUser.ProviderUserKey;
-                string fullName = GetUserFullName(userId);
+                MembershipUser currentUser = Membership.GetUser();
+                if (currentUser != null)
+                {
+                    userEmail = currentUser.Email;
+                    userId = (Guid)currentUser.ProviderUserKey;
+                    fullName = GetUserFullName(userId);
+                }
 
                 string formattedBody = $@"
 Message sent from {fullName} ({userEmail})

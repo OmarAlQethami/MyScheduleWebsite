@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="DepartmentHeadPage.aspx.cs" Inherits="MyScheduleWebsite.DepartmentHeadPage" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="DepartmentHeadPage.aspx.cs" Inherits="MyScheduleWebsite.DepartmentHeadPage" EnableEventValidation="false" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <link rel="stylesheet" href="/styles/DepartmentHeadStyles.css">
@@ -260,7 +260,7 @@
             <div id="majorPlan" class="tab-content">
                 <div class="mb-3">
     <asp:Button ID="btnOpenSubjectPopup" runat="server" Text="Add Subject"
-        CssClass="btn btn-primary mb-3"
+        CssClass="btn-custom-style"
         OnClientClick="openSubjectPopup(); return false;" />
 </div>
 
@@ -339,12 +339,12 @@
 
             <asp:TemplateField HeaderText="Actions">
                 <ItemTemplate>
-                    <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit" CssClass="btn btn-primary btn-edit" />
-                    <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn btn-danger btn-delete" />
+                    <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit"  CssClass="btn-custom-style" />
+                    <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn-custom-style no" />
                 </ItemTemplate>
                 <EditItemTemplate>
-                    <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn btn-success btn-update" />
-                    <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn btn-secondary btn-cancel" />
+                    <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn-custom-style yes" />
+                    <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn-custom-style no" />
                 </EditItemTemplate>
             </asp:TemplateField>
         </Columns>
@@ -353,7 +353,7 @@
 
             <div id="curriculum" class="tab-content">
                <div class="mb-3">
-                <asp:Button ID="btnAddSection" runat="server" Text="Add New Section" CssClass="btn btn-primary" OnClientClick="openPopup(); return false;" />
+                <asp:Button ID="btnAddSection" runat="server" Text="Add New Section" CssClass="btn-custom-style" OnClientClick="openPopup(); return false;" />
               </div>
                 <asp:GridView ID="gvCurriculum" runat="server" CssClass="curriculum-table" 
     AutoGenerateColumns="false" OnPreRender="gvCurriculum_PreRender"
@@ -388,12 +388,12 @@
 
         <asp:TemplateField HeaderText="Actions">
             <ItemTemplate>
-                <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit" CssClass="btn btn-primary btn-edit" />
-                <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn btn-danger btn-delete"  />
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CommandName="Edit" CssClass="btn-custom-style" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this subject?');" CssClass="btn-custom-style no"  />
             </ItemTemplate>
             <EditItemTemplate>
-                <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn btn-success btn-update" />
-                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn btn-secondary btn-cancel"/>
+                <asp:Button ID="btnUpdate" runat="server" Text="Update" CommandName="Update" CssClass="btn-custom-style yes" />
+                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CommandName="Cancel" CssClass="btn-custom-style no"/>
             </EditItemTemplate>
         </asp:TemplateField>
     </Columns>
@@ -412,8 +412,8 @@
     <asp:TextBox ID="txtPopupLocation" runat="server" placeholder="Location" CssClass="form-control" /><br />
     <asp:TextBox ID="txtPopupInstructor" runat="server" placeholder="Instructor Arabic Name" CssClass="form-control" /><br />
 
-    <asp:Button ID="btnSaveSection" runat="server" Text="Save Section" OnClick="btnSaveSection_Click" CssClass="btn btn-success" />
-    <input type="button" value="Cancel" class="btn btn-secondary" onclick="closePopup()" />
+    <asp:Button ID="btnSaveSection" runat="server" Text="Save Section" OnClick="btnSaveSection_Click" CssClass="btn-custom-style yes" />
+    <input type="button" value="Cancel" class="btn-custom-style no" onclick="closePopup()" />
 </div>
 
 
@@ -462,8 +462,8 @@
     <label>Prerequisites:</label><br />
     <asp:TextBox ID="txtPrerequisites" runat="server" CssClass="form-control" Placeholder="Example: 101,102" /><br /><br />
 
-    <asp:Button ID="btnSubmit" runat="server" Text="Save Subject" CssClass="btn btn-primary" OnClick="btnSubmit_Click" />
-    <input type="button" value="Cancel" class="btn btn-secondary" onclick="closeSubjectPopup()" />
+    <asp:Button ID="btnSubmit" runat="server" Text="Save Subject" CssClass="btn-custom-style yes" OnClick="btnSubmit_Click" />
+    <input type="button" value="Cancel" Class="btn-custom-style no" onclick="closeSubjectPopup()" />
 
 </div>
 

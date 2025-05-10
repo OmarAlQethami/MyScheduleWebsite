@@ -11,7 +11,7 @@
     }
 
     .schedule-card {
-        background-color: #FFFFFF;
+        background-color: #f7f7f7;
         padding: 20px;
         border-radius: 8px;
     }
@@ -22,15 +22,15 @@
     }
 
     h2 {
-        color: #3595cd;
-        font-size: 1.8rem;
+        /*color: #3595cd;*/
+        font-size: 2rem;
         font-weight: 700;
         margin-bottom: 10px;
     }
 
     .success-message {
         text-align: center;
-        color: #3595cd;
+        /*color: #3595cd;*/
         font-size: 1.6rem;
         font-weight: 700;
         margin-bottom: 1em;
@@ -56,16 +56,16 @@
     .info-label {
         font-weight: 600;
         color: #3595cd;
-        font-size: 1rem;
+        font-size: 1.3rem;
     }
 
     .info-value {
-        font-size: 1rem;
+        font-size: 1.3rem;
         color: #000000; 
         font-weight: 600;
     }
 
-    .schedule-table {
+    /*.schedule-table {
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
@@ -92,37 +92,13 @@
 
     .schedule-table tr:nth-child(even) {
         background-color: #f9f9f9;
-    }
+    }*/
 
     .action-buttons {
         display: flex;
         justify-content: center;
-        margin-top: 20px;
-        gap: 15px;
-    }
-
-    .btn {
-        padding: 10px 24px;
-        border: none;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 500;
-        color: white;
-        background-color: #3595cd;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-cancel {
-        background-color: #b2bcbd;
-    }
-
-    .btn-cancel:hover {
-        background-color: #c82333;
-    }
-
-    .btn:hover {
-        background-color: #afb6bc;
+        margin-top: 50px;
+        gap: 30px;
     }
 
     @media (max-width: 768px) {
@@ -153,6 +129,54 @@
             width: 100%;
             margin-bottom: 10px;
         }
+
+    }
+
+        .schedule-table
+  
+    {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 1.5rem 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        text-align:center;
+        overflow: hidden;
+    }
+
+    .schedule-table th
+    
+    {
+        background-color: #f8f9fa;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #343a40;
+        border-bottom: 2px solid #dee2e6;
+        text-align: center;
+    }
+
+
+    .schedule-table tbody td
+    
+    {
+        padding: 0.75rem 1rem;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+
+    .schedule-table tbody tr:nth-child(even)
+     {
+        background-color: #fcfcfc;
+    }
+
+
+    .schedule-table tbody tr:hover
+     {
+        background-color: #f1f3f5;
     }
 </style>
 
@@ -161,8 +185,8 @@
         <div class="header">
             <h2>Your Schedule has been Created Successfully!</h2>
         </div>
-
-        <div class="success-message">Your Schedule Details</div>
+        <br /><br />
+        <div class="success-message">Schedule Details:</div>
         
         <div class="student-info">
             <div class="info-row">
@@ -186,27 +210,27 @@
         <asp:GridView ID="gvSchedule" runat="server" AutoGenerateColumns="False" CssClass="schedule-table"
             OnRowDataBound="gvSchedule_RowDataBound" AllowSorting="True" OnSorting="gvSchedule_Sorting">
             <Columns>
-                <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" SortExpression="SubjectCode" />
-                <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" SortExpression="SubjectName" />
-                <asp:BoundField DataField="Credits" HeaderText="Credits" SortExpression="Credits" />
-                <asp:BoundField DataField="SectionNumber" HeaderText="Section No." SortExpression="SectionNumber" />
-                <asp:TemplateField HeaderText="Day" SortExpression="Day">
+                <asp:BoundField DataField="SubjectCode" HeaderText="Subject Code" />
+                <asp:BoundField DataField="SubjectName" HeaderText="Subject Name" />
+                <asp:BoundField DataField="Credits" HeaderText="Credits" />
+                <asp:BoundField DataField="SectionNumber" HeaderText="Section No." />
+                <asp:TemplateField HeaderText="Day">
                     <ItemTemplate>
                         <asp:Label ID="lblDay" runat="server" Text='<%# Eval("Day") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
-                <asp:TemplateField HeaderText="Start Time" SortExpression="StartTime">
+                <asp:TemplateField HeaderText="Start Time">
                     <ItemTemplate>
                         <asp:Label ID="lblStartTime" runat="server" Text='<%# Eval("StartTime") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
-                <asp:TemplateField HeaderText="End Time" SortExpression="EndTime">
+                <asp:TemplateField HeaderText="End Time">
                     <ItemTemplate>
                         <asp:Label ID="lblEndTime" runat="server" Text='<%# Eval("EndTime") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
-                <asp:BoundField DataField="Location" HeaderText="Location" SortExpression="Location" />
-                <asp:BoundField DataField="Instructor" HeaderText="Instructor" SortExpression="Instructor" />
+                <asp:BoundField DataField="Location" HeaderText="Location" />
+                <asp:BoundField DataField="Instructor" HeaderText="Instructor" />
             </Columns>
         </asp:GridView>
         
@@ -238,9 +262,9 @@
 
         <div class="action-buttons">
            <%-- <asp:Button ID="btnExport" runat="server" Text="Export to PDF" 
-                CssClass="btn" OnClick="btnExport_Click" />--%>
+                CssClass="btn-custom-style" OnClick="btnExport_Click" />--%>
             <asp:Button ID="btnCancel" runat="server" Text="Cancel Schedule" 
-                CssClass="btn btn-cancel" OnClick="btnCancel_Click"
+                CssClass="btn-custom-style no" OnClick="btnCancel_Click"
                 OnClientClick="return confirm('Are you sure you want to cancel your order and delete all ordered subjects?');"/>
         </div>
     </div>

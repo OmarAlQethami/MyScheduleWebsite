@@ -21,11 +21,12 @@
                     <div class="card-body p-4">
                         <div class="container mt-4">
                             <div class="row">
-                                <div class="col-12" style="text-align: justify">
+                                <div class="col-12" style="text-align: center">
                                     <asp:Label 
                                         ID="lblInfo" 
                                         runat="server" 
-                                        Text="This page is for student sign-ups only. Faculty, please contact Admin for account privileges." 
+                                        Text="This page is for student acocount registration only.
+                                        For Faculty and Department Heads, please contact Admin for account privileges." 
                                         CssClass="alert alert-warning d-block mb-3" 
                                         Visible="true">
                                     </asp:Label>
@@ -163,12 +164,12 @@
                                 </ContentTemplate>
                             </asp:UpdatePanel>
 
-                            <div class="d-grid mt-4 mb-0 gi">
-                                <asp:Button ID="btnCancel" runat="server" CausesValidation="false" CssClass="btn btn-secondary btn-lg" PostBackUrl="~/default.aspx" Text="Back" />
-                                <asp:Button ID="btnSignUp" runat="server" CssClass="btn btn-primary btn-lg" Text="Sign Up"  OnClick="btnSignUp_Click" OnClientClick="return confirmSignUp();" />
-                            </div>
+                            
                         </asp:Panel>
-
+                        <div class="d-grid mt-4 mb-0 gi">
+                                <asp:Button ID="btnCancel" runat="server" CausesValidation="false" CssClass="btn-custom-style no" PostBackUrl="~/default.aspx" Text="Back" />
+                                <asp:Button ID="btnSignUp" runat="server" CssClass="btn-custom-style yes" Text="Sign Up"  OnClick="btnSignUp_Click" OnClientClick="return confirmSignUp();" />
+                            </div>
     </div>
 
     <div class="card-footer text-center py-3">

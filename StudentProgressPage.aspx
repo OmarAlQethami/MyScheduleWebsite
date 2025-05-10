@@ -29,8 +29,8 @@
         </div>
         
         <div class="buttons">
-            <asp:Button ID="btnBack" runat="server" Text="Back" PostBackUrl="~/Default.aspx" CssClass="custom-button"/>
-            <asp:Button ID="btnConfirm" runat="server" Text="Confirm" CssClass="custom-button" OnClick="btnConfirm_Click" OnClientClick="return onConfirmClick();"/>
+            <asp:Button ID="btnBack" runat="server" Text="Back" PostBackUrl="~/Default.aspx" CssClass="custom-button no"/>
+            <asp:Button ID="btnConfirm" runat="server" Text="Confirm" CssClass="custom-button yes" OnClick="btnConfirm_Click" OnClientClick="return onConfirmClick();"/>
         </div>
         <asp:HiddenField ID="hdnSelectedSubjects" runat="server" ClientIDMode="Static" />
     </div>

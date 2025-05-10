@@ -175,6 +175,7 @@ button, .asp-Button {
     border: none;
     cursor: pointer;
     font-size: 16px;
+    font-weight: 500;
     margin-right: 5px;
     border-radius: 5px 5px 0 0;
     transition: all 0.3s;
@@ -185,8 +186,9 @@ button, .asp-Button {
     }
 
     .tab-button.active {
-        background: #4CAF50;
-        color: white;
+        background-color: #81D4FA;
+        font-weight: 700;
+        color: #01579B;
     }
 
 .tab-content {
@@ -200,3 +202,7 @@ button, .asp-Button {
     .tab-content.active {
         display: block;
     }
+
+.btn-custom-style {
+    font-size: 1.4rem;
+}

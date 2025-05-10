@@ -16,6 +16,10 @@ body {
     font-family: 'Lato', 'Rubik', sans-serif !important;
 }
 
+.container.body-content {
+    margin-top: 20px;
+}
+
 .top-container {
     width: 100%;
     height: 50px;
@@ -65,21 +69,233 @@ body {
 
 .custom-button {
     background-color: #888888;
-    color: white;
-    border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    font-size: 1.2em; /* Adjust font size */
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent; /* Start with transparent border */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease; /* Smooth transition */
+    margin: 2px 4px; /* Add some margin */
+    color: #01579B; /* Example text color (like view button) */
+    background-color: #81D4FA; /* Example background color (like view button) */
 }
 
-.custom-button:hover {
-    background-color: #555555;
-}
+    .custom-button:hover {
+        background-color: #1976D2; /* Darker background on hover */
+        color: white; /* Change text color on hover */
+        border-color: #105a9e; /* Add/change border color on hover */
+        transform: translateY(-1px); /* Slight lift effect */
+    }
+
+    .custom-button.yes {
+        background-color: #A9D18E;
+        color: #2C5F2D;
+    }
+
+        .custom-button.yes:hover {
+            background-color: #7CA961;
+            color: white;
+            border-color: #5a8a41;
+        }
+
+    .custom-button.no {
+        background-color: #F1948A;
+        color: #7B241C;
+    }
+
+        .custom-button.no:hover {
+            background-color: #D46A61;
+            color: white;
+            border-color: #a94442;
+        }
 
 .lbl-output {
     display: flex;
     justify-content: space-between;
     padding-right: 50px;
 }
+
+
+.navbar-default {
+    background: #EEEEEE;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    transition: transform 0.3s ease;
+}
+
+.navbar-logo {
+    height: 36px;
+    margin-right: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.navbar-fixed-top {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    height: 70px;
+}
+
+.navbar-brand-text {
+    padding-top: 6px;
+    font-weight: 900;
+    font-size: 2rem;
+    color: #2c3e50;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-nav {
+    margin: 0 15px;
+}
+
+    .navbar-nav > li {
+        margin: 0 8px;
+        position: relative;
+    }
+
+        .navbar-nav > li > a {
+            color: #4a5568 !important;
+            font-size: 1.7rem;
+            font-weight: 900;
+            padding: 20px 18px !important;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+            .navbar-nav > li > a:hover,
+            .navbar-nav > li > a:focus {
+                color: #2b6cb0 !important;
+                background: rgba(66, 153, 225, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .navbar-nav > li > a::after {
+                content: '';
+                position: absolute;
+                bottom: 12px;
+                left: 18px;
+                right: 18px;
+                height: 2px;
+                background: #2b6cb0;
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+        .navbar-nav > li.active > a {
+            color: #2b6cb0 !important;
+        }
+
+            .navbar-nav > li.active > a::after {
+                transform: scaleX(1);
+            }
+
+.navbar-btn-logout {
+    margin: 12px 20px !important;
+    padding: 8px 20px !important;
+    /*border-radius: 6px !important;
+    background: #2b6cb0 !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;*/
+}
+
+    .navbar-btn-logout:hover {
+        /*background: #2c5282 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);*/
+    }
+
+.navbar-toggle {
+    border: none !important;
+    margin-right: 15px;
+}
+
+    .navbar-toggle .icon-bar {
+        width: 24px;
+        height: 2px;
+        background-color: #4a5568;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-toggle:hover .icon-bar {
+        background-color: #2b6cb0;
+    }
+
+@media (max-width: 767px) {
+    .navbar-nav {
+        margin: 0;
+    }
+
+        .navbar-nav > li > a {
+            padding: 15px 20px !important;
+        }
+
+    .navbar-btn-logout {
+        margin: 10px 20px !important;
+        width: calc(100% - 40px);
+    }
+}
+
+/* General Button Style - Inspired by Stats Badges/View Button */
+.btn-custom-style {
+    display: inline-block;
+    padding: 6px 14px; /* Adjust padding as needed */
+    border-radius: 10px; /* Rounded corners like badges */
+    font-size: 1.2em; /* Adjust font size */
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent; /* Start with transparent border */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease; /* Smooth transition */
+    margin: 2px 4px; /* Add some margin */
+    color: #01579B; /* Example text color (like view button) */
+    background-color: #81D4FA; /* Example background color (like view button) */
+}
+
+    /* Hover Effect - Inspired by Sign In/Up */
+    .btn-custom-style:hover {
+        background-color: #1976D2; /* Darker background on hover */
+        color: white; /* Change text color on hover */
+        border-color: #105a9e; /* Add/change border color on hover */
+        transform: translateY(-1px); /* Slight lift effect */
+    }
+
+    /* Example Variations (like different badge colors) */
+    .btn-custom-style.yes {
+        background-color: #A9D18E;
+        color: #2C5F2D;
+    }
+
+        .btn-custom-style.yes:hover {
+            background-color: #7CA961;
+            color: white;
+            border-color: #5a8a41;
+        }
+
+    .btn-custom-style.no {
+        background-color: #F1948A;
+        color: #7B241C;
+    }
+
+        .btn-custom-style.no:hover {
+            background-color: #D46A61;
+            color: white;
+            border-color: #a94442;
+        }
+/* Add more variations as needed */
+

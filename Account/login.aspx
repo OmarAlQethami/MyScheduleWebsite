@@ -22,8 +22,8 @@
             <asp:Label ID="lblOutput" runat="server" CssClass="output-label" />
 
             <div class="button-group">
-                <asp:Button ID="btnLogin" runat="server" Text="Login" CssClass="btn btn-primary" OnClick="btnLogin_Click" />
-                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" PostBackUrl="~/default.aspx" />
+                <asp:Button ID="btnLogin" runat="server" Text="Login" CssClass="btn-custom-style yes" OnClick="btnLogin_Click" />
+                <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn-custom-style no" PostBackUrl="~/default.aspx" />
             </div>
         </div>
     </div>

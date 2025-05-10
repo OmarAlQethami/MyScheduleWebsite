@@ -182,12 +182,6 @@
                     <h4>Continuous Updates</h4>
                     <p>We regularly add new features based on student feedback.</p>
                 </div>
-                
-                <div class="feature-card">
-                    <i class="fas fa-headset"></i>
-                    <h4>24/7 Support</h4>
-                    <p>Our dedicated support team is always ready to help.</p>
-                </div>
             </div>
         </div>
     </div>
